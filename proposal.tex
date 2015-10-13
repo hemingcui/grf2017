@@ -3,6 +3,7 @@
 \usepackage[11pt,inchmargins]{sigmin}
 \usepackage[T1]{fontenc}
 \usepackage{tgtermes}
+\usepackage{atbegshi}
 %\usepackage{showframe}
 
 \usepackage{graphics}
@@ -73,7 +74,12 @@ Columbia University\\
 
 \input{plan}
 
-\pagebreak
+% \pagebreak
+
+\newpage
+\AtBeginShipout{%
+\AtBeginShipoutDiscard
+}
 
 \bibliographystyle{abbrvnat}
 \bibliography{bib/biblio}
