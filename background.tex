@@ -3,15 +3,44 @@
 
 TBD.
 
+\subsection{Concurrency Bugs and Attacks in Multithreaded Programs} \label{sec:others-work}
+
+% P1: multithreading, hard to get right, plagued with concurrency bugs.
+P1: TBD.
+
+% P2: Can lead to various exploits. Mention our initial study, types of software, 
+% and types of concurrency exploits. Just like bugs in single threaded program 
+% leader to exploits, concurrency bugs can lead to concurrency attacks.
+% Mention HotPart, found XX exploits. We: found YY exploits. patterns.
+% Two examples.
+P2: TBD.
+
+% \subsubsection{Priliminary Study on Real-world Concucrency Attacks} 
+% \label{sec:model-result}
+
+
+% P3: A key reason: a program can run into too many thread interleavings at runtime.
+% Hard to make sure all thread intleravings are correct. Mention our previous 
+% work Parrot, exponentially many.
+P3: TBD.
+
+% P4: Then, challenges come: a concurrency 
+% attack model should incorporate thread interleavings. A detection methond 
+% should also consider the consequence of thread interleavings. A runtim 
+% technique must think of ways to replicate and reduce the amount thread interleavings.
+P4: TBD.
+
+
 \subsection{Related Work by Others} \label{sec:others-work}
 
-\para{Concurrency bugs.} TBD.
+\para{Concurrency reliability techniques.} TBD. Emphasis that these tools are 
+complementary with \xxx because \xxx focuses on the security consequence of bugs.
 Detection tools.
 Debugging tools.
 Avoidance/fixing tools.
 Also mention concurrency attacks (HotPar).
 
-\para{TOCTTOU attacks.} TBD.
+\para{TOCTTOU attacks.} TBD. Concurrency attacks are serious than normal TOCTTOU.
 
 \para{Traditional security defense techniques.} TBD.
 Mention shadow memory approaches.
@@ -63,7 +92,7 @@ set of thread interleavings covering all inputs~\cite{ics:oopsla13}, and our
 \parrot runtime system has been integrated with a CMU software model 
 checker~\cite{dbug:spin11}.
 
-%%Our experience on building \smt runtime sytems can address the two 
+Our experience on building \smt runtime sytems can address the two 
 aforementioned major research challanges of the \smt and SMR integration. In 
 addition, our techniques on program analysis, verification, and model checking 
 can be deployed in \msmr replicas and enhance their reliability and security.
