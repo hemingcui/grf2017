@@ -5,78 +5,31 @@ TBD.
 
 \subsection{Related Work by Others} \label{sec:others-work}
 
-\para{State machine replication (SMR).}  SMR has been studied by the literature 
-for decades, and it is recognized by both industry and academia as a powerful 
-fault-tolerance technique in clouds and distributed systems~\cite{lamportclock, 
-smr:tutorial}. As a common standard, SMR uses \paxos~\cite{paxos} as the 
-consensue protocol to ensure that all replicas see the same input request 
-sequence. In this standard, replicas first ``agree" on a total order of input 
-request as a input sequence, and then ``execute" the requests that have reached 
-this consensus. This typical SMR approach is called ``agree-execute". SMR 
-systems, including Chubby~\cite{chubby:osdi}, ZooKeeper~\cite{zookeeper}, and 
-the Microsoft \paxos~\cite{paxos} implementation, have been widely used to 
-maintain critical distributed systems configurations (\eg, group leaders, 
-distributed locks, and storage meta data). SMR has also been applied broadly to 
-build various highly available services, including 
-storage~\cite{paxos:datastore} and wide-area 
-network~\cite{mencius:osdi08}. These systems all require single-threading in 
-the replicated service.
+\para{Concurrency bugs.} TBD.
+Detection tools.
+Debugging tools.
+Avoidance/fixing tools.
+Also mention concurrency attacks (HotPar).
 
-%% Work to support multi-threading.
-In order to support multi-threading in SMR, Eve~\cite{eve:osdi12} introduces a 
-new ``execute-verify" approach: it first executes a batch of requests 
-speculatively, and then verifies whether these requests have conflicts that 
-cause execution state divergence. If so, Eve rolls back the program to a state 
-before executing these requests and re-execute these requests sequentially. 
-Both Eve's execution divergence verification and rollbacks require developers 
-to annotate all shared states (\eg, global variables abd heaps) of a program, 
-which could be time consuming and error-prone. CBASE~\cite{cbase:dsn04} is 
-similar to Eve, but it assumes no conflicts on requests it batches.
+\para{Security defense techniques.} TBD.
+Mention shadow memory approaches.
+Mention security libraries.
+Mention stack overflow detection.
+Say these are mainly for single-threaded programs.
 
-Rex~\cite{rex:eurosys14} addresses the thread interleaving divergence problem 
-with a ``execute-agree-follow" approach: it first records thread interleavings 
-on the primary replica by executing requests, and then replays these 
-interleavings on the other replicas. If the executed interleavings in the 
-primary may not be agreed on the other nodes, then Rex will rollback the 
-primary's states. These rollbacks/checkpoints also require developers' manual 
-efforts for every program. Furthermore, Rex requires frequently shipping thread 
-interleavings across replicas, which may be much slower than our \smt approach 
-that schedules each replica indepently. NonStop Advanced 
-Architecture~\cite{nonstop:dsn05} is similar to Rex, but it can only do 
-replications on a local machine.
+\para{State machine replication.} TBD.
+Say systems.
+Also say checkpoint restore techniques.
 
-There are other work that support restricted concurrency such as 
-transactions~\cite{vandiver:sosp07, kobus:icdcs13} in SMR, but they are not for 
-replicating general multi-threaded programs.
-
-\para{\smt and \dmt systems.}  In order to make multi-threading easier to 
-undertand, test, analyze, and replicate, researchers have built two types of 
-reliabile multi-threading systems: (1) stable multi-threading systems (or 
-\smt)~\cite{grace:oopsla09, dthreads:sosp11, determinator:osdi10} that aim to 
-reduce the number of possible thread interleavings for program all inputs, and 
-(2) deterministic multi-threading systems (or \dmt)~\cite{dpj:oopsla09, 
-dmp:asplos09, kendo:asplos09, coredet:asplos10, dos:osdi10, ddos:asplos13, 
-ics:oopsla13} that aim to reduce the number of possible thread interleavings on 
-each program input. Typically, these systems use deterministic logical clocks 
-instead of nondeterministic physical clocks to make sure inter-thread 
-communications (\eg, \mutexlock and accesses to global variables) can only 
-happen at some specific logical clocks. Therefore, given the same or similar 
-inupts, these systems can enforce the same thread interleavings and eventually 
-the same executions. These systems 
-have shown to greatly improve software reliability, including coverage of 
-testing inputs~\cite{ics:oopsla13} and speed of recording 
-executions\cite{dos:osdi10} for debugging.
-
-Typical DMT systems, including \kendo~\cite{kendo:asplos09}, 
-\coredet~\cite{coredet:asplos10}, and \coredet-related 
-systems~\cite{dos:osdi10, ddos:asplos13}, improve performance by balancing each 
-thread's load with low-level instruction counts, so they are not stable to input 
-perturbations. Therefore, we argue that \smt is more useful than \dmt for 
-software reliability.
+\para{DMT systems.} TBD.
 
 
 
 \subsection{Related Work by the PI} \label{sec:my-work}
+
+First emphasis debugging experience on concurrency. Program analysis.
+Then mention security exploits found in Woodpecker.
+Then mention runtime systems.
 
 A key requirement to making SMR practically support multi-threading is that all 
 replicas must run the same thread interleavings so that the replica executions 
