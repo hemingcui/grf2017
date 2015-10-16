@@ -54,12 +54,13 @@ difficult to get right.
 % work Parrot, exponentially many.
 Our study shows that a key reason why multithreaded programs are so difficult 
 to get right is that, at run time, these programs may run into 
-exponentially many possible thread interleavings (or \emph{schedules}). It is 
-extremely challenging to understand, test, analyze, or verify this huge amount 
-of schedules and make sure they are free of concurrency bugs and exploits. 
-Therefore, state-of-the-art neither has a rigourous model on describing 
-concurrency attacks, nor lacks effective approaches to detect and defense such 
-attacks.
+exponentially many possible thread interleavings (or \emph{schedules}) 
+depending on the permutation orders of inter-thread communication operations 
+(\eg, mutex locks). It is extremely challenging to understand, test, analyze, 
+or verify this huge amount of schedules and make sure they are free of 
+concurrency bugs and exploits. Therefore, state-of-the-art neither has a 
+rigourous model on describing concurrency attacks, nor lacks effective 
+approaches to detect and defense such attacks.
 
 This \xxx project takes a thorough approach to cope with concurrency attacks.
 First, \xxx aims to develop a rigourous model to describe such attacks 
@@ -76,7 +77,7 @@ in the software deployment phase (\S\ref{sec:defense}).
 % should also consider the consequence of thread interleavings. A runtim 
 % technique must think of ways to replicate and reduce the amount thread 
 % interleavings.
-P4: TBD.
+% P4: TBD.
 
 
 \subsection{Related Work by Others} \label{sec:others-work}
