@@ -84,22 +84,127 @@ TBD.
 \subsection{Defensing Concurrency Attacks in Deployment Phase} 
 \label{sec:defense}
 
-TBD
-
-\subsubsection{Architecture of \xxx's Runtime DefenseInfrastructure} 
-\label{sec:defense-arch}
-
 % P1: motivation, why runtime detection is important. We want to mostly avoid 
 % exploits by preventing attackers from manipulating the schedules.
+Although \S\ref{sec:detect} has proposed an detection scheme for developers to 
+find concurrency attacks in the testing phase, this scheme can not catch 100\% 
+attacks because it is designed to find attacks on the concurrency bugs it meets 
+at runtime. Thus, to practically prevent concurrency attacks taking over 
+multi-threaded programs in the deployment phase, an efficient, transparent 
+runtime infrastructure is needed to defense concurrency attacks.
 
-% P2: reason 2: when races occur even if Parrot is enforced, we want to have fault-tolerance.
+% P2: reason 2: when races occur even if Parrot is enforced, we want to have 
+% fault-tolerance.
+To build a defense infrastructure, I propose to leverage state machine 
+replication (or \smr), a powerful fault-tolerance concept in today's 
+distributed system and clouds. \smr models a program as a deterministic
+state machine, where the states are important program data and the transitions 
+are deterministic executions of program code under input requests. SMR runs 
+replicas of the program and invokes a distributed consensus protocol 
+(typically \paxos) to ensure the same sequence of input requests for replicas, 
+as long as a quorum (typically a majority) of the replicas agrees on the input 
+request sequence. Under the deterministic execution assumption, this quorum of 
+replicas must reach the same exact state despite various exceptions such as 
+program failures or network partitions. SMR is proven safe in theory and 
+provides high availability in practice.
+
+The fault-tolerant benefit of \smr makes it particularly attractive
+on implementing a principled replication system for tolerating concurrency 
+attacks. Unfortunately, doing so is quite challenging, and I forsee four 
+challenges.
 
 % P3: reason 3: we want survive. checkpoint and re-execute, and diversify the 
 % schedules before re-execute. Sell it like a self-healing runtime system.
+First, today’s multithreaded programs are almost universally
+multithreaded, thus even concurrency attacks do not manifest, the programs 
+running across replicas can still easily run into different thread schedules 
+and divergent execution states. Second, to leverage existing SMR systems such 
+as ZooKeeper, developers often have to shoehorn their programs into the 
+narrowly defined state machine interfaces provided by these SMR systems. Third, 
+such a runtime infrasture should run almost as fast as the native executions in 
+the deployment phase. Fourth, if replicas run into buggy schedules that trigger 
+concurrency attacks, our infrastructure should be able to recover from the 
+attacks.
+
+\subsubsection{Architecture of \xxx's Runtime Defense Infrastructure} 
+\label{sec:defense-arch}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.3\columnwidth]{figures/defense}
+\vspace{-.05in}
+\caption{{A runtime infrastructure to defense concurrency attacks.}} 
+\label{fig:defense}
+\vspace{-.05in}
+\end{figure}
+
+To address these challenges, I propose a \smr-based replication 
+system. With this infrastructure, a developer focuses on implementing her 
+program’s intended functionality, not how to defense concurrency attacks. When 
+she is ready to replicate her program for strengthened security, she simply
+runs this infrastructure with her program on multiple replicas. Within
+each replica, this infrastructure interposes on the socket and the thread
+synchronization interfaces to keep replicas in sync. Specifically, to address 
+the first challenge, it considers each incoming socket call (e.g., accept() a 
+client’s connection or recv() a client’s data) an input request, and runs a 
+\paxos consensus protocol to ensure that a quorum of the replicas sees the same 
+exact sequence of the incoming socket calls.
+
+To address the second challenge, this infrastructure schedules synchronizations 
+using deterministic multithreading (DMT). This technique
+typically maintains a logical time2 that advances deterministically on each 
+thread's synchronization. By serializing thread synchronizations, DMT 
+practically makes an entire multithreaded execution deterministic. The overhead
+of DMT is typically moderate because most code is not synchronization and can 
+still run in parallel.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.3\columnwidth]{figures/healing}
+\vspace{-.05in}
+\caption{{The self-healing idea for recovering from concurrency attacks.}} 
+\label{fig:healing}
+\vspace{-.05in}
+\end{figure}
+
+% Mention the self healing idea.
+To address the fourth challenge, we propose a self-healing idea 
+(Figure~\ref{fig:healing}), which leverage existing transparent program 
+checkpoint and restore techniques. On program starts, one backup replica first 
+checkpoints the program, and then the program runs as is. Once minor replicas 
+hit concurrency attacks, the other replicas can still agree on new inputs and 
+process requests. If all replicas fail due to hitting the same vulnerable 
+schedule, we simply extracts a previous checkpoint, shuffle the schedules, and 
+then let the program continues to execute. To this end, this idea checkpoint 
+and recovery must work with general programs with its file system. To this end, 
+it leverages CRIU to checkpoint and restore process states, and LXC for file 
+system states.
+
+As a typical security setting, we need to define which components of 
+this Infrastructure must be trusted. In this project, we require the 
+infrastructure and the checkpoints are trusted (\ie, even if the program 
+compromises, its program checkpoints and the infrastructure are not effected). 
+We consider this requirement as reasonable, because once this infrastructure is 
+built, we can leverage existing verification techniques to focus on verifying 
+this infrastructure, and on top of it, we no longer need to verify those 
+programs.
+
+
+
+
+% P4: challenges on doing so. Including the initial work.
 
 \subsubsection{Priliminary work} \label{sec:defense-result}
 
 % P1: we have built a replication system. Perf and checkpoint results.
+My collaborators and I have built a propotype system~\cite{crane:sosp15} to 
+address the first two challenges. \crane has shown to be able to transparently 
+and efficiently support four general multithreaded programs without modifying 
+them. We have also shown that this infrastructure is robust on primary replica 
+or backup failures. For the third challenge, we plan to study more 
+programs and see whether we can leverage performance hints to optimize 
+performance. For the fourth challenge, our propotype system \crane has 
+implemented a basic checkpoint/restore feature.
 
 \subsection{Research Plan} \label{sec:rep}
 time line. R1 R2.
