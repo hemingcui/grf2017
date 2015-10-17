@@ -1,13 +1,23 @@
 \section{Research Plan and Methodology} \label{sec:rep}
 
-TBD
+This section takes a thorough approach to tackle concurrency attacks, including 
+its program analysis model, a novel detection approach to detection such 
+attacks via leveraging this model, and a runtime infrastructure to defense 
+attacks.
 
 \subsection{Modeling Concurrency Attacks} \label{sec:model}
 
 % P1: as mentioned in background, a key reason is thread interleavings, 
 % so we need to reason about the general patterns we have. Or we say our 
 % methodology is just like pattern matching.
-P1: TBD.
+As mentioned in \S\ref{sec:background}, state-of-the-art lacks a rigorous model 
+for concurrency attacks. Specifically, people lack understanding on how 
+concurrency bugs propogate to security-sensitive operations in source code, and 
+how we can use program analysis approaches to describe this propogation. This 
+section first gives two concrete examples on concurrency attacks 
+(\S\ref{sec:}), and then propose our model.
+
+\subsubsection{Concurrency Attacks Examples} \label{sec:examples}
 
 \begin{figure}[t]
 \centering
@@ -17,6 +27,18 @@ P1: TBD.
 \vspace{-.05in}
 \end{figure}
 
+Figure~\ref{fig:libsafe} shows the simplified code of a concurrency attack in 
+\libsafe, a popular stack overflow protection library. In short, this library 
+provides its own safe memory and string operations functions. In this 
+functions and carefully checks whether a stack variable is passed in as 
+function arguments and whether this function may overflow the call stack. If a 
+program is dying, such checks are disabled. Unfortunately, a global varible 
+\v{dying} is not protected by mutex locks, so attackers can leverage two 
+threads to trigger a data race bug on this variable, bypass the security 
+check, overflow the function's return address of the stack, and then makes the 
+program execute malicious code from inputs. Ironically, this \libsafe library 
+is no longer ``safe" in the mulithreading era.
+
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.99\columnwidth]{figures/apache}
@@ -25,23 +47,55 @@ P1: TBD.
 \vspace{-.05in}
 \end{figure}
 
-% P2: pattern 1.
-P2: TBD.
+Figure~\ref{fig:libsafe} shows the simplified code of a concurrency attack in 
+\apache, a widely used web server to manage http pages from different users. 
+\apache spawns a number of threads, with each to server a httpd request. Each 
+thread logs each http request it receives into a global log buffer and flush 
+this buffer to a log file when the log is full. However, developers missed a 
+mutex lock to protect this buffer, so this buffer can overflow and corrupt 
+other memory in heap. Unfortunately, \apache puts the log file's descriptor next 
+to this log buffer. If this descriptor is corrupted, \apache may write the 
+request log to arbitrary files. Our riliminary study have successfully corrupted 
+this file descriptor and writes the request logs to http pages owned by regular 
+users, violatinng integrity of \apache.
 
-% P3: pattern 2.
-P3: TBD.
+\subsubsection{Concurrency Attacks Program Analysis Models} 
+\label{sec:attack-phase}
 
-% P4: pattern 3.
-P4: TBD.
+% P3: pattern.
+These two examples appear to be diverse, but they have a few common elements in 
+order to construct a concurrency attack. First, corrupted global memory is 
+necessary (\eg, \v{dying} in \libsafe, and the \v{buf\_len} in \apache). 
+Second, a security-sensitive operation is necessary (\eg, \v{strcpy} and 
+\v{memcpy}). Third, the courrupted global memory must cause abnormal behavior of 
+the security-sensitive operation. For example, the abnormal behavior in \libsafe 
+is we must leverage the corrupted memory to bypass the security check. For 
+\apache, we leverage the corrupted memory to bypass the security check. In this 
+case, the corrupted memory may just have indirect impact on the 
+security-sensitive operation (\ie, its corrupted value does not flow to the 
+operation), or have direct impact (\ie, the corrupted memory, buffer log, is 
+part of the operation).
+
+In sum, three key elements compose a concurrency attack: corrupted memory, 
+security-sensitive operation, and impact (indirect or direct) from the memory 
+to the operation. In the PL community, we cause the indirect impact as control 
+dependency, and the direct impact data dependency. Actually, not only for these 
+examples, the \nattacks attacks we have reproduced and the \noldattacks in 
+previous study~\cite{con:hotpar12}, they all have these three key elements.
+
+% TBD: add a table on the list of concurrency bugs and the list of dangerous 
+% operations.
+
+
 
 % P5: how to handle unknow patterns? Just say patterns in our work may spur new 
 % patterns. We will continue to find new patterns as well.
-P5: TBD.
+% P5: TBD.
 
 % \subsubsection{Concurrency Attacks with Three Common Patterns}
 % \label{sec:model-pattern}
 
-Goal 1: modeling.
+% Goal 1: modeling.
 
 \subsection{Detecting Concurrency Attacks in Testing Phase}\label{sec:detect}
 
