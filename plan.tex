@@ -83,6 +83,23 @@ dependency, and the direct impact data dependency. Actually, not only for these
 examples, the \nattacks attacks we have reproduced and the \noldattacks in 
 previous study~\cite{con:hotpar12}, they all have these three key elements.
 
+% PX: emphasis the contribution/potential value of this model.
+In a high level, this model treats a concurrency attack as a source-sink model, 
+where a source is a courrupted global memory caused by a concurrency bug, and a 
+sink is a security-sensitive operation. Then this model tracks the data flow 
+and control flow of the corrupted memory to the sensitive operations. Unlike a 
+traditional model which only consider inputs as the source, our model considers
+concurrency bugs as the the inputs. This model spurs several interesting 
+research questions. First, how do we track down the corrupted memory in the 
+middle of an execution? Second, given that concurrency bugs are not only just 
+one, how does our analysis handle multiple concurrency bugs (\eg, multiple 
+corrupted variables)? Third, given that not all security-sensitive operations 
+are indeed relevant to the source, how do we prune the irrelevant operations 
+soundly (\ie, without missing exploits)? In \S\ref{sec:detect}, we plan to 
+leverage this model to develop an effective detection approach, and our 
+priliminary work has shown promissing results on addressing these research 
+questions.
+
 % TBD: add a table on the list of concurrency bugs and the list of dangerous 
 % operations.
 
