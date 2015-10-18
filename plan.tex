@@ -125,7 +125,9 @@ the bugs do not help. For example, we studied a few concurrency bugs in old
 Linux and BSD releases a few years ago, and their attacks are still helpful 
 becuase if attackers have broken in and gain root priviledge, simply fixing the 
 bugs or upgrading kernels can not remove the malicious root user.
- 
+
+\subsubsection{Workflow of \xxx's Detection Scheme}\label{sec:detect-arch}
+
 An effective concurrency attack detection tool should meet a few goals. First, 
 a concurrency attack report should contain preconditions on inputs of the 
 programs so that developers can easily inspect. This goal is especially useful 
@@ -139,9 +141,21 @@ software developers. To this end, this tool must precisely capture both the
 data flow and control flow between the courrupted global memory and any 
 potential security-sensitive operations in program source code. 
 
-Our key weapon for each goal. Symbolic execution and path slicing.
+Our key weapon to achieve the first goal is \emph{symbolic execution}, an 
+advanced program analysis technique that can systematically explore program 
+paths to find bugs. Unlike normal execution which runs on a concrete 
+inputs, this technique marks inputs (\eg, command lines and bytes received from 
+network) as symbolic, and if a branch statement depend on inputs, it forks the 
+execution, goes down both paths, and tracks constraints on inputs. If this 
+technique hit a bug, the constraints on inputs reflect on input conditions 
+which can triger this bug. This techinique has shown to find subtle bugs in 
+real-world programs.
 
-\subsubsection{Workflow of \xxx's Detection Scheme}\label{sec:detect-arch}
+Our key weapon to achieve the first goal is path slicing, an advanced program 
+analysis technique that. Given a trace of executed instructions and one 
+instruction in this trace, this technique goes backward compute a subset of 
+instructions that are necessary to determine the reachability and values of 
+operands of this instruction.
 
 \begin{figure}[t]
 \centering
@@ -152,7 +166,26 @@ Our key weapon for each goal. Symbolic execution and path slicing.
 \vspace{-.05in}
 \end{figure}
 
-Describe the workflow of the detection tool.
+With both the symbolic execution and path slicing tools, we plan to build a 
+concurrency attack detection tool. The workflow of the tool is shown in 
+Figure~\ref{fig:detection}. This tool takes program source code as input and 
+uses the LLVM compiler framework to compile it to LLVM IR instructions. The 
+symbolic execution engine marks a program input and bytes received from network 
+as symbolic and explore program paths. For each program path, we run a race 
+detector on the execution trace, and if a concurrency bug is detected, we feed 
+this trace to path slicer to see whether it may lead to a dangerous operation 
+or have any branch statements that can lead to dangerous operation. If the 
+trace does not contain any bug, we discard this trace.
+
+The path slicer takes a trace which contains a concurrency bug. The slicer 
+first sees whether this trace has a dangerous operation, if so, it reports a 
+potential concurrency bug with input preconditions. If not, the path slicer 
+starts from the last execution of the trace, goes backward, and see whether a 
+branch statement in this trace may lead to a dangerous operation. If so, it 
+marks this branch as relevant. After processing this trace, the path slicer 
+feed these branches to the symbolic execution engine, so that the engine can 
+focus on exploring paths on these branches to try to exercise dangerous 
+operations.
 
 % P1: why need a detection scheme. First, capture as many as exploits in 
 % testing phase. And call for re-install if there is any potential exploit. Even for 
@@ -176,14 +209,31 @@ Describe the workflow of the detection tool.
 
 % P1: we have implemented part of the dangerous operation. pointer NULL 
 % derefence. Report the results. FP:FN. 
+My collaborators and I have built one basic building block of this detection 
+tool, the path slicer called Woodpecker~\cite{woodpecker:asplos13} in ASPLOS 
+2013. Woodpecker detects 113 programming rule violations in 136 popular systems 
+programs, including 10 serious data loss errors with 2 most serious ones 
+already confirmed by the corresponding developers. My collaborators and I have 
+built a data race detector in our Tern~\cite{cui:tern:osdi10} in OSDI 2010 and 
+Peregrine~\cite{peregrine:sosp11} paper in SOSP 2011. We believe these 
+priliminary results show the potential and practical impact of our proposed 
+detection tool.
 
 % P2: mention our initial work in OSDI '10 and SOSP '11 on precise data race 
 % detection.
+
 
 % P2: we foresee a few open challenges on the continuation of developing this 
 % tool. First, how to make path slicing handle % non-function calls. Second, how 
 % to prioritize different operations ()? % Third, how to select malicious 
 % inputs and thread schedules that are more likely to triger concurrency bugs?
+We foresee a few open challenges on the continuation of developing this tool. 
+First, how to make path slicing handle non-function calls (\eg, NULL pointer 
+dereference). Second, how to prioritize different operations (\eg, some 
+\v{strcpy} functions do not involve with inputs and should be secure)? Third, 
+how to direct our symbolic execution engine to select malicious inputs and 
+thread schedules that are more likely to triger concurrency bugs? I belive 
+these challenges will continue to lead to significant work in good conferences.
 
 \subsection{Defensing Concurrency Attacks in Deployment Phase} 
 \label{sec:defense}
@@ -310,7 +360,7 @@ programs and see whether we can leverage performance hints to optimize
 performance. For the fourth challenge, our propotype system \crane has 
 implemented a basic checkpoint/restore feature.
 
-\subsection{Research Plan} \label{sec:rep}
-time line. R1 R2.
+% \subsection{Research Plan} \label{sec:rep}
+% Time line. R1 R2.
 
 
