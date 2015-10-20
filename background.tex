@@ -110,11 +110,25 @@ cause of TOCTTTOU attacks is mainly caused by incorrect use of file system API,
 while concurrency attacks are mainly caused by concurrency bugs with memory 
 accesses, which is much more difficult to track and prevent.
 
-\para{Traditional security defense techniques.} TBD.
-Mention shadow memory approaches.
-Mention security libraries.
-Mention stack overflow detection.
-Say these are mainly for single-threaded programs.
+\para{Traditional security defense techniques.} Defense techniques for 
+single-threaded programs have been well studied, including metadata 
+tracking~\cite{taintdroid:osdi10, lift:micro06, myers:information, 
+valgrind:pldi}, anomaly 
+detection~\cite{taskrecycling:ppopp90,schonberg:pldi89}, address space 
+randomization~\cite{ aslr-fail:ccs04}, and static 
+analysis~\cite{seth:pldi,engler:vmcai,wagner:syscall:ids,coverity:cacm, 
+klee:osdi08}.
+Say these are mainly for single-threaded programs. However, on the presence of 
+multithreading, these tools may be largely weakened. Concurrency 
+bugs in global memory may corrupt metadata tags in metadata tracking. Anomaly 
+detection lack a model for buggy thread interleavings to reasonabling about 
+concurrency bugs and their consenquence on attacks, which our attack model can 
+help. Static analysis has shown to find numerous bugs in real-world software, 
+however, when reasonabling about the exponentially many thread interleavings, 
+static analysis usually report too many false positives and burry the real 
+ones. To tackle concurrency attacks, existing defense techniques can leverage 
+our concurrency attack model (Objective 1) and use our detection tool 
+(Objective 2).
 
 \para{State machine replication (SMR).}  SMR has been studied by the literature 
 for decades, and it is recognized by both industry and academia as a powerful 
