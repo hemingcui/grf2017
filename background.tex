@@ -82,13 +82,19 @@ in the software deployment phase (\S\ref{sec:defense}).
 
 \subsection{Related Work by Others} \label{sec:others-work}
 
-\para{Concurrency reliability techniques.} TBD. Emphasis that these tools are 
-complementary with \xxx because \xxx focuses on the security consequence of 
-bugs.
-Detection tools.
-Debugging tools.
-Avoidance/fixing tools.
-Also mention concurrency attacks (HotPar).
+\para{Reliability tools.} There are various prior work on concurrency error 
+detection~\cite{yu:racetrack:sosp,savage:eraser,racerx:sosp03,lu:muvi:sosp,
+avio:asplos06,conmem:asplos10}, diagnosis~\cite{racefuzzer:pldi08,
+ctrigger:asplos09,atomfuzzer:fse08}, 
+and correction~\cite{dimmunix:osdi08,gadara:osdi08,wu:loom:osdi10,cfix:osdi12}. 
+These work mainly focus on the concurrency errors themselves, while \xxx's 
+concurrency attack detection approach mainly focuses on the security 
+consenquences of conrrency bugs, so our detection approach is complementary to 
+these prior work. These prior work can aslo be deployed on backup 
+replicas of \xxx's runtime infrastructure and help \xxx detect concurrency 
+errors. Moreover, the asynchronous replication nature of \xxx's runtime 
+infrastructure can also mitigate the performance overhead of these powerful 
+analyses~\cite{repframe:apsys15}.
 
 \para{TOCTTOU attacks.} TBD. Concurrency attacks are serious than normal 
 TOCTTOU.
@@ -99,15 +105,57 @@ Mention security libraries.
 Mention stack overflow detection.
 Say these are mainly for single-threaded programs.
 
-\para{State machine replication.} TBD.
-Say systems.
-Also say checkpoint restore techniques.
+\para{State machine replication (SMR).}  SMR has been studied by the literature 
+for decades, and it is recognized by both industry and academia as a powerful 
+fault-tolerance technique in clouds and distributed 
+systems~\cite{lamportclock,smr:tutorial}. As a common practice, SMR uses 
+\paxos~\cite{paxos,paxos:simple,paxos:complex} and its popular engineering 
+approaches~\cite{paxos:live,paxos:practical} as the consensus protocol to 
+ensure that all replicas see the same input request sequence. Since consensus 
+protocols are the core of SMR, a variety of study improve different aspects of 
+consensus protocols, including performance~\cite{epaxos:sosp13,paxos:fast} and 
+understandability~\cite{raft:usenix14}. Although \xxx's current implementation 
+takes a popular engineering approach~\cite{paxos:practical} for practicality, 
+it can also leverage other consensus protocols and approaches.
 
-\para{DMT systems.} TBD.
+\para{\dmt and \smt systems.}  In order to make multi-threading easier to 
+understand, test, analyze, and replicate, researchers have built two types of 
+reliable multi-threading systems: (1) stable multi-threading systems (or 
+\smt)~\cite{grace:oopsla09, dthreads:sosp11, determinator:osdi10} 
+that aim toreduce the number of possible thread interleavings for program all 
+inputs, and(2) deterministic multi-threading systems (or 
+\dmt)~\cite{dpj:oopsla09,dmp:asplos09,kendo:asplos09,coredet:asplos10,
+dos:osdi10,ddos:asplos13, ics:oopsla13} that aim to reduce the number of 
+possible thread interleavings on each program input. Typically, these systems 
+use deterministic logical clocks 
+instead of nondeterministic physical clocks to make sure inter-thread 
+communications (\eg, \mutexlock and accesses to global variables) can only 
+happen at some specific logical clocks. Therefore, given the same or similar 
+inputs, these systems can enforce the same thread interleavings and eventually 
+the same executions. These systems 
+have shown to greatly improve software reliability, including coverage of 
+testing inputs~\cite{ics:oopsla13} and speed of recording 
+executions\cite{dos:osdi10} for debugging.
 
-\para{Symbolic execution.} TBD.
 
-\para{Slicing algorithms. } TBD.
+\para{Symbolic execution.} The combination of symbolic and
+concrete executions has been a hot research topic. Researchers
+have built scalable and effective symbolic execution
+systems to detect errors [16–18, 20, 28–30, 49,
+54], block malicious inputs [21], and preserve privacy in
+error reports [19]. Compared to these systems, TERN applies
+symbolic execution to a new domain: tracking input
+constraints to reuse schedules.
+
+\para{Program analysis.} TBD. Program slicing [49] is a general 
+technique to prune irrelevant statements from a program or trace. Recently,
+systems researchers have leveraged or invented slicing techniques
+to block malicious input [18], synthesize executions for better error
+diagnosis [57], infer source code paths from log messages for postmortem
+analysis [56], and identify critical inter-thread reads that
+may lead to concurrency errors [59]. Our determinism-preserving
+slicing technique produces a correct trace slice for multithreaded
+programs and supports multiple ordered targets. It t
 
 
 \subsection{Related Work by the PI} \label{sec:my-work}
