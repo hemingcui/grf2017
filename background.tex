@@ -10,9 +10,9 @@ related work (\S\ref{sec:my-work}).
 \label{sec:background}
 
 % P1: multithreading, hard to get right, plagued with concurrency bugs.
-Driven by the prevalance of the multi-core hardware, multithreaded programs 
+Driven by the prevalence of the multi-core hardware, multithreaded programs 
 have become one main stream in real-world software. Unfortunately, despite 
-dedades of efforts on developing new theretical primitives and building 
+decades of efforts on developing new theoretical primitives and building 
 reliability tools, these programs are still notoriously difficult to get right. 
 Multithreaded programs are plagued with various types of concurrency bugs, 
 including data races, atomicity violations, deadlocks, and order violations. 
@@ -28,7 +28,7 @@ and wrong outputs.
 % Mention HotPart, found XX exploits. We: found YY exploits. patterns.
 % Two examples.
 Worse, recent study~\cite{con:hotpar12} on a wide range of real-world 
-multithreade programs has shown that attackers can leverage these concurrency 
+multithreaded programs has shown that attackers can leverage these concurrency 
 bugs to construct \emph{concurrency attacks}. Attackers can construct specific 
 inputs to trigger concurrency bugs with high probability (\eg, with only tens 
 of repeated executions), corrupt critical global memory shared by threads in 
@@ -38,7 +38,7 @@ privileges, or bypass authentication procedures.
 
 Unfortunately, most traditional defense techniques are weakened or completely 
 bypassed by concurrency attacks because these techniques are mainly designed to 
-protect single-threaded programs. For example, authough taint-tracking tools 
+protect single-threaded programs. For example, although taint-tracking tools 
 have proven effective on tracking inputs' flow to sensitive locations by 
 adding security tags to data, these tools are weakened in the multithreading 
 context because a race on data can corrupt the tags and bypass tracking. 
@@ -59,11 +59,11 @@ depending on the permutation orders of inter-thread communication operations
 (\eg, mutex locks). It is extremely challenging to understand, test, analyze, 
 or verify this huge amount of schedules and make sure they are free of 
 concurrency bugs and exploits. Therefore, state-of-the-art neither has a 
-rigourous model on describing concurrency attacks, nor lacks effective 
+rigorous model on describing concurrency attacks, nor lacks effective 
 approaches to detect and defense such attacks.
 
 This \xxx project takes a thorough approach to cope with concurrency attacks.
-First, \xxx aims to develop a rigourous model to describe such attacks 
+First, \xxx aims to develop a rigorous model to describe such attacks 
 (\S\ref{sec:model}). Unlike traditional models to deal with sequential attacks, 
 our model must incorporate vulnerable thread interleavings and their security 
 consequences. Second, leveraging this model, it aims to build an effective 
@@ -89,29 +89,29 @@ ctrigger:asplos09,atomfuzzer:fse08},
 and correction~\cite{dimmunix:osdi08,gadara:osdi08,wu:loom:osdi10,cfix:osdi12}. 
 These work mainly focus on the concurrency errors themselves, while \xxx's 
 concurrency attack detection approach mainly focuses on the security 
-consenquences of conrrency bugs, so our detection approach is complementary to 
-these prior work. These prior work can aslo be deployed on backup 
+consequence of concurrency bugs, so our detection approach is complementary to 
+these prior work. These prior work can also be deployed on backup 
 replicas of \xxx's runtime infrastructure and help \xxx detect concurrency 
 errors. Moreover, the asynchronous replication nature of \xxx's runtime 
 infrastructure can also mitigate the performance overhead of these powerful 
 analyses~\cite{repframe:apsys15}.
 
-\para{TOCTTOU attacks.} TOCTTTOU (Time Of Check To Time Of Use) 
+\para{TOCTTOU attacks.} TOCTTOU (Time Of Check To Time Of Use) 
 attacks have been well studied for 
 decades~\cite{bishop:tocttou,toctou:fast08,toctou:fast05,toctou:usec03}. These 
 attacks target mainly the file system interface, and leverage the non-atomicity 
 on time-of-check to time-of-use of a file to escalate illegal file access. Our 
-\xxx project targets general concurency attacks, which is much broader and 
-severe than typical TOCTTTOU attacks for two main reasons. First, TOCTTTOU 
-mainly causes illegal file access, while general concurency attacks can cause a 
-much broader range of security attacks, ranging from gaining root privileges, 
+\xxx project targets general concurrency attacks, which is much broader and 
+severe than typical TOCTTOU attacks for two main reasons. First, TOCTTOU 
+mainly causes illegal file access, while general concurrency attacks can cause 
+a much broader range of security attacks, ranging from gaining root privileges, 
 injecting malicious code, to bypassing authentication checks. Second, the root 
-cause of TOCTTTOU attacks is mainly caused by incorrect use of file system API, 
+cause of TOCTTOU attacks is mainly caused by incorrect use of file system API, 
 while concurrency attacks are mainly caused by concurrency bugs with memory 
 accesses, which is much more difficult to track and prevent.
 
 \para{Traditional security defense techniques.} Defense techniques for 
-single-threaded programs have been well studied, including metadata 
+single-threaded programs have been well studied, including meta-data 
 tracking~\cite{taintdroid:osdi10, lift:micro06, myers:information, 
 valgrind:pldi}, anomaly 
 detection~\cite{taskrecycling:ppopp90,schonberg:pldi89}, address space 
@@ -120,12 +120,12 @@ analysis~\cite{seth:pldi,engler:vmcai,wagner:syscall:ids,coverity:cacm,
 klee:osdi08}.
 Say these are mainly for single-threaded programs. However, on the presence of 
 multithreading, these tools may be largely weakened. Concurrency 
-bugs in global memory may corrupt metadata tags in metadata tracking. Anomaly 
-detection lack a model for buggy thread interleavings to reasonabling about 
-concurrency bugs and their consenquence on attacks, which our attack model can 
+bugs in global memory may corrupt meta data tags during tracking. Anomaly 
+detection lack a model for buggy thread interleavings to reasoning about 
+concurrency bugs and their consequence on attacks, which our attack model can 
 help. Static analysis has shown to find numerous bugs in real-world software, 
-however, when reasonabling about the exponentially many thread interleavings, 
-static analysis usually report too many false positives and burry the real 
+however, when reasoning about the exponentially many thread interleavings, 
+static analysis usually report too many false positives and bury the real 
 ones. To tackle concurrency attacks, existing defense techniques can leverage 
 our concurrency attack model (Objective 1) and use our detection tool 
 (Objective 2).
@@ -147,7 +147,7 @@ it can also leverage other consensus protocols and approaches.
 understand, test, analyze, and replicate, researchers have built two types of 
 reliable multi-threading systems: (1) stable multi-threading systems (or 
 \smt)~\cite{grace:oopsla09, dthreads:sosp11, determinator:osdi10} 
-that aim toreduce the number of possible thread interleavings for program all 
+that aim to reduce the number of possible thread interleavings for program all 
 inputs, and(2) deterministic multi-threading systems (or 
 \dmt)~\cite{dpj:oopsla09,dmp:asplos09,kendo:asplos09,coredet:asplos10,
 dos:osdi10,ddos:asplos13, ics:oopsla13} that aim to reduce the number of 

@@ -12,10 +12,10 @@ attacks.
 % methodology is just like pattern matching.
 As mentioned in \S\ref{sec:background}, state-of-the-art lacks a rigorous model 
 for concurrency attacks. Specifically, people lack understanding on how 
-concurrency bugs propogate to security-sensitive operations in source code, and 
-how we can use program analysis approaches to describe this propogation. This 
+concurrency bugs propagate to security-sensitive operations in source code, and 
+how we can use program analysis approaches to describe this propagation. This 
 section first gives two concrete examples on concurrency attacks 
-(\S\ref{sec:}), and then propose our model.
+(\S\ref{sec:examples}), and then propose our model (\S\ref{sec:attack-phase}).
 
 \subsubsection{Concurrency Attacks Examples} \label{sec:examples}
 
@@ -23,7 +23,7 @@ section first gives two concrete examples on concurrency attacks
 \centering
 \includegraphics[width=0.99\columnwidth]{figures/libsafe}
 \vspace{-.05in}
-\caption{{A concurrency attack in libsafe.}} \label{fig:libsafe}
+\caption{{A concurrency attack in Libsafe.}} \label{fig:libsafe}
 \vspace{-.05in}
 \end{figure}
 
@@ -32,12 +32,12 @@ Figure~\ref{fig:libsafe} shows the simplified code of a concurrency attack in
 provides its own safe memory and string operations functions. In this 
 functions and carefully checks whether a stack variable is passed in as 
 function arguments and whether this function may overflow the call stack. If a 
-program is dying, such checks are disabled. Unfortunately, a global varible 
+program is dying, such checks are disabled. Unfortunately, a global variable 
 \v{dying} is not protected by mutex locks, so attackers can leverage two 
 threads to trigger a data race bug on this variable, bypass the security 
 check, overflow the function's return address of the stack, and then makes the 
 program execute malicious code from inputs. Ironically, this \libsafe library 
-is no longer ``safe" in the mulithreading era.
+is no longer ``safe" in the multithreading era.
 
 \begin{figure}[t]
 \centering
@@ -48,16 +48,16 @@ is no longer ``safe" in the mulithreading era.
 \end{figure}
 
 Figure~\ref{fig:libsafe} shows the simplified code of a concurrency attack in 
-\apache, a widely used web server to manage http pages from different users. 
-\apache spawns a number of threads, with each to server a httpd request. Each 
-thread logs each http request it receives into a global log buffer and flush 
+\apache, a widely used web server to manage HTTP pages from different users. 
+\apache spawns a number of threads, with each to server a HTTP request. Each 
+thread logs each HTTP request it receives into a global log buffer and flush 
 this buffer to a log file when the log is full. However, developers missed a 
 mutex lock to protect this buffer, so this buffer can overflow and corrupt 
 other memory in heap. Unfortunately, \apache puts the log file's descriptor next 
 to this log buffer. If this descriptor is corrupted, \apache may write the 
-request log to arbitrary files. Our riliminary study have successfully corrupted 
-this file descriptor and writes the request logs to http pages owned by regular 
-users, violatinng integrity of \apache.
+request log to arbitrary files. Our preliminary study have successfully 
+corrupted this file descriptor and writes the request logs to HTTP pages owned 
+by regular users, violating integrity of \apache.
 
 \subsubsection{Concurrency Attacks Program Analysis Models} 
 \label{sec:attack-phase}
@@ -67,7 +67,7 @@ These two examples appear to be diverse, but they have a few common elements in
 order to construct a concurrency attack. First, corrupted global memory is 
 necessary (\eg, \v{dying} in \libsafe, and the \v{buf\_len} in \apache). 
 Second, a security-sensitive operation is necessary (\eg, \v{strcpy} and 
-\v{memcpy}). Third, the courrupted global memory must cause abnormal behavior of 
+\v{memcpy}). Third, the corrupted global memory must cause abnormal behavior of 
 the security-sensitive operation. For example, the abnormal behavior in \libsafe 
 is we must leverage the corrupted memory to bypass the security check. For 
 \apache, we leverage the corrupted memory to bypass the security check. In this 
@@ -85,7 +85,7 @@ previous study~\cite{con:hotpar12}, they all have these three key elements.
 
 % PX: emphasis the contribution/potential value of this model.
 In a high level, this model treats a concurrency attack as a source-sink model, 
-where a source is a courrupted global memory caused by a concurrency bug, and a 
+where a source is a corrupted global memory caused by a concurrency bug, and a 
 sink is a security-sensitive operation. Then this model tracks the data flow 
 and control flow of the corrupted memory to the sensitive operations. Unlike a 
 traditional model which only consider inputs as the source, our model considers
@@ -97,7 +97,7 @@ corrupted variables)? Third, given that not all security-sensitive operations
 are indeed relevant to the source, how do we prune the irrelevant operations 
 soundly (\ie, without missing exploits)? In \S\ref{sec:detect}, we plan to 
 leverage this model to develop an effective detection approach, and our 
-priliminary work has shown promissing results on addressing these research 
+preliminary work has shown promising results on addressing these research 
 questions.
 
 % TBD: add a table on the list of concurrency bugs and the list of dangerous 
@@ -120,10 +120,10 @@ We aim to build a concurrency attack detection tool for developers in the
 testing phase. This tool takes program source code as input, and it reports 
 whether this program has potential concurrency attacks. Even for old releases 
 of programs, this tool is still helpful, because attacks are consequences of 
-bugs, even if the bugs were already fixed, if the attacks have occured, fixing 
+bugs, even if the bugs were already fixed, if the attacks have occurred, fixing 
 the bugs do not help. For example, we studied a few concurrency bugs in old 
 Linux and BSD releases a few years ago, and their attacks are still helpful 
-becuase if attackers have broken in and gain root priviledge, simply fixing the 
+because if attackers have broken in and gain root privilege, simply fixing the 
 bugs or upgrading kernels can not remove the malicious root user.
 
 \subsubsection{Workflow of \xxx's Detection Scheme}\label{sec:detect-arch}
@@ -138,7 +138,7 @@ Second, this tool should be precise in terms of having as few as false
 positives (reports but actually not a feasible attack) and false negatives 
 (missing a real attack). A precise tool will encourage adoptions by the 
 software developers. To this end, this tool must precisely capture both the 
-data flow and control flow between the courrupted global memory and any 
+data flow and control flow between the corrupted global memory and any 
 potential security-sensitive operations in program source code. 
 
 Our key weapon to achieve the first goal is \emph{symbolic execution}, an 
@@ -148,7 +148,7 @@ inputs, this technique marks inputs (\eg, command lines and bytes received from
 network) as symbolic, and if a branch statement depend on inputs, it forks the 
 execution, goes down both paths, and tracks constraints on inputs. If this 
 technique hit a bug, the constraints on inputs reflect on input conditions 
-which can triger this bug. This techinique has shown to find subtle bugs in 
+which can trigger this bug. This technique has shown to find subtle bugs in 
 real-world programs.
 
 Our key weapon to achieve the first goal is path slicing, an advanced program 
@@ -205,7 +205,7 @@ operations.
 % \subsubsection{Implementing \xxx's Detection Scheme}\label{sec:detect-impl}
 % TBD
 
-\subsubsection{Priliminary work}\label{sec:detect-result}
+\subsubsection{Preliminary work}\label{sec:detect-result}
 
 % P1: we have implemented part of the dangerous operation. pointer NULL 
 % derefence. Report the results. FP:FN. 
@@ -216,7 +216,7 @@ programs, including 10 serious data loss errors with 2 most serious ones
 already confirmed by the corresponding developers. My collaborators and I have 
 built a data race detector in our Tern~\cite{cui:tern:osdi10} in OSDI 2010 and 
 Peregrine~\cite{peregrine:sosp11} paper in SOSP 2011. We believe these 
-priliminary results show the potential and practical impact of our proposed 
+preliminary results show the potential and practical impact of our proposed 
 detection tool.
 
 % P2: mention our initial work in OSDI '10 and SOSP '11 on precise data race 
@@ -232,7 +232,7 @@ First, how to make path slicing handle non-function calls (\eg, NULL pointer
 dereference). Second, how to prioritize different operations (\eg, some 
 \v{strcpy} functions do not involve with inputs and should be secure)? Third, 
 how to direct our symbolic execution engine to select malicious inputs and 
-thread schedules that are more likely to triger concurrency bugs? I belive 
+thread schedules that are more likely to trigger concurrency bugs? I believe 
 these challenges will continue to lead to significant work in good conferences.
 
 \subsection{Defensing Concurrency Attacks in Deployment Phase} 
@@ -264,21 +264,21 @@ provides high availability in practice.
 
 The fault-tolerant benefit of \smr makes it particularly attractive
 on implementing a principled replication system for tolerating concurrency 
-attacks. Unfortunately, doing so is quite challenging, and I forsee four 
+attacks. Unfortunately, doing so is quite challenging, and I foresee four 
 challenges.
 
 % P3: reason 3: we want survive. checkpoint and re-execute, and diversify the 
 % schedules before re-execute. Sell it like a self-healing runtime system.
-First, today’s multithreaded programs are almost universally
+First, today's multithreaded programs are almost universally
 multithreaded, thus even concurrency attacks do not manifest, the programs 
 running across replicas can still easily run into different thread schedules 
 and divergent execution states. Second, to leverage existing SMR systems such 
 as ZooKeeper, developers often have to shoehorn their programs into the 
 narrowly defined state machine interfaces provided by these SMR systems. Third, 
-such a runtime infrasture should run almost as fast as the native executions in 
-the deployment phase. Fourth, if replicas run into buggy schedules that trigger 
-concurrency attacks, our infrastructure should be able to recover from the 
-attacks.
+such a runtime infrastructure should run almost as fast as the native executions 
+in the deployment phase. Fourth, if replicas run into buggy schedules that 
+trigger concurrency attacks, our infrastructure should be able to recover from 
+the attacks.
 
 \subsubsection{Architecture of \xxx's Runtime Defense Infrastructure} 
 \label{sec:defense-arch}
@@ -294,21 +294,22 @@ attacks.
 
 To address these challenges, I propose a \smr-based replication 
 system. With this infrastructure, a developer focuses on implementing her 
-program’s intended functionality, not how to defense concurrency attacks. When 
+program's intended functionality, not how to defense concurrency attacks. When 
 she is ready to replicate her program for strengthened security, she simply
 runs this infrastructure with her program on multiple replicas. Within
 each replica, this infrastructure interposes on the socket and the thread
 synchronization interfaces to keep replicas in sync. Specifically, to address 
 the first challenge, it considers each incoming socket call (e.g., accept() a 
-client’s connection or recv() a client’s data) an input request, and runs a 
+client's connection or recv() a client's data) an input request, and runs a 
 \paxos consensus protocol to ensure that a quorum of the replicas sees the same 
 exact sequence of the incoming socket calls.
 
 To address the second challenge, this infrastructure schedules synchronizations 
 using deterministic multithreading (DMT). This technique
-typically maintains a logical time2 that advances deterministically on each 
-thread's synchronization. By serializing thread synchronizations, DMT 
-practically makes an entire multithreaded execution deterministic. The overhead
+typically maintains a global, monotonically increasing logical clock that 
+advances deterministically on each thread's synchronization. By serializing 
+thread synchronizations, DMT practically makes an entire multithreaded 
+execution deterministic. The overhead
 of DMT is typically moderate because most code is not synchronization and can 
 still run in parallel.
 
@@ -348,16 +349,16 @@ programs.
 
 % P4: challenges on doing so. Including the initial work.
 
-\subsubsection{Priliminary work} \label{sec:defense-result}
+\subsubsection{Preliminary work} \label{sec:defense-result}
 
 % P1: we have built a replication system. Perf and checkpoint results.
-My collaborators and I have built a propotype system~\cite{crane:sosp15} to 
+My collaborators and I have built a prototype system~\cite{crane:sosp15} to 
 address the first two challenges. \crane has shown to be able to transparently 
 and efficiently support four general multithreaded programs without modifying 
 them. We have also shown that this infrastructure is robust on primary replica 
 or backup failures. For the third challenge, we plan to study more 
 programs and see whether we can leverage performance hints to optimize 
-performance. For the fourth challenge, our propotype system \crane has 
+performance. For the fourth challenge, our prototype system \crane has 
 implemented a basic checkpoint/restore feature.
 
 % \subsection{Research Plan} \label{sec:rep}
