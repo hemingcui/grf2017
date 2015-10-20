@@ -170,44 +170,51 @@ executions\cite{dos:osdi10} for debugging.
 
 
 \subsection{Related Work by the PI} \label{sec:my-work}
+% 
+% First emphasis debugging experience on concurrency. Program analysis.
+% Then mention security exploits found in Woodpecker.
+% Then mention runtime systems.
 
-First emphasis debugging experience on concurrency. Program analysis.
-Then mention security exploits found in Woodpecker.
-Then mention runtime systems.
+The PI is an expert on developing program analysis algorithms and 
+tools~\cite{wu:pldi12, woodpecker:asplos13, repframe:apsys15}, reliable and 
+secure multithreading runtime systems~\cite{smt:cacm, cui:tern:osdi10, 
+peregrine:sosp11, parrot:sosp13}, and fault-tolerant distributed 
+systems~\cite{crane:sosp15}. These work have been published in premier 
+conferences on systems software (OSDI 2010, SOSP 2011, SOSP 2013, SOSP 2015) and 
+programming languages (PLDI 2012, ASPLOS 2013). Most of the PI's work are open 
+source. The PI's work has also been featured by media such as Phys.org and 
+ACM Tech news. In connection to this project, he has built a precise path 
+slicing tool (for Object 2), three deterministic multithreading runtime systems 
+(for Object 3), and one fault-tolerant replication system (for Object 3). These 
+work can be leveraged as basic building blocks of the detection approach and 
+the runtime infrastructure in this proposed project.
 
-A key requirement to making SMR practically support multi-threading is that all 
-replicas must run the same thread interleavings so that the replica executions 
-won't diverge. \smt~\cite{smt:cacm}, an advanced reliable multi-threading 
-runtime technique invented by my collaborators and me, meets this requirement. 
-This is because \smt can greatly reduce the number of possible thread 
-interleavings in multi-threaded programs for all inputs with low performance 
-overhead, making replications of multi-threaded programs almost as easy as 
-single-threaded ones. In the last four years, the PI has been collaborating 
-with Columbia and CMU researchers to build three \smt systems, 
-\tern~\cite{cui:tern:osdi10}, \peregrine~\cite{peregrine:sosp11}, and 
-\parrot~\cite{parrot:sosp13}, with each addressing distinct research 
-challenges. Notably, \parrot, our latest system, is the first \smt runtime 
-system that is fast (12.7\% mean overhead for all evaluated programs) on a wide 
-range of 100+ popular multi-threaded programs. We have 
-put all \parrot's source code and raw evaluation results on 
-\url{http://github.com/columbia/smt-mc} for future research and industrial 
-deployments. Due to \parrot's high practicality, we plan to leverage it in this 
-proposed \xxx system.
+% In the last four years, the PI has been collaborating 
+% with Columbia and CMU researchers to build three \smt systems, 
+% \tern~\cite{cui:tern:osdi10}, \peregrine~\cite{peregrine:sosp11}, and 
+% \parrot~\cite{parrot:sosp13}, with each addressing distinct research 
+% challenges. Notably, \parrot, our latest system, is the first \smt runtime 
+% system that is fast (12.7\% mean overhead for all evaluated programs) on a wide 
+% range of 100+ popular multi-threaded programs. We have 
+% put all \parrot's source code and raw evaluation results on 
+% \url{http://github.com/columbia/smt-mc} for future research and industrial 
+% deployments. Due to \parrot's high practicality, we plan to leverage it in this 
+% proposed \xxx system.
 
-To show \smt's potential, we have applied these systems to greatly improving 
-software reliability and security, including improving precision and simplicity 
-of program analysis and verification~\cite{wu:pldi12}, making debugging 
-concurrency errors much easier~\cite{cui:tern:osdi10}, and improving coverage 
-of model checking~\cite{parrot:sosp13}. Our work have also been leveraged by 
-the community: some techniques in our \tern system~\cite{cui:tern:osdi10} has 
-been used by University of Washington Seatle researchers on computing a small 
-set of thread interleavings covering all inputs~\cite{ics:oopsla13}, and our 
-\parrot runtime system has been integrated with a CMU software model 
-checker~\cite{dbug:spin11}.
-
-Our experience on building \smt runtime sytems can address the two 
-aforementioned major research challanges of the \smt and SMR integration. In 
-addition, our techniques on program analysis, verification, and model checking 
-can be deployed in \xxx replicas and enhance their reliability and security.
+% To show \smt's potential, we have applied these systems to greatly improving 
+% software reliability and security, including improving precision and simplicity 
+% of program analysis and verification~\cite{wu:pldi12}, making debugging 
+% concurrency errors much easier~\cite{cui:tern:osdi10}, and improving coverage 
+% of model checking~\cite{parrot:sosp13}. Our work have also been leveraged by 
+% the community: some techniques in our \tern system~\cite{cui:tern:osdi10} has 
+% been used by University of Washington Seatle researchers on computing a small 
+% set of thread interleavings covering all inputs~\cite{ics:oopsla13}, and our 
+% \parrot runtime system has been integrated with a CMU software model 
+% checker~\cite{dbug:spin11}.
+% 
+% Our experience on building \smt runtime sytems can address the two 
+% aforementioned major research challanges of the \smt and SMR integration. In 
+% addition, our techniques on program analysis, verification, and model checking 
+% can be deployed in \xxx replicas and enhance their reliability and security.
 
 
