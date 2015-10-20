@@ -96,8 +96,19 @@ errors. Moreover, the asynchronous replication nature of \xxx's runtime
 infrastructure can also mitigate the performance overhead of these powerful 
 analyses~\cite{repframe:apsys15}.
 
-\para{TOCTTOU attacks.} TBD. Concurrency attacks are serious than normal 
-TOCTTOU.
+\para{TOCTTOU attacks.} TOCTTTOU (Time Of Check To Time Of Use) 
+attacks have been well studied for 
+decades~\cite{bishop:tocttou,toctou:fast08,toctou:fast05,toctou:usec03}. These 
+attacks target mainly the file system interface, and leverage the non-atomicity 
+on time-of-check to time-of-use of a file to escalate illegal file access. Our 
+\xxx project targets general concurency attacks, which is much broader and 
+severe than typical TOCTTTOU attacks for two main reasons. First, TOCTTTOU 
+mainly causes illegal file access, while general concurency attacks can cause a 
+much broader range of security attacks, ranging from gaining root privileges, 
+injecting malicious code, to bypassing authentication checks. Second, the root 
+cause of TOCTTTOU attacks is mainly caused by incorrect use of file system API, 
+while concurrency attacks are mainly caused by concurrency bugs with memory 
+accesses, which is much more difficult to track and prevent.
 
 \para{Traditional security defense techniques.} TBD.
 Mention shadow memory approaches.
@@ -138,24 +149,24 @@ testing inputs~\cite{ics:oopsla13} and speed of recording
 executions\cite{dos:osdi10} for debugging.
 
 
-\para{Symbolic execution.} The combination of symbolic and
-concrete executions has been a hot research topic. Researchers
-have built scalable and effective symbolic execution
-systems to detect errors [16–18, 20, 28–30, 49,
-54], block malicious inputs [21], and preserve privacy in
-error reports [19]. Compared to these systems, TERN applies
-symbolic execution to a new domain: tracking input
-constraints to reuse schedules.
-
-\para{Program analysis.} TBD. Program slicing [49] is a general 
-technique to prune irrelevant statements from a program or trace. Recently,
-systems researchers have leveraged or invented slicing techniques
-to block malicious input [18], synthesize executions for better error
-diagnosis [57], infer source code paths from log messages for postmortem
-analysis [56], and identify critical inter-thread reads that
-may lead to concurrency errors [59]. Our determinism-preserving
-slicing technique produces a correct trace slice for multithreaded
-programs and supports multiple ordered targets. It t
+% \para{Symbolic execution.} The combination of symbolic and
+% concrete executions has been a hot research topic. Researchers
+% have built scalable and effective symbolic execution
+% systems to detect errors [16–18, 20, 28–30, 49,
+% 54], block malicious inputs [21], and preserve privacy in
+% error reports [19]. Compared to these systems, TERN applies
+% symbolic execution to a new domain: tracking input
+% constraints to reuse schedules.
+% 
+% \para{Program analysis.} TBD. Program slicing [49] is a general 
+% technique to prune irrelevant statements from a program or trace. Recently,
+% systems researchers have leveraged or invented slicing techniques
+% to block malicious input [18], synthesize executions for better error
+% diagnosis [57], infer source code paths from log messages for postmortem
+% analysis [56], and identify critical inter-thread reads that
+% may lead to concurrency errors [59]. Our determinism-preserving
+% slicing technique produces a correct trace slice for multithreaded
+% programs and supports multiple ordered targets.
 
 
 \subsection{Related Work by the PI} \label{sec:my-work}
