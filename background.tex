@@ -1,10 +1,10 @@
 
 \section{Research Background} \label{sec:related}
 
-This section first introduces the background of concurrency bugs and 
-their consequences on leading to concurrency attacks (\S\ref{sec:background}), 
-and then presents others' related work (\S\ref{sec:others-work}), and the PI's 
-related work (\S\ref{sec:my-work}).
+This section introduces the background of concurrency bugs and 
+their consequence on leading to concurrency attacks (\S\ref{sec:background}), 
+presents others' related work (\S\ref{sec:others-work}), and then introduces 
+the PI's related work (\S\ref{sec:my-work}).
 
 \subsection{Concurrency Bugs and Attacks in Multithreaded Programs} 
 \label{sec:background}
@@ -14,10 +14,10 @@ Driven by the prevalence of the multi-core hardware, multithreaded programs
 have become one main stream in real-world software. Unfortunately, despite 
 decades of efforts on developing new theoretical primitives and building 
 reliability tools, these programs are still notoriously difficult to get right. 
-Multithreaded programs are plagued with various types of concurrency bugs, 
-including data races, atomicity violations, deadlocks, and order violations. 
-These bugs can easily lead to severe program behaviors such as crashes, hangs, 
-and wrong outputs.
+Real-world multithreaded programs are plagued with various types of concurrency 
+bugs~\cite{lu:concurrency-bugs}, including data races, atomicity violations, 
+deadlocks, and order violations. These bugs can easily lead to severe program 
+behaviors such as crashes, hangs, and wrong outputs.
 
 
 
@@ -52,18 +52,18 @@ difficult to get right.
 % runtime.
 % Hard to make sure all thread intleravings are correct. Mention our previous 
 % work Parrot, exponentially many.
-Our study shows that a key reason why multithreaded programs are so difficult 
-to get right is that, at run time, these programs may run into 
-exponentially many possible thread interleavings (or \emph{schedules}) 
-depending on the permutation orders of inter-thread communication operations 
-(\eg, mutex locks). It is extremely challenging to understand, test, analyze, 
-or verify this huge amount of schedules and make sure they are free of 
-concurrency bugs and exploits. Therefore, state-of-the-art neither has a 
-rigorous model on describing concurrency attacks, nor lacks effective 
-approaches to detect and defense such attacks.
+Our prior study~\cite{smt:cacm,parrot:sosp13} reveals that a key reason why 
+multithreaded programs are so difficult to get right is that, at run time, these 
+programs may run into exponentially many possible thread interleavings (or 
+\emph{schedules}) depending on the permutation orders of inter-thread 
+communication operations (\eg, mutex locks). It is extremely challenging to 
+understand, test, analyze, or verify this huge amount of schedules and make sure 
+they are free of concurrency bugs and exploits. Therefore, state-of-the-art 
+neither has a rigorous model on describing concurrency attacks, nor lacks 
+effective approaches to detect and defense such attacks.
 
-This \xxx project takes a thorough approach to cope with concurrency attacks.
-First, \xxx aims to develop a rigorous model to describe such attacks 
+This proposed \xxx project takes a thorough approach to cope with concurrency 
+attacks. First, \xxx aims to develop a rigorous model to describe such attacks 
 (\S\ref{sec:model}). Unlike traditional models to deal with sequential attacks, 
 our model must incorporate vulnerable thread interleavings and their security 
 consequences. Second, leveraging this model, it aims to build an effective 

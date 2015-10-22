@@ -5,7 +5,7 @@ its program analysis model, a novel detection approach to detection such
 attacks via leveraging this model, and a runtime infrastructure to defense 
 attacks.
 
-\subsection{Modeling Concurrency Attacks} \label{sec:model}
+\subsection{Objective 1: Modeling Concurrency Attacks} \label{sec:model}
 
 % P1: as mentioned in background, a key reason is thread interleavings, 
 % so we need to reason about the general patterns we have. Or we say our 
@@ -114,7 +114,8 @@ questions.
 
 % Goal 1: modeling.
 
-\subsection{Detecting Concurrency Attacks in Testing Phase}\label{sec:detect}
+\subsection{Objective 2: Detecting Concurrency Attacks in Testing 
+Phase}\label{sec:detect}
 
 We aim to build a concurrency attack detection tool for developers in the 
 testing phase. This tool takes program source code as input, and it reports 
@@ -235,7 +236,7 @@ how to direct our symbolic execution engine to select malicious inputs and
 thread schedules that are more likely to trigger concurrency bugs? I believe 
 these challenges will continue to lead to significant work in good conferences.
 
-\subsection{Defensing Concurrency Attacks in Deployment Phase} 
+\subsection{Objective 3: Defensing Concurrency Attacks in Deployment Phase} 
 \label{sec:defense}
 
 % P1: motivation, why runtime detection is important. We want to mostly avoid 
@@ -361,7 +362,16 @@ programs and see whether we can leverage performance hints to optimize
 performance. For the fourth challenge, our prototype system \crane has 
 implemented a basic checkpoint/restore feature.
 
-% \subsection{Research Plan} \label{sec:rep}
-% Time line. R1 R2.
+\subsection{Research Plan} \label{sec:plan}
+This \xxx project will require two PhD students S1 and S2 for a period of 
+three years. S1 will develop the concurrency attack model (Objective 1) and 
+design the detailed workflow of the detection approach (part of Objective 2). S2 
+will implement the detection approach as a software tool (part of Objective 2) 
+and build the runtime defense infrastructure (Objective 3). The two students can 
+carry on many tasks of these objectives in parallel. The two students will also 
+conduct a wide range study on real-world multithreaded programs to evaluate the 
+effectiveness our models, tools, and runtime infrastructures. The PI will 
+supervise the students by providing advice concerning both algorithms and 
+systems implementation levels.
 
 
