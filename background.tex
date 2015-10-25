@@ -2,18 +2,14 @@
 \section{Research Background} \label{sec:related}
 
 This section introduces the background of concurrency bugs and 
-their consequence on leading to concurrency attacks (\S\ref{sec:background}), 
+their consequence on concurrency attacks (\S\ref{sec:background}), 
 presents others' related work (\S\ref{sec:others-work}), and then introduces 
 the PI's related work (\S\ref{sec:my-work}).
 
-\subsection{Concurrency Bugs and Attacks in Multithreaded Programs} 
+\subsection{Concurrency Bugs and Concurrency Attacks} 
 \label{sec:background}
 
-% P1: multithreading, hard to get right, plagued with concurrency bugs.
-Driven by the prevalence of the multi-core hardware, multithreaded programs 
-have become one main stream in real-world software. Unfortunately, despite 
-decades of efforts on developing new theoretical primitives and building 
-reliability tools, these programs are still notoriously difficult to get right. 
+% P1: multithreading, hard to get right, plagued with concurrency bugs. 
 Real-world multithreaded programs are plagued with various types of concurrency 
 bugs~\cite{lu:concurrency-bugs}, including data races, atomicity violations, 
 deadlocks, and order violations. These bugs can easily lead to severe program 
@@ -27,50 +23,76 @@ behaviors such as crashes, hangs, and wrong outputs.
 % leader to exploits, concurrency bugs can lead to concurrency attacks.
 % Mention HotPart, found XX exploits. We: found YY exploits. patterns.
 % Two examples.
-Worse, recent study~\cite{con:hotpar12} on a wide range of real-world 
-multithreaded programs has shown that attackers can leverage these concurrency 
-bugs to construct \emph{concurrency attacks}. Attackers can construct specific 
-inputs to trigger concurrency bugs with high probability (\eg, with only tens 
-of repeated executions), corrupt critical global memory shared by threads in 
-a program, leverage the corrupted values in memory to bypass security 
-checks in programs' source code, and finally inject malicious code, gain 
-privileges, or bypass authentication procedures.
+Worse, a recent study~\cite{con:hotpar12} on 46 real-world concurrency bugs 
+from CVE~\cite{cve-races} and open source software's bug databases has shown 
+that attackers can leverage concurrency bugs to construct \emph{concurrency 
+attacks}, including corruption of critical memory, malicious 
+code injection~\cite{libsafe:bug}, and privilege escalation. These attacks 
+affect a wide range of multithreaded programs, ranging from applications such as 
+KDE, Internet Explorer, Firefox, and Google Chrome, to OS kernels such as 
+Windows, MacOS X, Linux, iPhone OS.
 
-Unfortunately, most traditional defense techniques are weakened or completely 
+Unfortunately, most existing defense techniques are weakened or completely 
 bypassed by concurrency attacks because these techniques are mainly designed to 
-protect single-threaded programs. For example, although taint-tracking tools 
-have proven effective on tracking inputs' flow to sensitive locations by 
-adding security tags to data, these tools are weakened in the multithreading 
-context because a race on data can corrupt the tags and bypass tracking. 
-\S\ref{sec:others-work} discusses why concurrency attacks can weaken various 
-traditional defense techniques in more details. In short, compared to the 
-traditional single-threaded programs, multithreaded programs are much more 
-difficult to get right.
-
+protect single-threaded programs. For example, although taint-tracking 
+tools~\cite{taintdroid:osdi10, lift:micro06, myers:information, 
+valgrind:pldi} have proven effective by associating sensitive input data
+with security tags during a program's execution, these tools are weakened in 
+the concurrency context because a race on data can corrupt the tags and bypass 
+trackings. \S\ref{sec:others-work} will discuss why concurrency attacks can 
+weaken various existing defense techniques in more details.
 
 % P3: A key reason: a program can run into too many thread interleavings at 
 % runtime.
 % Hard to make sure all thread intleravings are correct. Mention our previous 
 % work Parrot, exponentially many.
-Our prior study~\cite{smt:cacm,parrot:sosp13} reveals that a key reason why 
-multithreaded programs are so difficult to get right is that, at run time, these 
-programs may run into exponentially many possible thread interleavings (or 
-\emph{schedules}) depending on the permutation orders of inter-thread 
-communication operations (\eg, mutex locks). It is extremely challenging to 
-understand, test, analyze, or verify this huge amount of schedules and make sure 
-they are free of concurrency bugs and exploits. Therefore, state-of-the-art 
-neither has a rigorous model on describing concurrency attacks, nor lacks 
-effective approaches to detect and defense such attacks.
+A key reason~\cite{smt:cacm, parrot:sosp13} why multithreaded programs are so 
+difficult to get right is that these programs may run into too many 
+possible thread interleavings (or \emph{schedules}) at runtime, depending on 
+the permutation orders of inter-thread communication operations (\eg, mutex 
+locks). It is extremely challenging to understand, test, analyze, or verify 
+this huge amount of schedules and make sure they are free of concurrency bugs 
+and exploits.
+% Therefore, to tackle concurrency attacks, our propose models, 
+% detection tools, and defense infrastructures take thread schedules into account 
+% significantly.
 
-This proposed \xxx project takes a thorough approach to cope with concurrency 
-attacks. First, \xxx aims to develop a rigorous model to describe such attacks 
-(\S\ref{sec:model}). Unlike traditional models to deal with sequential attacks, 
-our model must incorporate vulnerable thread interleavings and their security 
-consequences. Second, leveraging this model, it aims to build an effective 
-detection approach for developers to find as many as concurrency attacks in the 
-software testing phase (\S\ref{sec:detect}). Third, \xxx aims to build an 
-efficient, transparent, and robust runtime system to defense concurrency attacks 
-in the software deployment phase (\S\ref{sec:defense}).
+\subsubsection{Our Preliminary Study on Concurrency Attacks} 
+\label{sec:out-study}
+
+To guide the development of this \xxx project, my collaborators and I have also 
+conducted a preliminary study on another 23 real-world concurrency bugs and 
+their consequence on concurrency attacks. We have written scripts and 
+constructed inputs to reproduce all these 23 concurrency bugs: 14 bugs caused 
+Denial of Service (DoS) atttacks in application programs (Apache, MySQL, Tomcat, 
+and PgSQL) by causing segmentation faults, three bugs caused heap buffer 
+overflows in applications programs (Apache and htmlCleaner) five bugs caused 
+privilege escalations in the FreeBSD or Linux kernels, and one bug bypassed 
+security checks in a security library Libsafe and led to stack overflow attacks.
+
+We found two interesting points in our study. First, unlike state-of-the-art 
+understanding that triggering a concurrency bug require lots of repeated 
+executions, some concurrency bugs can be triggered and exploited with high 
+probability. For instance, in a MySQL DoS attack, we chose nested \v{select} 
+statements to successfully construct a concurrency bug with escalated 
+privileges of MySQL users. Second, even many of the concurrency bugs we studied 
+were old and many of them were fixed by software upgrading, it doesn't help to 
+avoid concurrency attacks because hackers may have already broken in. 
+Therefore, studying whether existing known concurrency bugs may lead to 
+concurrency attacks are crucial.
+
+
+
+
+% This proposed \xxx project takes a thorough approach to cope with concurrency 
+% attacks. First, \xxx aims to develop a rigorous model to describe such attacks 
+% (\S\ref{sec:model}). Unlike traditional models to deal with sequential attacks, 
+% our model must incorporate vulnerable thread interleavings and their security 
+% consequences. Second, leveraging this model, it aims to build an effective 
+% detection approach for developers to find as many as concurrency attacks in the 
+% software testing phase (\S\ref{sec:detect}). Third, \xxx aims to build an 
+% efficient, transparent, and robust runtime system to defense concurrency attacks 
+% in the software deployment phase (\S\ref{sec:defense}).
 
 % P4: Then, challenges come: a concurrency 
 % attack model should incorporate thread interleavings. A detection methond 
