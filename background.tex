@@ -162,9 +162,10 @@ errors~\cite{dart:pldi,cute:fse,godefroid:grammar-fuzzing,
 godefroid:whitebox-fuzzing,
 klee:osdi08,yang:malicious-disk:oakland06,cadar:exe:ccs06,s2e:hotdep09,
 taas:socc10}, block malicious inputs~\cite{castro:bouncer}, and preserve 
-privacy in error reports~\cite{castro:bug-report-privacy}. Our 
-\textbf{Objective 2} will leverage symbolic execution to construct an automated 
-concurrency attack detection approach.
+privacy in error reports~\cite{castro:bug-report-privacy}.
+% Our 
+% \textbf{Objective 2} will leverage symbolic execution to construct an automated 
+% concurrency attack detection approach.
 
 \para{Program slicing.}  Program slicing~\cite{Tip:slicing} is a general
 technique to prune irrelevant statements from a program or trace.
@@ -173,8 +174,10 @@ techniques to block malicious input~\cite{castro:bouncer}, synthesize
 executions for better error diagnosis~\cite{esd:eurosys10}, infer source
 code paths from log messages for postmortem analysis~\cite{sherlog:asplos10}, 
 and identify critical inter-thread reads that may lead to concurrency 
-errors~\cite{conseq:asplos11}. Our \textbf{Objective 2} will leverage symbolic 
-execution to construct an automated concurrency attack detection approach.
+errors~\cite{conseq:asplos11}.
+
+% Our \textbf{Objective 2} will leverage symbolic 
+% execution to construct an automated concurrency attack detection approach.
 
 % \para{\dmt and \smt systems.}  In order to make multi-threading easier to 
 % understand, test, analyze, and replicate, researchers have built two types of 
@@ -226,15 +229,13 @@ The PI is an expert on developing program analysis algorithms and
 tools~\cite{wu:pldi12, woodpecker:asplos13, repframe:apsys15}, reliable and 
 secure multithreading runtime systems~\cite{smt:cacm, cui:tern:osdi10, 
 peregrine:sosp11, parrot:sosp13}, and fault-tolerant distributed 
-systems~\cite{crane:sosp15}. These work have been published in premier 
-conferences on systems software (OSDI 2010, SOSP 2011, SOSP 2013, SOSP 2015) and 
-programming languages (PLDI 2012, ASPLOS 2013). Most of the PI's work are open 
-source. The PI's work has also been featured by media such as Phys.org and 
-ACM Tech news. In connection to this project, he has built a precise path 
-slicing tool (for Object 2), three deterministic multithreading runtime systems 
-(for Object 3), and one fault-tolerant replication system (for Object 3). These 
-work can be leveraged as basic building blocks of the detection approach and 
-the runtime infrastructure in this proposed project.
+systems~\cite{crane:sosp15}. The PI's work have been published in 
+premier conferences on systems software (OSDI 2010, SOSP 2011, SOSP 2013, SOSP 
+2015) and programming languages (PLDI 2012, ASPLOS 2013). In connection to 
+this project, he has built a precise program slicing tool (a key building 
+block for \textbf{Object 2}), three deterministic multithreading runtime 
+systems (a crucial technique for \textbf{Object 3}), and one fault-tolerant 
+replication system (a crucial technique for \textbf{Object 3}).
 
 % In the last four years, the PI has been collaborating 
 % with Columbia and CMU researchers to build three \smt systems, 
