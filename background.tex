@@ -33,8 +33,8 @@ KDE, Internet Explorer, Firefox, and Google Chrome, to OS kernels such as
 Windows, MacOS X, Linux, iPhone OS.
 
 Unfortunately, most existing defense techniques are weakened or completely 
-bypassed by concurrency attacks because these techniques are mainly designed to 
-protect single-threaded programs. For example, although taint-tracking 
+bypassed by concurrency attacks because these techniques are mainly designed 
+for single-threaded programs. For example, although taint-tracking 
 tools~\cite{taintdroid:osdi10, lift:micro06, myers:information, 
 valgrind:pldi} have proven effective by associating sensitive input data
 with security tags during a program's execution, these tools are weakened in 
@@ -47,9 +47,9 @@ weaken various existing defense techniques in more details.
 % Hard to make sure all thread intleravings are correct. Mention our previous 
 % work Parrot, exponentially many.
 A key reason~\cite{smt:cacm, parrot:sosp13} why multithreaded programs are so 
-difficult to get right is that these programs may run into too many 
+difficult to get right is that these programs may exercise too many 
 possible thread interleavings (or \emph{schedules}) at runtime, depending on 
-the permutation orders of inter-thread communication operations (\eg, mutex 
+the permutation orders of inter-thread communications (\eg, mutex 
 locks). It is extremely challenging to understand, test, analyze, or verify 
 this huge amount of schedules and make sure they are free of concurrency bugs 
 and exploits.
@@ -60,26 +60,27 @@ and exploits.
 \subsubsection{Our Preliminary Study on Concurrency Attacks} 
 \label{sec:out-study}
 
-To guide the development of this \xxx project, my collaborators and I have also 
-conducted a preliminary study on another 23 real-world concurrency bugs and 
-their consequence on concurrency attacks. We have written scripts and 
-constructed inputs to reproduce all these 23 concurrency bugs: 14 bugs caused 
-Denial of Service (DoS) atttacks in application programs (Apache, MySQL, Tomcat, 
-and PgSQL) by causing segmentation faults, three bugs caused heap buffer 
-overflows in applications programs (Apache and htmlCleaner) five bugs caused 
-privilege escalations in the FreeBSD or Linux kernels, and one bug bypassed 
-security checks in a security library Libsafe and led to stack overflow attacks.
+To guide the development of this \xxx project, we have studied another 23 
+real-world concurrency bugs and their consequence on concurrency attacks. We 
+have written scripts and constructed inputs to reproduce all these 23 
+concurrency bugs: 14 bugs caused Denial of Service (DoS) atttacks in application 
+programs (Apache, MySQL, Tomcat, and PgSQL) by causing segmentation faults, 
+three bugs caused heap overflows in applications programs (Apache and 
+htmlCleaner), five bugs caused privilege escalations in the FreeBSD or Linux 
+kernels, and one bug bypassed security checks in a security library Libsafe and 
+led to stack overflows. \S\ref{sec:model} will give two concrete 
+examples.
 
-We found two interesting points in our study. First, unlike state-of-the-art 
-understanding that triggering a concurrency bug require lots of repeated 
-executions, some concurrency bugs can be triggered and exploited with high 
-probability. For instance, in a MySQL DoS attack, we chose nested \v{select} 
-statements to successfully construct a concurrency bug with escalated 
-privileges of MySQL users. Second, even many of the concurrency bugs we studied 
-were old and many of them were fixed by software upgrading, it doesn't help to 
-avoid concurrency attacks because hackers may have already broken in. 
-Therefore, studying whether existing known concurrency bugs may lead to 
-concurrency attacks are crucial.
+We found two interesting points in our study. First, unlike 
+state-of-the-art understanding that triggering a concurrency bug require lots of 
+repeated executions, some concurrency bugs can be triggered and exploited with 
+high probability. For instance, in a MySQL DoS attack, we chose nested 
+\texttt{select} statements to successfully construct a concurrency bug with 
+escalated privileges of MySQL users. Second, even many of the concurrency bugs 
+we studied were old and many of them were fixed by software upgrading, it 
+doesn't help to avoid concurrency attacks because hackers may have already 
+broken in. Therefore, studying whether existing known concurrency bugs may lead 
+to concurrency attacks are crucial.
 
 
 
@@ -109,80 +110,68 @@ detection~\cite{yu:racetrack:sosp,savage:eraser,racerx:sosp03,lu:muvi:sosp,
 avio:asplos06,conmem:asplos10}, diagnosis~\cite{racefuzzer:pldi08,
 ctrigger:asplos09,atomfuzzer:fse08}, 
 and correction~\cite{dimmunix:osdi08,gadara:osdi08,wu:loom:osdi10,cfix:osdi12}. 
-These work mainly focus on the concurrency errors themselves, while \xxx's 
-concurrency attack detection approach mainly focuses on the security 
-consequence of concurrency bugs, so our detection approach is complementary to 
-these prior work. These prior work can also be deployed on backup 
-replicas of \xxx's runtime infrastructure and help \xxx detect concurrency 
-errors. Moreover, the asynchronous replication nature of \xxx's runtime 
-infrastructure can also mitigate the performance overhead of these powerful 
-analyses~\cite{repframe:apsys15}.
+These work focus on the concurrency errors themselves, while \xxx's 
+proposed concurrency attack detection approach mainly focuses on the security 
+consequence of concurrency bugs, so these prior work are complementary to our 
+objectives in this proposed project.
 
 \para{TOCTTOU attacks.} TOCTTOU (Time Of Check To Time Of Use) 
-attacks have been well studied for 
-decades~\cite{bishop:tocttou,toctou:fast08,toctou:fast05,toctou:usec03}. These 
-attacks target mainly the file system interface, and leverage the non-atomicity 
-on time-of-check to time-of-use of a file to escalate illegal file access. Our 
-\xxx project targets general concurrency attacks, which is much broader and 
-severe than typical TOCTTOU attacks for two main reasons. First, TOCTTOU 
-mainly causes illegal file access, while general concurrency attacks can cause 
-a much broader range of security attacks, ranging from gaining root privileges, 
-injecting malicious code, to bypassing authentication checks. Second, the root 
-cause of TOCTTOU attacks is mainly caused by incorrect use of file system API, 
-while concurrency attacks are mainly caused by concurrency bugs with memory 
-accesses, which is much more difficult to track and prevent.
+attacks~\cite{bishop:tocttou,toctou:fast08,toctou:fast05,toctou:usec03} target 
+mainly the file system interface, and leverage the non-atomicity bug on 
+time-of-check to time-of-use of a file to gain illegal file access. Concurrency 
+attacks are much more challenging than TOCTTOU attacks for two main reasons. 
+First, TOCTTOU mainly causes illegal file access, while concurrency attacks can 
+cause a much broader range of security vulnerabilities, ranging from gaining 
+root privileges, injecting malicious code, to bypassing authentication checks. 
+Second, concurrency attacks are mainly caused by concurrency bugs 
+on global memory accesses, which is a much more difficult to track than the 
+file access API of TOCTTOU attacks.
 
-\para{Traditional security defense techniques.} Defense techniques for 
+\para{Security defense techniques.} Defense techniques for 
 single-threaded programs have been well studied, including meta-data 
 tracking~\cite{taintdroid:osdi10, lift:micro06, myers:information, 
 valgrind:pldi}, anomaly 
 detection~\cite{taskrecycling:ppopp90,schonberg:pldi89}, address space 
 randomization~\cite{ aslr-fail:ccs04}, and static 
 analysis~\cite{seth:pldi,engler:vmcai,wagner:syscall:ids,coverity:cacm, 
-klee:osdi08}.
-Say these are mainly for single-threaded programs. However, on the presence of 
-multithreading, these tools may be largely weakened. Concurrency 
-bugs in global memory may corrupt meta data tags during tracking. Anomaly 
-detection lack a model for buggy thread interleavings to reasoning about 
-concurrency bugs and their consequence on attacks, which our attack model can 
-help. Static analysis has shown to find numerous bugs in real-world software, 
-however, when reasoning about the exponentially many thread interleavings, 
-static analysis usually report too many false positives and bury the real 
-ones. To tackle concurrency attacks, existing defense techniques can leverage 
-our concurrency attack model (Objective 1) and use our detection tool 
-(Objective 2).
+klee:osdi08}. However, with the presence of 
+multithreading, these tools may be largely weakened. For instance, concurrency 
+bugs in global memory may corrupt meta data tags in metadata tracking 
+techniques. Anomaly detection lacks a model for buggy thread interleavings to 
+reasoning about concurrency bugs and their consequence on attacks, which the 
+attack model in this proposed project may help. Static analysis has shown to 
+find numerous bugs in real-world programs, however, when facing a program's 
+huge amount of thread interleavings, static analysis usually reports too many 
+false positives and bury the real ones.
 
-\para{State machine replication (SMR).}  SMR has been studied by the literature 
-for decades, and it is recognized by both industry and academia as a powerful 
+\para{State machine replication (SMR).}  SMR is a widely-adopted 
 fault-tolerance technique in clouds and distributed 
-systems~\cite{lamportclock,smr:tutorial}. As a common practice, SMR uses 
-\paxos~\cite{paxos,paxos:simple,paxos:complex} and its popular engineering 
-approaches~\cite{paxos:live,paxos:practical} as the consensus protocol to 
-ensure that all replicas see the same input request sequence. Since consensus 
-protocols are the core of SMR, a variety of study improve different aspects of 
-consensus protocols, including performance~\cite{epaxos:sosp13,paxos:fast} and 
-understandability~\cite{raft:usenix14}. Although \xxx's current implementation 
-takes a popular engineering approach~\cite{paxos:practical} for practicality, 
-it can also leverage other consensus protocols and approaches.
+systems~\cite{lamportclock,smr:tutorial}. SMR runs the same program on a set of 
+physical machines (replicas), and it uses the 
+\paxos~\cite{paxos,paxos:simple,paxos:complex} distributed consensus protocol to 
+ensure consistent inputs for replicas as long as a majority of replcas is 
+working correctly (\ie, even if minor replicas fail, SMR still guarantees 
+availability of a program). Due to SMR's strength on fault-tolerance, this 
+\xxx project will leverage to build a runtime defense infrastructure.
 
-\para{\dmt and \smt systems.}  In order to make multi-threading easier to 
-understand, test, analyze, and replicate, researchers have built two types of 
-reliable multi-threading systems: (1) stable multi-threading systems (or 
-\smt)~\cite{grace:oopsla09, dthreads:sosp11, determinator:osdi10} 
-that aim to reduce the number of possible thread interleavings for program all 
-inputs, and(2) deterministic multi-threading systems (or 
-\dmt)~\cite{dpj:oopsla09,dmp:asplos09,kendo:asplos09,coredet:asplos10,
-dos:osdi10,ddos:asplos13, ics:oopsla13} that aim to reduce the number of 
-possible thread interleavings on each program input. Typically, these systems 
-use deterministic logical clocks 
-instead of nondeterministic physical clocks to make sure inter-thread 
-communications (\eg, \mutexlock and accesses to global variables) can only 
-happen at some specific logical clocks. Therefore, given the same or similar 
-inputs, these systems can enforce the same thread interleavings and eventually 
-the same executions. These systems 
-have shown to greatly improve software reliability, including coverage of 
-testing inputs~\cite{ics:oopsla13} and speed of recording 
-executions\cite{dos:osdi10} for debugging.
+% \para{\dmt and \smt systems.}  In order to make multi-threading easier to 
+% understand, test, analyze, and replicate, researchers have built two types of 
+% reliable multi-threading systems: (1) stable multi-threading systems (or 
+% \smt)~\cite{grace:oopsla09, dthreads:sosp11, determinator:osdi10} 
+% that aim to reduce the number of possible thread interleavings for program all 
+% inputs, and(2) deterministic multi-threading systems (or 
+% \dmt)~\cite{dpj:oopsla09,dmp:asplos09,kendo:asplos09,coredet:asplos10,
+% dos:osdi10,ddos:asplos13, ics:oopsla13} that aim to reduce the number of 
+% possible thread interleavings on each program input. Typically, these systems 
+% use deterministic logical clocks 
+% instead of nondeterministic physical clocks to make sure inter-thread 
+% communications (\eg, \mutexlock and accesses to global variables) can only 
+% happen at some specific logical clocks. Therefore, given the same or similar 
+% inputs, these systems can enforce the same thread interleavings and eventually 
+% the same executions. These systems 
+% have shown to greatly improve software reliability, including coverage of 
+% testing inputs~\cite{ics:oopsla13} and speed of recording 
+% executions\cite{dos:osdi10} for debugging.
 
 
 % \para{Symbolic execution.} The combination of symbolic and
