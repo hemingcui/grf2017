@@ -1,13 +1,13 @@
 
-\section{Research Background} \label{sec:related}
+\vspace{-.15in}\section{Research Background} \label{sec:related}\vspace{-.075in}
 
 This section introduces the background of concurrency bugs and 
 their consequence on concurrency attacks (\S\ref{sec:background}), 
 presents others' related work (\S\ref{sec:others-work}), and then introduces 
 the PI's related work (\S\ref{sec:my-work}).
 
-\subsection{Concurrency Bugs and Concurrency Attacks} 
-\label{sec:background}
+\vspace{-.15in}\subsection{Concurrency Bugs and Concurrency Attacks} 
+\label{sec:background}\vspace{-.075in}
 
 % P1: multithreading, hard to get right, plagued with concurrency bugs. 
 Real-world multithreaded programs are plagued with various types of concurrency 
@@ -34,13 +34,11 @@ Windows, MacOS X, Linux, iPhone OS.
 
 Unfortunately, most existing defense techniques are weakened or completely 
 bypassed by concurrency attacks because these techniques are mainly designed 
-for single-threaded programs. For example, although taint-tracking 
-tools~\cite{taintdroid:osdi10, lift:micro06, myers:information, 
-valgrind:pldi} have proven effective by associating sensitive input data
-with security tags during a program's execution, these tools are weakened in 
-the concurrency context because a race on data can corrupt the tags and bypass 
-trackings. \S\ref{sec:others-work} will discuss why concurrency attacks can 
-weaken various existing defense techniques in more details.
+for single-threaded programs. For example, taint-tracking~\cite{taintdroid:osdi10, lift:micro06, myers:information, 
+valgrind:pldi}, a runtime technique that tracks sensitivie input data by 
+associating security tags as metadata for each data byte, is weakened when running with 
+multithreading programs because a race on data can corrupt the tags. \S\ref{sec:others-work} 
+will discuss how concurrency attacks weaken various defense techniques.
 
 % P3: A key reason: a program can run into too many thread interleavings at 
 % runtime.
@@ -57,8 +55,8 @@ and exploits.
 % detection tools, and defense infrastructures take thread schedules into account 
 % significantly.
 
-\subsubsection{Our Preliminary Study on Concurrency Attacks} 
-\label{sec:out-study}
+\vspace{-.15in}\subsubsection{Our Preliminary Study on Concurrency Attacks} 
+\label{sec:out-study}\vspace{-.075in}
 
 To guide the development of this \xxx project, we have studied another 23 
 real-world concurrency bugs and their consequence on concurrency attacks. We 
@@ -71,7 +69,7 @@ kernels, and one bug bypassed security checks in a security library Libsafe and
 led to stack overflows. \S\ref{sec:model} will give two concrete 
 examples.
 
-We found two interesting points in our study. First, unlike 
+There are two interesting discoveries in our study. First, unlike 
 state-of-the-art understanding that triggering a concurrency bug require lots of 
 repeated executions, some concurrency bugs can be triggered and exploited with 
 high probability. For instance, in a MySQL DoS attack, we chose nested 
@@ -79,8 +77,7 @@ high probability. For instance, in a MySQL DoS attack, we chose nested
 escalated privileges of MySQL users. Second, even many of the concurrency bugs 
 we studied were old and many of them were fixed by software upgrading, it 
 doesn't help to avoid concurrency attacks because hackers may have already 
-broken in. Therefore, studying whether existing known concurrency bugs may lead 
-to concurrency attacks are crucial.
+broken in. Therefore, studying existing know concurrency are still crucial.
 
 
 
@@ -103,7 +100,8 @@ to concurrency attacks are crucial.
 % P4: TBD.
 
 
-\subsection{Related Work by Others} \label{sec:others-work}
+\vspace{-.15in}\subsection{Related Work by Others} 
+\label{sec:others-work}\vspace{-.075in}
 
 \para{Reliability tools.} There are various prior work on concurrency error 
 detection~\cite{yu:racetrack:sosp,savage:eraser,racerx:sosp03,lu:muvi:sosp,
@@ -144,7 +142,7 @@ find numerous bugs in real-world programs, however, when facing a program's
 huge amount of thread interleavings, static analysis usually reports too many 
 false positives and bury the real ones.
 
-\noindent {\bf Symbolic Execution} Symbolic execution is an advanced program 
+\noindent {\bf Symbolic Execution.} Symbolic execution is an advanced program 
 analysis technique that can systematicaly explore a program's execution paths 
 to find bugs.  Researchers have built
 scalable and effective symbolic execution systems to detect
@@ -152,7 +150,7 @@ errors~\cite{dart:pldi,cute:fse,godefroid:grammar-fuzzing,
 godefroid:whitebox-fuzzing,
 klee:osdi08,yang:malicious-disk:oakland06,cadar:exe:ccs06,s2e:hotdep09,
 taas:socc10}, block malicious inputs~\cite{castro:bouncer}, and preserve 
-privacy in error reports~\cite{castro:bug-report-privacy}. Our 
+privacy in error reports~\cite{castro:bug-report-privacy}. 
 \textbf{Objective 2} will leverage symbolic execution to construct an automated 
 concurrency attack detection approach.
 
@@ -163,18 +161,17 @@ techniques to block malicious input~\cite{castro:bouncer}, synthesize
 executions for better error diagnosis~\cite{esd:eurosys10}, infer source
 code paths from log messages for postmortem analysis~\cite{sherlog:asplos10}, 
 and identify critical inter-thread reads that may lead to concurrency 
-errors~\cite{conseq:asplos11}. Our \textbf{Objective 2} will leverage symbolic 
+errors~\cite{conseq:asplos11}. \textbf{Objective 2} will leverage symbolic 
 execution to construct an automated concurrency attack detection approach.
 
-\para{State machine replication (SMR).}  SMR is a widely-adopted 
-fault-tolerance technique in clouds and distributed 
-systems~\cite{lamportclock,smr:tutorial}. SMR runs the same program on a set of 
+\para{State machine replication (SMR).}  SMR is a powerful fault-tolerant technique 
+in distributed systems~\cite{lamportclock,smr:tutorial}. SMR runs the same program on a set of 
 physical machines (replicas), and it uses the 
 \paxos~\cite{paxos,paxos:simple,paxos:complex} distributed consensus protocol 
 to ensure consistent inputs for replicas as long as a majority of replcas is 
 working correctly (\ie, even if minor replicas fail, SMR still guarantees 
-availability of a program). Our \textbf{Objective 3} of this project will 
-leverage SMR to build a runtime defense infrastructure.
+availability of a program). \textbf{Objective 3} will leverage SMR to build a 
+defense infrastructure.
 
 % \para{\dmt and \smt systems.}  In order to make multi-threading easier to 
 % understand, test, analyze, and replicate, researchers have built two types of 
@@ -216,7 +213,8 @@ leverage SMR to build a runtime defense infrastructure.
 % programs and supports multiple ordered targets.
 
 
-\subsection{Related Work by the PI} \label{sec:my-work}
+\vspace{-.15in}\subsection{Related Work by the PI} 
+\label{sec:my-work}\vspace{-.075in}
 % 
 % First emphasis debugging experience on concurrency. Program analysis.
 % Then mention security exploits found in Woodpecker.
@@ -230,8 +228,7 @@ systems~\cite{crane:sosp15}. The PI's work have been published in
 premier conferences on systems software (OSDI 2010, SOSP 2011, SOSP 2013, SOSP 
 2015) and programming languages (PLDI 2012, ASPLOS 2013). In connection to 
 this project, he has built a precise program slicing tool (a key building 
-block for \textbf{Objective 2}), three reliable multithreading runtime 
-systems (a key technique for \textbf{Objective 3}), and one fault-tolerant 
+block for \textbf{Objective 2}) and one fault-tolerant 
 replication system (a key technique for \textbf{Objective 3}).
 
 % In the last four years, the PI has been collaborating 
