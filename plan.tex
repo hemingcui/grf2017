@@ -1,12 +1,12 @@
 \section{Research Plan and Methodology} \label{sec:rep}
 
 This \xxx project tackles concurrency attacks with a thorough, systematic 
-methodology. To this end, we will present three objectives in this section, including 
+methodology. To this end, this section presents three objectives in this section, including 
 a general, rigorous concurrency attack model (\S\ref{sec:model}), 
 a systematic concurrency attack detection approach 
 (\S\ref{sec:detect}) by leveraging this model, and a runtime defense 
-infrastructure (\S\ref{sec:defense}). For each objective, we will introduce our preliminary results. 
-Then, we will describe our research plan (\S\ref{sec:plan}).
+infrastructure (\S\ref{sec:defense}). Each objective includes our preliminary results. 
+Finally, this section describes our research plan (\S\ref{sec:plan}).
 
 \vspace{-.15in}\subsection{Objective 1: Modeling Concurrency Attacks} 
 \label{sec:model}\vspace{-.075in}
@@ -16,10 +16,10 @@ Then, we will describe our research plan (\S\ref{sec:plan}).
 % methodology is just like pattern matching.
 As mentioned in \S\ref{sec:background}, state-of-the-art lacks a rigorous model 
 for concurrency attacks. Specifically, people lack understanding on how 
-concurrency bugs propagate to security-sensitive operations in source code, and 
-how we can use program analysis approaches to describe this propagation. This 
-section first gives two concrete examples on concurrency attacks 
-(\S\ref{sec:examples}), and then propose our model (\S\ref{sec:attack-phase}).
+concurrency bugs propagate to vulnerable instructions in source code. This 
+section first gives two concurrency attack examples our preliminary study 
+successfully constructed (\S\ref{sec:examples}), and then proposes 
+our model (\S\ref{sec:attack-phase}).
 
 \vspace{-.15in}\subsubsection{Concurrency Attacks Examples In Our Preliminary Study} 
 \label{sec:examples}\vspace{-.075in}
@@ -28,41 +28,36 @@ section first gives two concrete examples on concurrency attacks
 \centering
 \includegraphics[width=0.8\columnwidth]{figures/libsafe}
 \vspace{-.05in}
-\caption{{A concurrency attack in Libsafe.}} \label{fig:libsafe}
-\vspace{-.05in}
+\caption{{A concurrency attack in the Libsafe security library.}} \label{fig:libsafe}
+\vspace{-.15in}
 \end{figure}
 
-Figure~\ref{fig:libsafe} shows the simplified code of a concurrency attack in 
-\libsafe, a popular stack overflow protection library. In short, this library 
-provides its own safe memory and string operations functions. In this 
-functions and carefully checks whether a stack variable is passed in as 
-function arguments and whether this function may overflow the call stack. If a 
-program is dying, such checks are disabled. Unfortunately, a global variable 
-\v{dying} is not protected by mutex locks, so attackers can leverage two 
-threads to trigger a data race bug on this variable, bypass the security 
-check, overflow the function's return address of the stack, and then makes the 
-program execute malicious code from inputs. Ironically, this \libsafe library 
-is no longer ``safe" in the multithreading era.
+Figure~\ref{fig:libsafe} shows the code of a concurrency attack in 
+\libsafe, a popular stack overflow protection library. This library 
+provides its own safe memory and string operations functions. For instance, the 
+\texttt{libsafe\_strcpy()} function checks whether a stack variable is passed in as 
+the function argument \texttt{dest} before it calls the actual \texttt{strcpy()}. If a program 
+receives a kill signal, Libsafe's internal thread (thread 1) sets a global variable 
+\texttt{dying}, then security checks are disabled in \texttt{libsafe\_strcpy()}. Unfortunately, 
+\v{dying} was not protected by mutex locks. In our study, we triggered a data race on this variable, bypassed the security 
+check, and overflowed thread 2's stack by passing malicious code to \texttt{dest}. Ironically, this 
+\libsafe library is no longer ``safe" when facing concurrency attacks.
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.8\columnwidth]{figures/apache}
 \vspace{-.05in}
-\caption{{A concurrency attack in Apache.}} \label{fig:apache}
-\vspace{-.05in}
+\caption{{A concurrency attack in the \apache web server.}} \label{fig:apache}
+\vspace{-.15in}
 \end{figure}
 
-Figure~\ref{fig:libsafe} shows the simplified code of a concurrency attack in 
-\apache, a widely used web server to manage HTTP pages from different users. 
-\apache spawns a number of threads, with each to server a HTTP request. Each 
-thread logs each HTTP request it receives into a global log buffer and flush 
-this buffer to a log file when the log is full. However, developers missed a 
-mutex lock to protect this buffer, so this buffer can overflow and corrupt 
-other memory in heap. Unfortunately, \apache puts the log file's descriptor next 
-to this log buffer. If this descriptor is corrupted, \apache may write the 
-request log to arbitrary files. Our preliminary study have successfully 
-corrupted this file descriptor and writes the request logs to HTTP pages owned 
-by regular users, violating integrity of \apache.
+Figure~\ref{fig:apache} shows the code of a concurrency attack in 
+the widely used \apache web server for maintaining users' HTTP pages. \apache spawns a number of threads,  
+each serves a HTTP request. Each thread also records the request in a global log 
+buffer in heap and flushes this buffer to a log file when the buffer is full. However, developers 
+missed a mutex lock to protect this buffer, so the buffer can overflow and corrupt 
+adjacent memory, including the log file's descriptor. In our study, we corrupted this 
+descriptor and made \apache write a request record to mess up another user's HTTP page.
 
 
 
