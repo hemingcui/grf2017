@@ -1,15 +1,15 @@
 \section{Research Plan and Methodology} \label{sec:rep}
 
 This \xxx project tackles concurrency attacks with a thorough, systematic 
-methodology. To this end, this section proposes three objectives, including 
-developing a rigorous concurrency attack model (\S\ref{sec:model}), 
-constructing a systematic concurrency attack detection approach 
-(\S\ref{sec:detect}) by leveraging this model, and building a runtime defense 
-infrastructure (\S\ref{sec:defense}). To justify the feasibility of this 
-project, this section presents our preliminary results at each objective. 
-Finally, this section ends with a research plan (\S\ref{sec:plan}).
+methodology. To this end, we will present three objectives in this section, including 
+a general, rigorous concurrency attack model (\S\ref{sec:model}), 
+a systematic concurrency attack detection approach 
+(\S\ref{sec:detect}) by leveraging this model, and a runtime defense 
+infrastructure (\S\ref{sec:defense}). For each objective, we will introduce our preliminary results. 
+Then, we will describe our research plan (\S\ref{sec:plan}).
 
-\subsection{Objective 1: Modeling Concurrency Attacks} \label{sec:model}
+\vspace{-.15in}\subsection{Objective 1: Modeling Concurrency Attacks} 
+\label{sec:model}\vspace{-.075in}
 
 % P1: as mentioned in background, a key reason is thread interleavings, 
 % so we need to reason about the general patterns we have. Or we say our 
@@ -21,11 +21,12 @@ how we can use program analysis approaches to describe this propagation. This
 section first gives two concrete examples on concurrency attacks 
 (\S\ref{sec:examples}), and then propose our model (\S\ref{sec:attack-phase}).
 
-\subsubsection{Concurrency Attacks Examples} \label{sec:examples}
+\vspace{-.15in}\subsubsection{Concurrency Attacks Examples In Our Preliminary Study} 
+\label{sec:examples}\vspace{-.075in}
 
-\begin{figure}[t]
+\begin{figure}[h]
 \centering
-\includegraphics[width=0.99\columnwidth]{figures/libsafe}
+\includegraphics[width=0.8\columnwidth]{figures/libsafe}
 \vspace{-.05in}
 \caption{{A concurrency attack in Libsafe.}} \label{fig:libsafe}
 \vspace{-.05in}
@@ -43,9 +44,9 @@ check, overflow the function's return address of the stack, and then makes the
 program execute malicious code from inputs. Ironically, this \libsafe library 
 is no longer ``safe" in the multithreading era.
 
-\begin{figure}[t]
+\begin{figure}[h]
 \centering
-\includegraphics[width=0.99\columnwidth]{figures/apache}
+\includegraphics[width=0.8\columnwidth]{figures/apache}
 \vspace{-.05in}
 \caption{{A concurrency attack in Apache.}} \label{fig:apache}
 \vspace{-.05in}
@@ -63,8 +64,10 @@ request log to arbitrary files. Our preliminary study have successfully
 corrupted this file descriptor and writes the request logs to HTTP pages owned 
 by regular users, violating integrity of \apache.
 
-\subsubsection{Concurrency Attacks Program Analysis Models} 
-\label{sec:attack-phase}
+
+
+\vspace{-.15in}\subsubsection{Concurrency Attacks Program Analysis Models} 
+\label{sec:attack-phase}\vspace{-.075in}
 
 % P3: pattern.
 These two examples appear to be diverse, but they have a few common elements in 
@@ -118,8 +121,8 @@ questions.
 
 % Goal 1: modeling.
 
-\subsection{Objective 2: Detecting Concurrency Attacks in Testing 
-Phase}\label{sec:detect}
+\vspace{-.15in}\subsection{Objective 2: Detecting Concurrency Attacks in Testing 
+Phase}\label{sec:detect}\vspace{-.075in}
 
 We aim to build a concurrency attack detection tool for developers in the 
 testing phase. This tool takes program source code as input, and it reports 
@@ -131,7 +134,8 @@ Linux and BSD releases a few years ago, and their attacks are still helpful
 because if attackers have broken in and gain root privilege, simply fixing the 
 bugs or upgrading kernels can not remove the malicious root user.
 
-\subsubsection{Workflow of \xxx's Detection Scheme}\label{sec:detect-arch}
+\vspace{-.15in}\subsubsection{Workflow of \xxx's Detection Scheme}
+\label{sec:detect-arch}\vspace{-.075in}
 
 An effective concurrency attack detection tool should meet a few goals. First, 
 a concurrency attack report should contain preconditions on inputs of the 
@@ -162,7 +166,7 @@ instruction in this trace, this technique goes backward compute a subset of
 instructions that are necessary to determine the reachability and values of 
 operands of this instruction.
 
-\begin{figure}[t]
+\begin{figure}[ht]
 \centering
 \includegraphics[width=0.5\columnwidth]{figures/detection}
 \vspace{-.05in}
@@ -210,7 +214,8 @@ operations.
 % \subsubsection{Implementing \xxx's Detection Scheme}\label{sec:detect-impl}
 % TBD
 
-\subsubsection{Preliminary work}\label{sec:detect-result}
+\vspace{-.15in}\subsubsection{Preliminary Results}
+\label{sec:detect-result}\vspace{-.075in}
 
 % P1: we have implemented part of the dangerous operation. pointer NULL 
 % derefence. Report the results. FP:FN. 
@@ -240,8 +245,8 @@ how to direct our symbolic execution engine to select malicious inputs and
 thread schedules that are more likely to trigger concurrency bugs? I believe 
 these challenges will continue to lead to significant work in good conferences.
 
-\subsection{Objective 3: Defensing Concurrency Attacks in Deployment Phase} 
-\label{sec:defense}
+\vspace{-.15in}\subsection{Objective 3: Defensing Concurrency Attacks in Deployment Phase} 
+\label{sec:defense}\vspace{-.075in}
 
 % P1: motivation, why runtime detection is important. We want to mostly avoid 
 % exploits by preventing attackers from manipulating the schedules.
@@ -285,10 +290,10 @@ in the deployment phase. Fourth, if replicas run into buggy schedules that
 trigger concurrency attacks, our infrastructure should be able to recover from 
 the attacks.
 
-\subsubsection{Architecture of \xxx's Runtime Defense Infrastructure} 
-\label{sec:defense-arch}
+\vspace{-.15in}\subsubsection{Architecture of \xxx's Runtime Defense Infrastructure} 
+\label{sec:defense-arch}\vspace{-.075in}
 
-\begin{figure}[t]
+\begin{figure}[ht]
 \centering
 \includegraphics[width=0.3\columnwidth]{figures/defense}
 \vspace{-.05in}
@@ -318,7 +323,7 @@ execution deterministic. The overhead
 of DMT is typically moderate because most code is not synchronization and can 
 still run in parallel.
 
-\begin{figure}[t]
+\begin{figure}[ht]
 \centering
 \includegraphics[width=0.3\columnwidth]{figures/healing}
 \vspace{-.05in}
@@ -354,7 +359,8 @@ programs.
 
 % P4: challenges on doing so. Including the initial work.
 
-\subsubsection{Preliminary work} \label{sec:defense-result}
+\vspace{-.15in}\subsubsection{Preliminary Results} 
+\label{sec:defense-result}\vspace{-.075in}
 
 % P1: we have built a replication system. Perf and checkpoint results.
 My collaborators and I have built a prototype system~\cite{crane:sosp15} to 
@@ -366,7 +372,8 @@ programs and see whether we can leverage performance hints to optimize
 performance. For the fourth challenge, our prototype system \crane has 
 implemented a basic checkpoint/restore feature.
 
-\subsection{Research Plan} \label{sec:plan}
+\vspace{-.15in}\subsection{Research Plan} \label{sec:plan}\vspace{-.075in}
+
 This \xxx project will require two PhD students S1 and S2 for a period of 
 three years. In the first year, S1 will develop and refine the concurrency 
 attack model (Objective 1), and S2 will leverage the model to design the 
