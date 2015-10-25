@@ -61,22 +61,26 @@ descriptor and made \apache write a request record to mess up another user's HTT
 
 
 
-\vspace{-.15in}\subsubsection{Concurrency Attacks Program Analysis Models} 
+\vspace{-.15in}\subsubsection{Concurrency Attack Model} 
 \label{sec:attack-phase}\vspace{-.075in}
 
+A key question on modeling concurrency attack is: how does the corrupted memory 
+in a concurrency bug propagate to vulnerable instructions in souce code? Since existing 
+reliability tools (\S\ref{sec:others-work}) are already effective on detecting 
+concurrency bugs, if our model can address this question, we can effectively 
+identify which concurency bugs will lead to attacks and we can safely ignore 
+those won't do.
+
 % P3: pattern.
-These two examples appear to be diverse, but they have a few common elements in 
-order to construct a concurrency attack. First, corrupted global memory is 
-necessary (\eg, \v{dying} in \libsafe, and the \v{buf\_len} in \apache). 
-Second, a security-sensitive operation is necessary (\eg, \v{strcpy} and 
-\v{memcpy}). Third, the corrupted global memory must cause abnormal behavior of 
-the security-sensitive operation. For example, the abnormal behavior in \libsafe 
-is we must leverage the corrupted memory to bypass the security check. For 
-\apache, we leverage the corrupted memory to bypass the security check. In this 
-case, the corrupted memory may just have indirect impact on the 
-security-sensitive operation (\ie, its corrupted value does not flow to the 
-operation), or have direct impact (\ie, the corrupted memory, buffer log, is 
-part of the operation).
+The two aforementioned examples appear to be diverse, but they have three common elements in 
+order to construct concurrency attacks. First, corrupted global memory is 
+necessary (\eg, \texttt{dying} in \libsafe, and the \texttt{buf\_len} in \apache). Second, 
+ an attack must associate with a vulnerable instruction (\eg, 
+\texttt{strcpy()} or \texttt{setuid()}). Third, the corrupted values must cause abnormal behavior of 
+the vulnerable instructions. For example, the abnormal behavior in \libsafe 
+is we must leverage the corrupted memory to ``bypass the security check", an 
+abnormal control-flow of the execution. For \apache, we must directly corrupt 
+(\ie, overflow) the buffer log, an abnormal data-flow of the execution.
 
 In sum, three key elements compose a concurrency attack: corrupted memory, 
 security-sensitive operation, and impact (indirect or direct) from the memory 
