@@ -144,16 +144,6 @@ find numerous bugs in real-world programs, however, when facing a program's
 huge amount of thread interleavings, static analysis usually reports too many 
 false positives and bury the real ones.
 
-\para{State machine replication (SMR).}  SMR is a widely-adopted 
-fault-tolerance technique in clouds and distributed 
-systems~\cite{lamportclock,smr:tutorial}. SMR runs the same program on a set of 
-physical machines (replicas), and it uses the 
-\paxos~\cite{paxos,paxos:simple,paxos:complex} distributed consensus protocol to 
-ensure consistent inputs for replicas as long as a majority of replcas is 
-working correctly (\ie, even if minor replicas fail, SMR still guarantees 
-availability of a program). The \textbf{Objective 3} of this project will 
-leverage SMR to build a runtime defense infrastructure.
-
 \noindent {\bf Symbolic Execution} Symbolic execution is an advanced program 
 analysis technique that can systematicaly explore a program's execution paths 
 to find bugs.  Researchers have built
@@ -162,10 +152,9 @@ errors~\cite{dart:pldi,cute:fse,godefroid:grammar-fuzzing,
 godefroid:whitebox-fuzzing,
 klee:osdi08,yang:malicious-disk:oakland06,cadar:exe:ccs06,s2e:hotdep09,
 taas:socc10}, block malicious inputs~\cite{castro:bouncer}, and preserve 
-privacy in error reports~\cite{castro:bug-report-privacy}.
-% Our 
-% \textbf{Objective 2} will leverage symbolic execution to construct an automated 
-% concurrency attack detection approach.
+privacy in error reports~\cite{castro:bug-report-privacy}. Our 
+\textbf{Objective 2} will leverage symbolic execution to construct an automated 
+concurrency attack detection approach.
 
 \para{Program slicing.}  Program slicing~\cite{Tip:slicing} is a general
 technique to prune irrelevant statements from a program or trace.
@@ -174,10 +163,18 @@ techniques to block malicious input~\cite{castro:bouncer}, synthesize
 executions for better error diagnosis~\cite{esd:eurosys10}, infer source
 code paths from log messages for postmortem analysis~\cite{sherlog:asplos10}, 
 and identify critical inter-thread reads that may lead to concurrency 
-errors~\cite{conseq:asplos11}.
+errors~\cite{conseq:asplos11}. Our \textbf{Objective 2} will leverage symbolic 
+execution to construct an automated concurrency attack detection approach.
 
-% Our \textbf{Objective 2} will leverage symbolic 
-% execution to construct an automated concurrency attack detection approach.
+\para{State machine replication (SMR).}  SMR is a widely-adopted 
+fault-tolerance technique in clouds and distributed 
+systems~\cite{lamportclock,smr:tutorial}. SMR runs the same program on a set of 
+physical machines (replicas), and it uses the 
+\paxos~\cite{paxos,paxos:simple,paxos:complex} distributed consensus protocol 
+to ensure consistent inputs for replicas as long as a majority of replcas is 
+working correctly (\ie, even if minor replicas fail, SMR still guarantees 
+availability of a program). Our \textbf{Objective 3} of this project will 
+leverage SMR to build a runtime defense infrastructure.
 
 % \para{\dmt and \smt systems.}  In order to make multi-threading easier to 
 % understand, test, analyze, and replicate, researchers have built two types of 
@@ -233,9 +230,9 @@ systems~\cite{crane:sosp15}. The PI's work have been published in
 premier conferences on systems software (OSDI 2010, SOSP 2011, SOSP 2013, SOSP 
 2015) and programming languages (PLDI 2012, ASPLOS 2013). In connection to 
 this project, he has built a precise program slicing tool (a key building 
-block for \textbf{Object 2}), three deterministic multithreading runtime 
-systems (a crucial technique for \textbf{Object 3}), and one fault-tolerant 
-replication system (a crucial technique for \textbf{Object 3}).
+block for \textbf{Objective 2}), three reliable multithreading runtime 
+systems (a key technique for \textbf{Objective 3}), and one fault-tolerant 
+replication system (a key technique for \textbf{Objective 3}).
 
 % In the last four years, the PI has been collaborating 
 % with Columbia and CMU researchers to build three \smt systems, 
