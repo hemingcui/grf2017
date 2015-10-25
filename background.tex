@@ -151,8 +151,30 @@ physical machines (replicas), and it uses the
 \paxos~\cite{paxos,paxos:simple,paxos:complex} distributed consensus protocol to 
 ensure consistent inputs for replicas as long as a majority of replcas is 
 working correctly (\ie, even if minor replicas fail, SMR still guarantees 
-availability of a program). Due to SMR's strength on fault-tolerance, this 
-\xxx project will leverage to build a runtime defense infrastructure.
+availability of a program). The \textbf{Objective 3} of this project will 
+leverage SMR to build a runtime defense infrastructure.
+
+\noindent {\bf Symbolic Execution} Symbolic execution is an advanced program 
+analysis technique that can systematicaly explore a program's execution paths 
+to find bugs.  Researchers have built
+scalable and effective symbolic execution systems to detect
+errors~\cite{dart:pldi,cute:fse,godefroid:grammar-fuzzing,
+godefroid:whitebox-fuzzing,
+klee:osdi08,yang:malicious-disk:oakland06,cadar:exe:ccs06,s2e:hotdep09,
+taas:socc10}, block malicious inputs~\cite{castro:bouncer}, and preserve 
+privacy in error reports~\cite{castro:bug-report-privacy}. Our 
+\textbf{Objective 2} will leverage symbolic execution to construct an automated 
+concurrency attack detection approach.
+
+\para{Program slicing.}  Program slicing~\cite{Tip:slicing} is a general
+technique to prune irrelevant statements from a program or trace.
+Recently, systems researchers have leveraged or invented slicing
+techniques to block malicious input~\cite{castro:bouncer}, synthesize
+executions for better error diagnosis~\cite{esd:eurosys10}, infer source
+code paths from log messages for postmortem analysis~\cite{sherlog:asplos10}, 
+and identify critical inter-thread reads that may lead to concurrency 
+errors~\cite{conseq:asplos11}. Our \textbf{Objective 2} will leverage symbolic 
+execution to construct an automated concurrency attack detection approach.
 
 % \para{\dmt and \smt systems.}  In order to make multi-threading easier to 
 % understand, test, analyze, and replicate, researchers have built two types of 
