@@ -1,12 +1,12 @@
 \section{Research Plan and Methodology} \label{sec:rep}
 
 This \xxx project tackles concurrency attacks with a thorough, systematic 
-methodology. To this end, this section presents three objectives in this section, including 
-a general, rigorous concurrency attack model (\S\ref{sec:model}), 
-a systematic concurrency attack detection approach 
+methodology. To this end, this section presents three objectives in this 
+section, including a general, rigorous concurrency attack model 
+(\S\ref{sec:model}), a systematic concurrency attack detection approach 
 (\S\ref{sec:detect}) by leveraging this model, and a runtime defense 
-infrastructure (\S\ref{sec:defense}). Each objective includes our preliminary results. 
-Finally, this section describes our research plan (\S\ref{sec:plan}).
+infrastructure (\S\ref{sec:defense}). Each objective includes our preliminary 
+results. Finally, this section describes our research plan (\S\ref{sec:plan}).
 
 \vspace{-.15in}\subsection{Objective 1: Modeling Concurrency Attacks} 
 \label{sec:model}\vspace{-.075in}
@@ -21,27 +21,31 @@ section first gives two concurrency attack examples our preliminary study
 successfully constructed (\S\ref{sec:examples}), and then proposes 
 our model (\S\ref{sec:attack-phase}).
 
-\vspace{-.15in}\subsubsection{Concurrency Attacks Examples In Our Preliminary Study} 
+\vspace{-.15in}\subsubsection{Concurrency Attacks Examples In Our Preliminary 
+Study} 
 \label{sec:examples}\vspace{-.075in}
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.8\columnwidth]{figures/libsafe}
 \vspace{-.05in}
-\caption{{A concurrency attack in the Libsafe security library.}} \label{fig:libsafe}
+\caption{{A concurrency attack in the Libsafe security library.}} 
+\label{fig:libsafe}
 \vspace{-.15in}
 \end{figure}
 
 Figure~\ref{fig:libsafe} shows the code of a concurrency attack in 
 \libsafe, a popular stack overflow protection library. This library 
 provides its own safe memory and string operations functions. For instance, the 
-\texttt{libsafe\_strcpy()} function checks whether a stack variable is passed in as 
-the function argument \texttt{dest} before it calls the actual \texttt{strcpy()}. If a program 
-receives a kill signal, Libsafe's internal thread (thread 1) sets a global variable 
-\texttt{dying}, then security checks are disabled in \texttt{libsafe\_strcpy()}. Unfortunately, 
-\v{dying} was not protected by mutex locks. In our study, we triggered a data race on this variable, bypassed the security 
-check, and overflowed thread 2's stack by passing malicious code to \texttt{dest}. Ironically, this 
-\libsafe library is no longer ``safe" when facing concurrency attacks.
+\texttt{libsafe\_strcpy()} function checks whether a stack variable is passed 
+in as the function argument \texttt{dest} before it calls the actual 
+\texttt{strcpy()}. If a program receives a kill signal, Libsafe's internal 
+thread (thread 1) sets a global variable \texttt{dying}, then security checks 
+are disabled in \texttt{libsafe\_strcpy()}. Unfortunately, \v{dying} was not 
+protected by mutex locks. In our study, we triggered a data race on this 
+variable, bypassed the security check, and overflowed thread 2's stack by 
+passing malicious code to \texttt{dest}. Ironically, this \libsafe library is 
+no longer ``safe" when facing concurrency attacks.
 
 \begin{figure}[h]
 \centering
@@ -52,12 +56,13 @@ check, and overflowed thread 2's stack by passing malicious code to \texttt{dest
 \end{figure}
 
 Figure~\ref{fig:apache} shows the code of a concurrency attack in 
-the widely used \apache web server for maintaining users' HTTP pages. \apache spawns a number of threads,  
-each serves a HTTP request. Each thread also records the request in a global log 
-buffer in heap and flushes this buffer to a log file when the buffer is full. However, developers 
-missed a mutex lock to protect this buffer, so the buffer can overflow and corrupt 
-adjacent memory, including the log file's descriptor. In our study, we corrupted this 
-descriptor and made \apache write a request record to mess up another user's HTTP page.
+the widely used \apache web server for maintaining users' HTTP pages. \apache 
+spawns a number of threads, each serves a HTTP request. Each thread also records 
+the request in a global log buffer in heap and flushes this buffer to a log 
+file when the buffer is full. However, developers missed a mutex lock to 
+protect this buffer, so the buffer can overflow and corrupt adjacent memory, 
+including the log file's descriptor. In our study, we corrupted this descriptor 
+and made \apache write a request record to mess up another user's HTTP page.
 
 
 
@@ -65,21 +70,22 @@ descriptor and made \apache write a request record to mess up another user's HTT
 \label{sec:attack-phase}\vspace{-.075in}
 
 A key question on modeling concurrency attack is: how does the corrupted memory 
-in a concurrency bug propagate to vulnerable instructions in souce code? Since existing 
-reliability tools (\S\ref{sec:others-work}) are already effective on detecting 
-concurrency bugs, if our model can address this question, we can effectively 
-identify which concurency bugs will lead to attacks and we can safely ignore 
-those won't do.
+in a concurrency bug propagate to vulnerable instructions in souce code? Since 
+existing reliability tools (\S\ref{sec:others-work}) are already effective on 
+detecting concurrency bugs, if our model can address this question, we can 
+effectively identify which concurency bugs will lead to attacks and we can 
+safely ignore those won't do.
 
 % P3: pattern.
-The two aforementioned examples appear to be diverse, but they have three common elements in 
-order to construct concurrency attacks. First, corrupted global memory is 
-necessary (\eg, \texttt{dying} in \libsafe, and the \texttt{buf\_len} in \apache). Second, 
- an attack must associate with a vulnerable instruction (\eg, 
-\texttt{strcpy()} or \texttt{setuid()}). Third, the corrupted values must cause abnormal behavior of 
-the vulnerable instructions. For example, the abnormal behavior in \libsafe 
-is we must leverage the corrupted memory to ``bypass the security check", an 
-abnormal control-flow of the execution. For \apache, we must directly corrupt 
+The two aforementioned examples appear to be diverse, but they have three 
+common elements in order to construct concurrency attacks. First, corrupted 
+global memory is necessary (\eg, \texttt{dying} in \libsafe, and the 
+\texttt{buf\_len} in \apache). Second, an attack must associate with a 
+vulnerable instruction (\eg, \texttt{strcpy()} or \texttt{setuid()}). Third, 
+the corrupted values must cause abnormal behavior of the vulnerable 
+instructions. For example, the abnormal behavior in \libsafe is we must 
+leverage the corrupted memory to ``bypass the security check", an abnormal 
+control-flow of the execution. For \apache, we must directly corrupt 
 (\ie, overflow) the buffer log, an abnormal data-flow of the execution.
 
 In sum, three key elements compose a concurrency attack: corrupted memory, 
@@ -120,7 +126,8 @@ questions.
 
 % Goal 1: modeling.
 
-\vspace{-.15in}\subsection{Objective 2: Detecting Concurrency Attacks in Testing 
+\vspace{-.15in}\subsection{Objective 2: Detecting Concurrency Attacks in 
+Testing 
 Phase}\label{sec:detect}\vspace{-.075in}
 
 We aim to build a concurrency attack detection tool for developers in the 
@@ -196,7 +203,8 @@ focus on exploring paths on these branches to try to exercise dangerous
 operations.
 
 % P1: why need a detection scheme. First, capture as many as exploits in 
-% testing phase. And call for re-install if there is any potential exploit. Even for 
+% testing phase. And call for re-install if there is any potential exploit. 
+Even for 
 % old concurrency bugs, it is still necessary because exploits may have already 
 % occured and attackers may have already broken in.
 
@@ -233,7 +241,8 @@ detection tool.
 
 
 % P2: we foresee a few open challenges on the continuation of developing this 
-% tool. First, how to make path slicing handle % non-function calls. Second, how 
+% tool. First, how to make path slicing handle % non-function calls. Second, 
+how 
 % to prioritize different operations ()? % Third, how to select malicious 
 % inputs and thread schedules that are more likely to triger concurrency bugs?
 We foresee a few open challenges on the continuation of developing this tool. 
@@ -244,7 +253,8 @@ how to direct our symbolic execution engine to select malicious inputs and
 thread schedules that are more likely to trigger concurrency bugs? I believe 
 these challenges will continue to lead to significant work in good conferences.
 
-\vspace{-.15in}\subsection{Objective 3: Defensing Concurrency Attacks in Deployment Phase} 
+\vspace{-.15in}\subsection{Objective 3: Defensing Concurrency Attacks in 
+Deployment Phase} 
 \label{sec:defense}\vspace{-.075in}
 
 % P1: motivation, why runtime detection is important. We want to mostly avoid 
@@ -284,12 +294,14 @@ running across replicas can still easily run into different thread schedules
 and divergent execution states. Second, to leverage existing SMR systems such 
 as ZooKeeper, developers often have to shoehorn their programs into the 
 narrowly defined state machine interfaces provided by these SMR systems. Third, 
-such a runtime infrastructure should run almost as fast as the native executions 
+such a runtime infrastructure should run almost as fast as the native 
+executions 
 in the deployment phase. Fourth, if replicas run into buggy schedules that 
 trigger concurrency attacks, our infrastructure should be able to recover from 
 the attacks.
 
-\vspace{-.15in}\subsubsection{Architecture of \xxx's Runtime Defense Infrastructure} 
+\vspace{-.15in}\subsubsection{Architecture of \xxx's Runtime Defense 
+Infrastructure} 
 \label{sec:defense-arch}\vspace{-.075in}
 
 \begin{figure}[ht]
@@ -384,7 +396,8 @@ year, S1 will build the runtime defense infrastructure (Objective 3), and S2
 will apply our model, detection tool, and defense infrastructure to benefit 
 other research areas (\eg, byzantine fault tolerance). Overall, both the two 
 students will involve theoretical methods, implement real software systems, and 
-perform real-world study. The PI will supervise the students by providing advice 
+perform real-world study. The PI will supervise the students by providing 
+advice 
 concerning both theoretical and systems implementation levels.
 
 
