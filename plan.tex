@@ -295,10 +295,9 @@ and divergent execution states. Second, to leverage existing SMR systems such
 as ZooKeeper, developers often have to shoehorn their programs into the 
 narrowly defined state machine interfaces provided by these SMR systems. Third, 
 such a runtime infrastructure should run almost as fast as the native 
-executions 
-in the deployment phase. Fourth, if replicas run into buggy schedules that 
-trigger concurrency attacks, our infrastructure should be able to recover from 
-the attacks.
+executions in the deployment phase. Fourth, if replicas run into buggy 
+schedules that trigger concurrency attacks, our infrastructure should be able 
+to recover from the attacks.
 
 \vspace{-.15in}\subsubsection{Architecture of \xxx's Runtime Defense 
 Infrastructure} 
