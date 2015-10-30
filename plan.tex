@@ -73,44 +73,54 @@ A key question on modeling concurrency attack is: how does the corrupted memory
 in a concurrency bug propagate to vulnerable instructions in souce code? Since 
 existing reliability tools (\S\ref{sec:others-work}) are already effective on 
 detecting concurrency bugs, if our model can address this question, we can 
-effectively identify which concurency bugs will lead to attacks and we can 
-safely ignore those won't do.
+effectively identify which concurency bugs have the potential to lead to 
+attacks, and we can safely ignore those don't.
 
 % P3: pattern.
-The two aforementioned examples appear to be diverse, but they have three 
-common elements in order to construct concurrency attacks. First, corrupted 
-global memory is necessary (\eg, \texttt{dying} in \libsafe, and the 
-\texttt{buf\_len} in \apache). Second, an attack must associate with a 
-vulnerable instruction (\eg, \texttt{strcpy()} or \texttt{setuid()}). Third, 
-the corrupted values must cause abnormal behavior of the vulnerable 
-instructions. For example, the abnormal behavior in \libsafe is we must 
-leverage the corrupted memory to ``bypass the security check", an abnormal 
-control-flow of the execution. For \apache, we must directly corrupt 
-(\ie, overflow) the buffer log, an abnormal data-flow of the execution.
+Although the two aforementioned examples appear to be diverse, we have 
+identified three common elements in these concurrency attacks. First, it is 
+necessary to have corrupted global memory (\eg, \texttt{dying} in \libsafe, and 
+the \texttt{buf\_len} in \apache) caused by concurency bugs. Second, it is 
+necessary to have a vulnerable instruction (\eg, \texttt{strcpy()} or 
+\texttt{setuid()}) to perform an attack. Third, the corrupted values in global 
+memory must cause abnormal behavior on the vulnerable instructions. For example, 
+the abnormal behavior in \libsafe is we must leverage the corrupted memory to 
+bypass the stack overflow check, an abnormal control-flow of the execution. For 
+\apache, we must directly corrupt (\ie, overflow) the buffer log, an abnormal 
+data-flow of the execution.
 
-In sum, three key elements compose a concurrency attack: corrupted memory, 
-security-sensitive operation, and impact (indirect or direct) from the memory 
-to the operation. In the PL community, we cause the indirect impact as control 
-dependency, and the direct impact data dependency. Actually, not only for these 
-examples, the \nattacks attacks we have reproduced and the \noldattacks in 
-previous study~\cite{con:hotpar12}, they all have these three key elements.
+% In sum, three common elements compose a concurrency attack model: corrupted 
+% memory, security-sensitive operation, and impact (indirect or direct) from the 
+% memory to the operation.
+% 
+In addition to these two examples, the \nattacks concurrency attacks in recent 
+study~\cite{con:hotpar12} and the \noldattacks ones our own preliminary study 
+\S\ref{sec:examples}) also have the three common elements. For the first 
+element, these attacks have four types of concurrency bugs, including data 
+races, atomicity violations, deadlocks, and order violations. For the second 
+element, we have collected three types of vulnerable instructions, including 
+memory operations (\eg, \texttt{strcpy()}), pointer deferences (\eg, when the 
+pointer is NULL), and systems calls (\eg, \texttt{setuid()}). For the third 
+element, the key is to detect abnormal control-flow and data-flow of 
+executions, and \S\ref{sec:detect} will proposse our systematic detection 
+approach.
 
 % PX: emphasis the contribution/potential value of this model.
-In a high level, this model treats a concurrency attack as a source-sink model, 
-where a source is a corrupted global memory caused by a concurrency bug, and a 
-sink is a security-sensitive operation. Then this model tracks the data flow 
-and control flow of the corrupted memory to the sensitive operations. Unlike a 
-traditional model which only consider inputs as the source, our model considers
-concurrency bugs as the the inputs. This model spurs several interesting 
-research questions. First, how do we track down the corrupted memory in the 
-middle of an execution? Second, given that concurrency bugs are not only just 
-one, how does our analysis handle multiple concurrency bugs (\eg, multiple 
-corrupted variables)? Third, given that not all security-sensitive operations 
-are indeed relevant to the source, how do we prune the irrelevant operations 
-soundly (\ie, without missing exploits)? In \S\ref{sec:detect}, we plan to 
-leverage this model to develop an effective detection approach, and our 
-preliminary work has shown promising results on addressing these research 
-questions.
+% In a high level, this model treats a concurrency attack as a source-sink model, 
+% where a source is a corrupted global memory caused by a concurrency bug, and a 
+% sink is a security-sensitive operation. Then this model tracks the data flow 
+% and control flow of the corrupted memory to the sensitive operations. Unlike a 
+% traditional model which only consider inputs as the source, our model considers
+% concurrency bugs as the the inputs. This model spurs several interesting 
+% research questions. First, how do we track down the corrupted memory in the 
+% middle of an execution? Second, given that concurrency bugs are not only just 
+% one, how does our analysis handle multiple concurrency bugs (\eg, multiple 
+% corrupted variables)? Third, given that not all security-sensitive operations 
+% are indeed relevant to the source, how do we prune the irrelevant operations 
+% soundly (\ie, without missing exploits)? In \S\ref{sec:detect}, we plan to 
+% leverage this model to develop an effective detection approach, and our 
+% preliminary work has shown promising results on addressing these research 
+% questions.
 
 % TBD: add a table on the list of concurrency bugs and the list of dangerous 
 % operations.
@@ -127,8 +137,7 @@ questions.
 % Goal 1: modeling.
 
 \vspace{-.15in}\subsection{Objective 2: Detecting Concurrency Attacks in 
-Testing 
-Phase}\label{sec:detect}\vspace{-.075in}
+Testing Phase}\label{sec:detect}\vspace{-.075in}
 
 We aim to build a concurrency attack detection tool for developers in the 
 testing phase. This tool takes program source code as input, and it reports 
