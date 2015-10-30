@@ -57,9 +57,9 @@ no longer ``safe" when facing concurrency attacks.
 
 Figure~\ref{fig:apache} shows the code of a concurrency attack in 
 the widely used \apache web server for maintaining users' HTTP pages. \apache 
-spawns a number of threads, each serves a HTTP request. Each thread also records 
-the request in a global log buffer in heap and flushes this buffer to a log 
-file when the buffer is full. However, developers missed a mutex lock to 
+spawns a number of threads, each serves a HTTP request. Each thread also 
+records the request in a global log buffer in heap and flushes this buffer to a 
+log file when the buffer is full. However, developers missed a mutex lock to 
 protect this buffer, so the buffer can overflow and corrupt adjacent memory, 
 including the log file's descriptor. In our study, we corrupted this descriptor 
 and made \apache write a request record to mess up another user's HTTP page.
@@ -83,15 +83,15 @@ necessary to have corrupted global memory (\eg, \texttt{dying} in \libsafe, and
 the \texttt{buf\_len} in \apache) caused by concurency bugs. Second, it is 
 necessary to have a vulnerable instruction (\eg, \texttt{strcpy()} or 
 \texttt{setuid()}) to perform an attack. Third, the corrupted values in global 
-memory must cause abnormal behavior on the vulnerable instructions. For example, 
-the abnormal behavior in \libsafe is we must leverage the corrupted memory to 
-bypass the stack overflow check, an abnormal control-flow of the execution. For 
-\apache, we must directly corrupt (\ie, overflow) the buffer log, an abnormal 
-data-flow of the execution.
+memory must cause abnormal behavior on the vulnerable instructions. For 
+example, the abnormal behavior in \libsafe is we must leverage the corrupted 
+memory to bypass the stack overflow check, an abnormal control-flow of the 
+execution. For \apache, we must directly corrupt (\ie, overflow) the buffer 
+log, an abnormal data-flow of the execution.
 
 % In sum, three common elements compose a concurrency attack model: corrupted 
-% memory, security-sensitive operation, and impact (indirect or direct) from the 
-% memory to the operation.
+% memory, security-sensitive operation, and impact (indirect or direct) from 
+the % memory to the operation.
 % 
 In addition to these two examples, the \nattacks concurrency attacks in recent 
 study~\cite{con:hotpar12} and the \noldattacks ones our own preliminary study 
@@ -106,11 +106,15 @@ executions, and \S\ref{sec:detect} will proposse our systematic detection
 approach.
 
 % PX: emphasis the contribution/potential value of this model.
-% In a high level, this model treats a concurrency attack as a source-sink model, 
-% where a source is a corrupted global memory caused by a concurrency bug, and a 
+% In a high level, this model treats a concurrency attack as a source-sink 
+model, 
+% where a source is a corrupted global memory caused by a concurrency bug, and 
+a 
 % sink is a security-sensitive operation. Then this model tracks the data flow 
-% and control flow of the corrupted memory to the sensitive operations. Unlike a 
-% traditional model which only consider inputs as the source, our model considers
+% and control flow of the corrupted memory to the sensitive operations. Unlike 
+a 
+% traditional model which only consider inputs as the source, our model 
+considers
 % concurrency bugs as the the inputs. This model spurs several interesting 
 % research questions. First, how do we track down the corrupted memory in the 
 % middle of an execution? Second, given that concurrency bugs are not only just 
@@ -139,47 +143,61 @@ approach.
 \vspace{-.15in}\subsection{Objective 2: Detecting Concurrency Attacks in 
 Testing Phase}\label{sec:detect}\vspace{-.075in}
 
-We aim to build a concurrency attack detection tool for developers in the 
-testing phase. This tool takes program source code as input, and it reports 
-whether this program has potential concurrency attacks. Even for old releases 
-of programs, this tool is still helpful, because attacks are consequences of 
-bugs, even if the bugs were already fixed, if the attacks have occurred, fixing 
-the bugs do not help. For example, we studied a few concurrency bugs in old 
-Linux and BSD releases a few years ago, and their attacks are still helpful 
-because if attackers have broken in and gain root privilege, simply fixing the 
-bugs or upgrading kernels can not remove the malicious root user.
+To detect the abnormal control-flow and data-flow between corrupted global 
+memory to vulnerable instructions, we propose a systematic detection approach. 
+Our tool takes program source code as input, and its output is whether this 
+program has potential concurrency attacks. This approach is mainly for program 
+developers to detect potential attacks and fix them during the software testing 
+phase.
 
-\vspace{-.15in}\subsubsection{Workflow of \xxx's Detection Scheme}
+This detection approach is also useful for analyzing concurrency bugs and their 
+potential attacks in old releases of software programs. The reason is because 
+even if concurrency bugs were already fixed in the latest software release, if 
+concurrency attacks have occurred and hackers have broken in, fixing the bugs 
+won't help.
+
+% For example, we studied a 
+% few concurrency bugs in old Linux and BSD releases a few years ago, and their 
+% attacks are still helpful because if attackers have broken in and gain root 
+% privilege, simply fixing the 
+% bugs or upgrading kernels can not remove the malicious root user.
+
+\vspace{-.15in}\subsubsection{Workflow of \xxx's Detection Approach}
 \label{sec:detect-arch}\vspace{-.075in}
 
-An effective concurrency attack detection tool should meet a few goals. First, 
-a concurrency attack report should contain preconditions on inputs of the 
-programs so that developers can easily inspect. This goal is especially useful 
-for developers to triggering attacks on rare inputs (\eg, mention the nested 
-select inputs in MySQL).
+We foresee two major goals for an effective concurrency attack detection 
+apporach. First, a concurrency attack detection report should contain 
+preconditions on program inputs so that developers can easily reproduce the 
+attack. This goal is especially useful for developers to triggering attacks on 
+rare inputs. For example, in a MySQL concurrency attack~\cite{XXX}, only feeding
+nested \texttt{select} statements to the MySQL server can trigger this attack.
 
-Second, this tool should be precise in terms of having as few as false 
+Second, this approach should be precise in terms of having as few as false 
 positives (reports but actually not a feasible attack) and false negatives 
-(missing a real attack). A precise tool will encourage adoptions by the 
-software developers. To this end, this tool must precisely capture both the 
-data flow and control flow between the corrupted global memory and any 
-potential security-sensitive operations in program source code. 
+(missing a real attack). To this end, this approach should capture only the 
+data-flow and control-flow relevant for the propagation from corrupted memory 
+to vulnerable instructions, and it should discard the irrelevant ones. 
 
-Our key weapon to achieve the first goal is \emph{symbolic execution}, an 
-advanced program analysis technique that can systematically explore program 
-paths to find bugs. Unlike normal execution which runs on a concrete 
-inputs, this technique marks inputs (\eg, command lines and bytes received from 
-network) as symbolic, and if a branch statement depend on inputs, it forks the 
-execution, goes down both paths, and tracks constraints on inputs. If this 
-technique hit a bug, the constraints on inputs reflect on input conditions 
-which can trigger this bug. This technique has shown to find subtle bugs in 
-real-world programs.
+Our proposed solution to achieve the first goal is \emph{symbolic 
+execution}~\ref{sec:others-work}, a program analysis technique that 
+systematicallys explore a program's execution paths to find bugs. Unlike normal 
+execution which runs on a concrete inputs, this technique marks inputs (\eg, 
+command line arguments and bytes received from network) as symbolic and tracks 
+down the input preconditions on control statements (\eg, \texttt{if} and 
+\texttt{while}) during the execution. If a control statement depends on inputs, 
+symbolic execution forks a new execution, let the two exeuctions go down 
+different paths, and tracks input preconditions on each execution. If one 
+execution hit a bug, the input preconditions reflect which inputs can trigger 
+this bug. This technique has shown to find subtle bugs in real-world programs.
 
-Our key weapon to achieve the first goal is path slicing, an advanced program 
-analysis technique that. Given a trace of executed instructions and one 
-instruction in this trace, this technique goes backward compute a subset of 
-instructions that are necessary to determine the reachability and values of 
-operands of this instruction.
+Our proposed solution to achieve the second goal is \emph{path slicing}.Given a 
+trace of executed instructions and one essential instruction in this trace, 
+path slicing starts from this essential instruction, goes backward the trace, 
+and compute a subset of instructions that are necessary to determine the 
+reachability and values of operands of this instruction. This path slicing 
+technique has shown to compute compact input preconditions to block malicious 
+inputs~\cite{castro:bouncer} and compute relevant instructions for programming 
+rule violations~\cite{woodpecker:asplos13}.
 
 \begin{figure}[ht]
 \centering
@@ -190,10 +208,10 @@ operands of this instruction.
 \vspace{-.05in}
 \end{figure}
 
-With both the symbolic execution and path slicing tools, we plan to build a 
-concurrency attack detection tool. The workflow of the tool is shown in 
-Figure~\ref{fig:detection}. This tool takes program source code as input and 
-uses the LLVM compiler framework to compile it to LLVM IR instructions. The 
+By leveraging the symbolic execution and path slicing, we propose a systematic 
+concurrency attack detection approach. The workflow of the approach is shown in 
+Figure~\ref{fig:detection}. This approach takes program source code as input 
+and uses the LLVM compiler framework to compile it to LLVM IR instructions. The 
 symbolic execution engine marks a program input and bytes received from network 
 as symbolic and explore program paths. For each program path, we run a race 
 detector on the execution trace, and if a concurrency bug is detected, we feed 
@@ -213,7 +231,7 @@ operations.
 
 % P1: why need a detection scheme. First, capture as many as exploits in 
 % testing phase. And call for re-install if there is any potential exploit. 
-Even for 
+% Even for 
 % old concurrency bugs, it is still necessary because exploits may have already 
 % occured and attackers may have already broken in.
 
@@ -251,7 +269,7 @@ detection tool.
 
 % P2: we foresee a few open challenges on the continuation of developing this 
 % tool. First, how to make path slicing handle % non-function calls. Second, 
-how 
+% how 
 % to prioritize different operations ()? % Third, how to select malicious 
 % inputs and thread schedules that are more likely to triger concurrency bugs?
 We foresee a few open challenges on the continuation of developing this tool. 
