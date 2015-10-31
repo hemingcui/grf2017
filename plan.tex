@@ -91,7 +91,7 @@ log, an abnormal data-flow of the execution.
 
 % In sum, three common elements compose a concurrency attack model: corrupted 
 % memory, security-sensitive operation, and impact (indirect or direct) from 
-the % memory to the operation.
+% the % memory to the operation.
 % 
 In addition to these two examples, the \nattacks concurrency attacks in recent 
 study~\cite{con:hotpar12} and the \noldattacks ones our own preliminary study 
@@ -101,9 +101,8 @@ races, atomicity violations, deadlocks, and order violations. For the second
 element, we have collected three types of vulnerable instructions, including 
 memory operations (\eg, \texttt{strcpy()}), pointer deferences (\eg, when the 
 pointer is NULL), and systems calls (\eg, \texttt{setuid()}). For the third 
-element, the key is to detect abnormal control-flow and data-flow of 
-executions, and \S\ref{sec:detect} will proposse our systematic detection 
-approach.
+element, \S\ref{sec:detect} will propose our systematic detection 
+approach to detect abnormal control-flow and data-flow of executions.
 
 % PX: emphasis the contribution/potential value of this model.
 % In a high level, this model treats a concurrency attack as a source-sink 
@@ -143,18 +142,19 @@ approach.
 \vspace{-.15in}\subsection{Objective 2: Detecting Concurrency Attacks in 
 Testing Phase}\label{sec:detect}\vspace{-.075in}
 
-To detect the abnormal control-flow and data-flow between corrupted global 
-memory to vulnerable instructions, we propose a systematic detection approach. 
-Our tool takes program source code as input, and its output is whether this 
-program has potential concurrency attacks. This approach is mainly for program 
-developers to detect potential attacks and fix them during the software testing 
-phase.
+% To detect the abnormal control-flow and data-flow between corrupted global 
+% memory to vulnerable instructions, our approach takes program source code as 
+% input, and it outputs whether this program has potential concurrency attacks. 
+% This approach is mainly for program 
+% developers to detect and fix potential attacks during the software 
+% testing phase.
 
-This detection approach is also useful for analyzing concurrency bugs and their 
-potential attacks in old releases of software programs. The reason is because 
-even if concurrency bugs were already fixed in the latest software release, if 
-concurrency attacks have occurred and hackers have broken in, fixing the bugs 
-won't help.
+Our proposed detection approach is not only useful for developers to detect 
+concurrency attacks during software testhing phase, but also useful for 
+analyzing concurrency bugs and their potential attacks in old releases of 
+software programs. The reason is because even if concurrency bugs were already 
+fixed in the latest software release, if concurrency attacks have occurred and 
+hackers have broken in, simply fixing the bugs won't help.
 
 % For example, we studied a 
 % few concurrency bugs in old Linux and BSD releases a few years ago, and their 
@@ -165,12 +165,12 @@ won't help.
 \vspace{-.15in}\subsubsection{Workflow of \xxx's Detection Approach}
 \label{sec:detect-arch}\vspace{-.075in}
 
-We foresee two major goals for an effective concurrency attack detection 
-apporach. First, a concurrency attack detection report should contain 
-preconditions on program inputs so that developers can easily reproduce the 
-attack. This goal is especially useful for developers to triggering attacks on 
-rare inputs. For example, in a MySQL concurrency attack~\cite{XXX}, only feeding
-nested \texttt{select} statements to the MySQL server can trigger this attack.
+We identify two major goals for our detection apporach. First, a report should 
+contain preconditions on program inputs so that developers can easily reproduce 
+the concurrency attack. This goal is especially useful for developers to 
+trigger attacks on rare inputs (\eg, nested \texttt{select} statements are 
+required to trigger a concurrency attack to MySQL in our preliminary 
+study study (\S\ref{sec:examples}).
 
 Second, this approach should be precise in terms of having as few as false 
 positives (reports but actually not a feasible attack) and false negatives 
@@ -178,26 +178,37 @@ positives (reports but actually not a feasible attack) and false negatives
 data-flow and control-flow relevant for the propagation from corrupted memory 
 to vulnerable instructions, and it should discard the irrelevant ones. 
 
-Our proposed solution to achieve the first goal is \emph{symbolic 
+We plan to achieve the first goal with \emph{symbolic 
 execution}~\ref{sec:others-work}, a program analysis technique that 
 systematicallys explore a program's execution paths to find bugs. Unlike normal 
 execution which runs on a concrete inputs, this technique marks inputs (\eg, 
-command line arguments and bytes received from network) as symbolic and tracks 
-down the input preconditions on control statements (\eg, \texttt{if} and 
-\texttt{while}) during the execution. If a control statement depends on inputs, 
-symbolic execution forks a new execution, let the two exeuctions go down 
-different paths, and tracks input preconditions on each execution. If one 
-execution hit a bug, the input preconditions reflect which inputs can trigger 
-this bug. This technique has shown to find subtle bugs in real-world programs.
+command line arguments) as ``symbolic" and tracks down the input preconditions 
+on control statements (\eg, \texttt{if} and \texttt{while}) during the 
+execution. If a control statement depends on inputs, symbolic execution forks a 
+new execution, let the two exeuctions go down different paths, and tracks input 
+preconditions on each execution. This technique has shown to find new bugs in 
+real-world systems programs~\cite{klee:osdi08}.
 
-Our proposed solution to achieve the second goal is \emph{path slicing}.Given a 
+We plan to achieve the second goal with \emph{path slicing}. Given a 
 trace of executed instructions and one essential instruction in this trace, 
 path slicing starts from this essential instruction, goes backward the trace, 
-and compute a subset of instructions that are necessary to determine the 
-reachability and values of operands of this instruction. This path slicing 
-technique has shown to compute compact input preconditions to block malicious 
-inputs~\cite{castro:bouncer} and compute relevant instructions for programming 
-rule violations~\cite{woodpecker:asplos13}.
+and computes a subset of instructions that affect the reachability and operand 
+values of this instruction. This path slicing technique has shown to compute 
+compact input preconditions to block malicious inputs~\cite{castro:bouncer} and 
+compute relevant instructions for programming rule 
+violations~\cite{woodpecker:asplos13}.
+
+By leveraging the symbolic execution and path slicing, the workflow of our 
+detection approach is shown in Figure~\ref{fig:detection}. This approach takes 
+program source code as input and uses the LLVM compiler framework to compile it 
+to LLVM IR instructions. The symbolic execution engine marks a program input 
+and bytes received from network as symbolic and explore program paths. For each 
+execution, we collect all the the executed instructions as a trace, and run a 
+race detector on the trace: if a concurrency bug is detected, we feed this 
+trace to path slicer to see whether: (1) the trace may have contained a 
+vulnerable instruction, or (2) this trace have any control statements that can 
+lead to vulnerable instruction in the not executed branches. If the trace does 
+not satisfy any of the two conditions, we then safely discard this trace.
 
 \begin{figure}[ht]
 \centering
@@ -208,30 +219,19 @@ rule violations~\cite{woodpecker:asplos13}.
 \vspace{-.05in}
 \end{figure}
 
-By leveraging the symbolic execution and path slicing, we propose a systematic 
-concurrency attack detection approach. The workflow of the approach is shown in 
-Figure~\ref{fig:detection}. This approach takes program source code as input 
-and uses the LLVM compiler framework to compile it to LLVM IR instructions. The 
-symbolic execution engine marks a program input and bytes received from network 
-as symbolic and explore program paths. For each execution, we collect all the 
-the executed instructions as a trace, and run a race detector on the trace: if 
-a concurrency bug is detected, we feed this trace to path slicer to see 
-whether: (1) the trace may have contained a vulnerable instruction, or (2) 
-this trace have any control statements that can lead to vulnerable instruction 
-in the not executed branches. If the trace does not satisfy any of the two 
-conditions, we then safely discard this trace.
 
-The path slicer is the key weapon to track the propogation from a concurrency 
-bug to potential vulnerable instruction. The slicer takes an execution trace as 
-input, and it first sees whether this trace already contains a vulnerable 
-instruction, if so, it reports this trace as a potential concurrency attack with 
-input preconditions for developers to reproduce this execution. If this trace 
-does not contain any type of vulnerable instruction (\S\ref{sec:model}), the 
-path slicer starts from the last execution of the trace, goes backward, and 
-collect control statements that may lead to a vulnerable instruction. After 
-processing the whole trace, the path slicer lets the symbolic execution engine 
-explore these control statements with high priority and see whether the 
-following executions may exercise potential vulnerable instructions.
+
+The path slicer is our core technique to track the propogation from a 
+concurrency bug to potential vulnerable instruction (see the concurrency attack 
+model (\S\ref{sec:model}). The slicer first checks whether this trace already 
+contains a vulnerable instruction, if so, it reports this trace as a potential 
+concurrency attack with input preconditions for developers to reproduce this 
+execution. If this trace does not contain a vulnerable instruction, the 
+path slicer goes backward from the last execution of the trace and
+collects control statements that may lead to a vulnerable instruction in the 
+not-executed branches. The path slicer then notifies symbolic execution 
+to explore these control statements with high priority and sees whether 
+following executions exercise vulnerable instructions.
 
 % P1: why need a detection scheme. First, capture as many as exploits in 
 % testing phase. And call for re-install if there is any potential exploit. 
@@ -257,19 +257,17 @@ following executions may exercise potential vulnerable instructions.
 
 % P1: we have implemented part of the dangerous operation. pointer NULL 
 % derefence. Report the results. FP:FN. 
-\para{Preliminary results.} My collaborators and I have built two basic 
-building blocks of this detection approach. First, we have presented a 
-preliminary path slicer called Woodpecker~\cite{woodpecker:asplos13} in 
-in ASPLOS 2013 for detecting single-threaded security violations on system 
-calls (\eg, \texttt{setuid()}). Woodpecker detects 113 programming rule 
-violations in 136 popular systems programs, including 10 serious data loss 
-errors with seven most serious ones already confirmed by the corresponding 
-developers. Second, my collaborators and I have also built a data race detector 
-in our and Peregrine~\cite{peregrine:sosp11} paper in SOSP 2011. This race 
-detector has detected several new data races in heavily-studied 
-programs~\cite{wu:pldi12} in PLDI 2012. We believe that these preliminary 
-results show the feasibility of our proposed concurrency attack detection 
-approach.
+\para{Preliminary results.} We have developed two preliminary techniques for 
+this detection approach. First, we have presented a precise path slicer called 
+Woodpecker~\cite{woodpecker:asplos13} in in ASPLOS 2013 for detecting 
+single-threaded security violations on system calls (\eg, \texttt{setuid()}). 
+Woodpecker detects 113 programming rule violations in 136 popular systems 
+programs, including seven serious ones already confirmed by developers. Second, 
+we have also presented a data race detector in our 
+and Peregrine~\cite{peregrine:sosp11} work in SOSP 2011. This race 
+detector has detected several new data races in 
+heavily-studied programs~\cite{wu:pldi12}. These preliminary techniques and 
+results show the feasibility of our proposed detection approach.
 
 % P2: mention our initial work in OSDI '10 and SOSP '11 on precise data race 
 % detection.
@@ -326,20 +324,28 @@ provides high availability in practice.
 % schedules before re-execute. Sell it like a self-healing runtime system.
 Although \smr's fault-tolerant benefit makes it particularly attractive
 on building a general runtime infrastructure for defending tolerating 
-concurrency attacks, we foresee five challenges toward building a practical 
+concurrency attacks, we foresee five research challenges to realize this 
 infrastructure. First, to leverage existing SMR systems such as ZooKeeper, 
 program developers often have to shoehorn their programs into the 
 narrowly defined state machine interfaces provided by these SMR systems, a 
-time-consuming and error-prone process. Second, if replicas run into buggy 
-schedules that trigger concurrency attacks, our infrastructure should 
-automatically recover from the attacks and switch to secure schedules.
+time-consuming and error-prone process.
 
-Third, to encourage adoption, this infrastructure should run almost as fast as 
-the native executions. Fourth, in addition to regular synchronizations (\eg, 
-\mutexlock) among threads, our infrastructure should also handle ``ad-hoc 
-synchronizations" (\eg, to enforce execution order, one thread does busy wait to 
-wait a global variable to be true, and the other thread sets the variable to be 
-true).
+Second, as introduced in \S\ref{sec:background}, even given the same 
+input, multithreaded programs can easily run into too many different thread 
+interleavings (or \emph{schedules}) at runtime depending on inter-thread 
+communications (\eg, \mutexlock). Therefore, even if concurrency attacks do not 
+manifest, different schedules can still easily cause replicas to diverge and no 
+longer reach consensus. 
+
+
+Third, if replicas run into buggy schedules that trigger concurrency attacks, 
+our infrastructure should automatically recover the replicas from the 
+attacks and consistently make all replicas switch to another schedules.
+
+Fourth, in addition to regular synchronizations (\eg, \mutexlock) among 
+threads, our infrastructure should also handle ``ad-hoc synchronizations" (\eg, 
+to enforce execution order, one thread does busy wait to wait a global variable 
+to be true, and the other thread sets the variable to be true).
 
 \vspace{-.15in}\subsubsection{Architecture of \xxx's Runtime Defense 
 Infrastructure} 
@@ -354,18 +360,31 @@ Infrastructure}
 \vspace{-.05in}
 \end{figure}
 
-To address these challenges, I propose a \smr-based 
-infrastructure. This infrastructure addresses the first challenge by letting a 
-general multi-threaded program run in this infrastructure \emph{transparently} 
-without being modified. A key benefit of this transparency is that now the 
-program developers focus on implementing their program's intended 
-functionality, not how to defense concurrency attacks. To achieve transparency, 
-within each \smr replica, this infrastructure interposes on the socket and the 
-thread synchronization interfaces to keep replicas in sync. Specifically, to 
-address the first challenge, it considers each incoming socket call (e.g., 
-accept() a client's connection or recv() a client's data) an input request, and 
-runs a \paxos consensus protocol to ensure that a quorum of the replicas sees 
-the same exact sequence of the incoming socket calls.
+To address these challenges, Figure~\ref{fig:defense} shows our proposed 
+\smr-based infrastructure. This infrastructure addresses the first challenge by 
+letting a general multi-threaded program run in this infrastructure 
+\emph{transparently} without being modified. A key benefit of this transparency 
+is that now the program developers focus on implementing their program's 
+intended functionality, not how to defense concurrency attacks.
+
+Specifically, to achieve transparency, within each \smr replica, this 
+infrastructure interposes on the socket and the thread synchronization 
+interfaces to keep replicas in sync. Specifically, to address the first 
+challenge, it considers each incoming socket call (e.g., accept() a client's 
+connection or recv() a client's data) an input request, and runs a \paxos 
+consensus protocol to ensure that a quorum of the replicas sees the same exact 
+sequence of the incoming socket calls.
+
+To address the second challenge, \xxx schedules synchronizations using 
+\emph{deterministic 
+multithreading (\dmt)}~\cite{dpj:oopsla09,dmp:asplos09,kendo:asplos09,
+coredet:asplos10, 
+dos:osdi10,ddos:asplos13,ics:oopsla13}.  This technique typically maintains a 
+\emph{logical time}, that advances deterministically on each thread's 
+synchronization. By serializing thread synchronizations, \dmt practically makes 
+an entire multithreaded execution deterministic. The overhead of \dmt is 
+typically moderate because most code is not synchronization and can still run 
+in parallel.
 
 
 % \begin{figure}[ht]
@@ -378,53 +397,63 @@ the same exact sequence of the incoming socket calls.
 % \end{figure}
 
 % Mention the self healing idea.
-To address the second challenge, we propose a self-healing idea 
-(Figure~\ref{fig:healing}), which leverage existing transparent program 
-checkpoint and restore techniques. On program starts, one backup replica first 
-checkpoints the program, and then the program runs as is. Once minor replicas 
-hit concurrency attacks, the other replicas can still agree on new inputs and 
-process requests. If all replicas fail due to hitting the same vulnerable 
-schedule, we simply extracts a previous checkpoint, shuffle the schedules, and 
-then let the program continues to execute. To this end, this idea checkpoint 
-and recovery must work with general programs with its file system. To this end, 
-it leverages CRIU to checkpoint and restore process states, and LXC for file 
-system states.
+To address the third challenge, we propose to leverage recent transparent 
+program checkpoint techniques to checkpoint/restore a program's execution 
+state, including the process state (\eg, memory of the program)~\cite{criu} and 
+file system state (\eg, files used by the program)~\cite{lxc}. This checkpoint 
+operation can be done on a backup machine of the infrastructure, thus it does 
+not affect the other replicas to efficiently reach consensus on inputs and 
+response. To handle all replicas running into the same buggy schedules and 
+triggering concurrency attacks (buggys schedules are rare compared to correct 
+schedules~\cite{lu:concurrency-bugs}), we plan to run an observer problem on 
+a dedicated machine to periodically check the status of the replicas and their 
+programs. If all replicas fail, it restarts the replicas, retrieves the latest 
+checkpoint of the application program, and restores the program's state on all 
+replicas.
 
-As a typical security setting, we need to define which components of 
-this Infrastructure must be trusted. In this project, we require the 
-infrastructure and the checkpoints are trusted (\ie, even if the program 
-compromises, its program checkpoints and the infrastructure are not effected). 
-We consider this requirement as reasonable, because once this infrastructure is 
-built, we can leverage existing verification techniques to focus on verifying 
-this infrastructure, and on top of it, we no longer need to verify those 
-programs.
+To address the fourth challenge, we plan to leverage recent work to 
+automatically annotate ad-hoc synchronizations~\cite{syncfinder:osdi10, 
+cfix:osdi12}, and then leverage a \dmt scheduler (\eg,~\cite{dthreads:sosp11, 
+parrot:sosp13} to schedule these ad-hoc synchronizations in a deterministic 
+order.
+
+% As a typical security setting, we need to define which components of 
+% this Infrastructure must be trusted. In this project, we require the 
+% infrastructure and the checkpoints are trusted (\ie, even if the program 
+% compromises, its program checkpoints and the infrastructure are not effected). 
+% We consider this requirement as reasonable, because once this infrastructure is 
+% built, we can leverage existing verification techniques to focus on verifying 
+% this infrastructure, and on top of it, we no longer need to verify those 
+% programs.
 
 
 
 
 % P4: challenges on doing so. Including the initial work.
 
-% \vspace{-.15in}\subsubsection{Preliminary Results} 
-% \label{sec:defense-result}\vspace{-.075in}
+
+
+% To address the third and fourth challenges, 
+% this infrastructure schedules synchronizations 
+% using deterministic multithreading (DMT). This technique typically maintains a 
+% global, monotonically increasing logical clock that advances deterministically 
+% on each thread's synchronization. By serializing thread synchronizations, DMT 
+% practically makes an entire multithreaded execution deterministic. The overhead
+% of DMT is typically moderate because most code is not synchronization and can 
+% still run in parallel.
+
+\vspace{-.15in}\subsubsection{Preliminary Results} 
+\label{sec:defense-result}\vspace{-.075in}
 
 % P1: we have built a replication system. Perf and checkpoint results.
-\para{Preliminary results.} My collaborators and I have built a prototype 
-system~\cite{crane:sosp15} to address the first two challenges. \crane has 
-shown to be able to transparently and efficiently support four general 
-multithreaded programs without modifying them. We have also shown that this 
-infrastructure is robust on primary replica or backup failures. For the third 
-challenge, we plan to study more programs and see whether we can leverage 
-performance hints to optimize performance. For the fourth challenge, our 
-prototype system \crane has implemented a basic checkpoint/restore feature.
-
-\para{Open research challenges.} To address the third and fourth challenges, 
-this infrastructure schedules synchronizations 
-using deterministic multithreading (DMT). This technique typically maintains a 
-global, monotonically increasing logical clock that advances deterministically 
-on each thread's synchronization. By serializing thread synchronizations, DMT 
-practically makes an entire multithreaded execution deterministic. The overhead
-of DMT is typically moderate because most code is not synchronization and can 
-still run in parallel.
+My collaborators and I have built preliminary systems to address the first two 
+challenges. To address the first challenge, we have built a transparent \smr 
+system \crane~\cite{crane:sosp15}. \crane is able to transparently support four 
+general programs without modifications, including widely used server programs 
+\apache, \mysql, and \clamav. To address the second challenge, we have built an 
+efficient \dmt runtime \parrot~\cite{parrot:sosp13}. \parrot incurred merely 
+12.7\% overhead on a wide range of 108 popular multithreaded programs on 
+24-core machines.
 
 \vspace{-.15in}\subsection{Research Plan} \label{sec:plan}\vspace{-.075in}
 
@@ -440,7 +469,6 @@ will apply our model, detection tool, and defense infrastructure to benefit
 other research areas (\eg, byzantine fault tolerance). Overall, both the two 
 students will involve theoretical methods, implement real software systems, and 
 perform real-world study. The PI will supervise the students by providing 
-advice 
-concerning both theoretical and systems implementation levels.
+advice concerning both theoretical and systems implementation levels.
 
 
