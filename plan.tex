@@ -213,10 +213,10 @@ not satisfy any of the two conditions, we then safely discard this trace.
 \begin{figure}[ht]
 \centering
 \includegraphics[width=0.5\columnwidth]{figures/detection}
-\vspace{-.05in}
+\vspace{-.15in}
 \caption{{Workflow of the concurrency attack detection scheme.}} 
 \label{fig:detection}
-\vspace{-.05in}
+\vspace{-.1in}
 \end{figure}
 
 
@@ -295,28 +295,28 @@ in Deployment Phase}\label{sec:defense}\vspace{-.075in}
 
 % P1: motivation, why runtime detection is important. We want to mostly avoid 
 % exploits by preventing attackers from manipulating the schedules.
-Although \S\ref{sec:detect} has proposed an detection approach for developers 
-to find concurrency attacks during the software testing phase, this approach 
-does not gurantee to catch 100\% concurrency attacks, because exploring 100\% 
-program paths is still an open problem for symbolic execution. Thus, to 
+The proposed concurrency attack detection approach (\S\ref{sec:detect}) is not 
+designed to catch 100\% concurrency attacks because exploring 100\% program 
+paths in symbolic execution is still an open research problem. Therefore, to 
 practically prevent concurrency attacks taking over multi-threaded programs 
-during the software deployment phase, an efficient, this project proposes a 
-transparent runtime infrastructure.
+during the software deployment phase, this project proposes a runtime defense 
+infrastructure.
 
 % P2: reason 2: when races occur even if Parrot is enforced, we want to have 
 % fault-tolerance.
-Since a security defense infrastructure often requires tolerating program 
-filures, this project proposes to leverage state machine replication (or \smr), 
-a powerful fault-tolerance concept for today's distributed system and clouds. 
-\smr models a program as a deterministic state machine, where the states are 
+Since a security defense infrastructure requires tolerating program filures, 
+this project plans to leverage \emph{state machine replication (or \smr)}, a 
+powerful fault-tolerance concept in distributed systems. \smr 
+models a program as a deterministic state machine, where the states are 
 important program data and the transitions are deterministic executions of 
-program code under input requests. SMR runs replicas of the program and invokes 
-a distributed consensus protocol (typically \paxos) to ensure the same sequence 
-of input requests for replicas, as long as a majority of the replicas agrees on 
-the input request sequence. Under the deterministic execution assumption, this 
-quorum of replicas must reach the same exact state despite various exceptions 
-such as program failures or network partitions. SMR is proven safe in theory and 
-provides high availability in practice.
+program code under input requests. SMR runs replicas of the program on 
+different physical computers and invokes a distributed consensus protocol 
+(typically \paxos) to ensure the same input sequence for replicas, 
+as long as a majority of the replicas agrees on the sequence. 
+Under the deterministic execution assumption, this quorum of replicas must reach 
+the same exact state despite various exceptions such as program failures or 
+network partitions. SMR is proven safe in theory and provides high availability 
+in practice.
 
 
 
@@ -338,18 +338,33 @@ manifest, different schedules can still easily cause replicas to diverge and no
 longer reach consensus. 
 
 
-Third, if replicas run into buggy schedules that trigger concurrency attacks, 
-our infrastructure should automatically recover the replicas from the 
-attacks and consistently make all replicas switch to another schedules.
+Third, if all replicas run into the same buggy schedules and trigger 
+concurrency attacks, our infrastructure should automatically recover the 
+replicas and make them switch to another schedules.
 
-Fourth, in addition to regular synchronizations (\eg, \mutexlock) among 
-threads, our infrastructure should also handle ``ad-hoc synchronizations" (\eg, 
-to enforce execution order, one thread does busy wait to wait a global variable 
-to be true, and the other thread sets the variable to be true).
+Fourth, in addition to regular synchronizations (\eg, \mutexlock), our 
+infrastructure should also handle ``ad-hoc synchronizations" (\eg, to enforce 
+execution order, one thread does busy wait to wait a global variable to be true, 
+and the other thread sets the variable to be true).
 
 \vspace{-.15in}\subsubsection{Architecture of \xxx's Runtime Defense 
 Infrastructure} 
 \label{sec:defense-arch}\vspace{-.075in}
+
+To address these challenges, Figure~\ref{fig:defense} shows our proposed 
+\smr-based infrastructure. This infrastructure addresses the first challenge by 
+enabling a general multi-threaded program run in it \emph{transparently} 
+without modifications. A major benefit of this transparency is that now the 
+program developers can focus on implementing their program's functionality, not 
+how to defense concurrency attacks.
+
+Specifically, to achieve transparency, within each \smr replica, this 
+infrastructure interposes on the socket and the thread synchronization 
+interfaces to keep replicas in sync. Specifically, to address the first 
+challenge, it considers each incoming socket call (e.g., accept() a client's 
+connection or recv() a client's data) an input request, and runs a \paxos 
+consensus protocol to ensure that a majority of the replicas sees the same 
+exact sequence of the incoming socket calls.
 
 \begin{figure}[ht]
 \centering
@@ -357,26 +372,15 @@ Infrastructure}
 \vspace{-.05in}
 \caption{{A runtime infrastructure to defense concurrency attacks.}} 
 \label{fig:defense}
-\vspace{-.05in}
+\vspace{-.2in}
 \end{figure}
 
-To address these challenges, Figure~\ref{fig:defense} shows our proposed 
-\smr-based infrastructure. This infrastructure addresses the first challenge by 
-letting a general multi-threaded program run in this infrastructure 
-\emph{transparently} without being modified. A key benefit of this transparency 
-is that now the program developers focus on implementing their program's 
-intended functionality, not how to defense concurrency attacks.
 
-Specifically, to achieve transparency, within each \smr replica, this 
-infrastructure interposes on the socket and the thread synchronization 
-interfaces to keep replicas in sync. Specifically, to address the first 
-challenge, it considers each incoming socket call (e.g., accept() a client's 
-connection or recv() a client's data) an input request, and runs a \paxos 
-consensus protocol to ensure that a quorum of the replicas sees the same exact 
-sequence of the incoming socket calls.
 
-To address the second challenge, \xxx schedules synchronizations using 
-\emph{deterministic 
+
+
+To address the second challenge, this infrastructure schedules synchronizations 
+using \emph{deterministic 
 multithreading (\dmt)}~\cite{dpj:oopsla09,dmp:asplos09,kendo:asplos09,
 coredet:asplos10, 
 dos:osdi10,ddos:asplos13,ics:oopsla13}.  This technique typically maintains a 
@@ -397,19 +401,20 @@ in parallel.
 % \end{figure}
 
 % Mention the self healing idea.
-To address the third challenge, we propose to leverage recent transparent 
+To address the third challenge, we plan to leverage recent transparent 
 program checkpoint techniques to checkpoint/restore a program's execution 
-state, including the process state (\eg, memory of the program)~\cite{criu} and 
-file system state (\eg, files used by the program)~\cite{lxc}. This checkpoint 
-operation can be done on a backup machine of the infrastructure, thus it does 
-not affect the other replicas to efficiently reach consensus on inputs and 
-response. To handle all replicas running into the same buggy schedules and 
-triggering concurrency attacks (buggys schedules are rare compared to correct 
-schedules~\cite{lu:concurrency-bugs}), we plan to run an observer problem on 
-a dedicated machine to periodically check the status of the replicas and their 
-programs. If all replicas fail, it restarts the replicas, retrieves the latest 
-checkpoint of the application program, and restores the program's state on all 
-replicas.
+state, including process state (\eg, memory of the program)~\cite{criu} and 
+file system state (\eg, files used by the program)~\cite{lxc}. Each checkpoint 
+operation will be done on a backup replica of the infrastructure so that it 
+will not affect the other replicas to efficiently reach consensus on inputs 
+and send responses. To handle all replicas running into the same buggy 
+schedules (buggys schedules are extremely rare compared to bug-free 
+schedules~\cite{lu:concurrency-bugs}), we plan to build an observer program 
+that runs on a dedicated machine to periodically check the status of the 
+replicas. If all replicas fail, the observer restarts the replicas, 
+retrieves the latest checkpoint of the application program, and restores the 
+program's state on all replicas. If only minor replicas fail, the nature of 
+\smr makes the other replicas run normally.
 
 To address the fourth challenge, we plan to leverage recent work to 
 automatically annotate ad-hoc synchronizations~\cite{syncfinder:osdi10, 
@@ -446,13 +451,12 @@ order.
 \label{sec:defense-result}\vspace{-.075in}
 
 % P1: we have built a replication system. Perf and checkpoint results.
-My collaborators and I have built preliminary systems to address the first two 
-challenges. To address the first challenge, we have built a transparent \smr 
-system \crane~\cite{crane:sosp15}. \crane is able to transparently support four 
-general programs without modifications, including widely used server programs 
-\apache, \mysql, and \clamav. To address the second challenge, we have built an 
-efficient \dmt runtime \parrot~\cite{parrot:sosp13}. \parrot incurred merely 
-12.7\% overhead on a wide range of 108 popular multithreaded programs on 
+We have built preliminary systems to address the first two challenges. To 
+address the first challenge, we have built a transparent \smr system 
+\crane~\cite{crane:sosp15}. \crane is able to transparently support widely used 
+general programs without modifications. To address the second challenge, we have 
+built an efficient \dmt runtime \parrot~\cite{parrot:sosp13}. \parrot incurred 
+merely 12.7\% overhead on a wide range of 108 popular multithreaded programs on 
 24-core machines.
 
 \vspace{-.15in}\subsection{Research Plan} \label{sec:plan}\vspace{-.075in}
@@ -468,7 +472,8 @@ year, S1 will build the runtime defense infrastructure (Objective 3), and S2
 will apply our model, detection tool, and defense infrastructure to benefit 
 other research areas (\eg, byzantine fault tolerance). Overall, both the two 
 students will involve theoretical methods, implement real software systems, and 
-perform real-world study. The PI will supervise the students by providing 
-advice concerning both theoretical and systems implementation levels.
+perform real-world study.
+% The PI will supervise the students by providing 
+% advice concerning both theoretical and systems implementation levels.
 
 
