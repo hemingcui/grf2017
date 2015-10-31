@@ -213,21 +213,25 @@ concurrency attack detection approach. The workflow of the approach is shown in
 Figure~\ref{fig:detection}. This approach takes program source code as input 
 and uses the LLVM compiler framework to compile it to LLVM IR instructions. The 
 symbolic execution engine marks a program input and bytes received from network 
-as symbolic and explore program paths. For each program path, we run a race 
-detector on the execution trace, and if a concurrency bug is detected, we feed 
-this trace to path slicer to see whether it may lead to a dangerous operation 
-or have any branch statements that can lead to dangerous operation. If the 
-trace does not contain any bug, we discard this trace.
+as symbolic and explore program paths. For each execution, we collect all the 
+the executed instructions as a trace, and run a race detector on the trace: if 
+a concurrency bug is detected, we feed this trace to path slicer to see 
+whether: (1) the trace may have contained a vulnerable instruction, or (2) 
+this trace have any control statements that can lead to vulnerable instruction 
+in the not executed branches. If the trace does not satisfy any of the two 
+conditions, we then safely discard this trace.
 
-The path slicer takes a trace which contains a concurrency bug. The slicer 
-first sees whether this trace has a dangerous operation, if so, it reports a 
-potential concurrency bug with input preconditions. If not, the path slicer 
-starts from the last execution of the trace, goes backward, and see whether a 
-branch statement in this trace may lead to a dangerous operation. If so, it 
-marks this branch as relevant. After processing this trace, the path slicer 
-feed these branches to the symbolic execution engine, so that the engine can 
-focus on exploring paths on these branches to try to exercise dangerous 
-operations.
+The path slicer is the key weapon to track the propogation from a concurrency 
+bug to potential vulnerable instruction. The slicer takes an execution trace as 
+input, and it first sees whether this trace already contains a vulnerable 
+instruction, if so, it reports this trace as a potential concurrency attack with 
+input preconditions for developers to reproduce this execution. If this trace 
+does not contain any type of vulnerable instruction (\S\ref{sec:model}), the 
+path slicer starts from the last execution of the trace, goes backward, and 
+collect control statements that may lead to a vulnerable instruction. After 
+processing the whole trace, the path slicer lets the symbolic execution engine 
+explore these control statements with high priority and see whether the 
+following executions may exercise potential vulnerable instructions.
 
 % P1: why need a detection scheme. First, capture as many as exploits in 
 % testing phase. And call for re-install if there is any potential exploit. 
@@ -248,20 +252,24 @@ operations.
 % \subsubsection{Implementing \xxx's Detection Scheme}\label{sec:detect-impl}
 % TBD
 
-\vspace{-.15in}\subsubsection{Preliminary Results}
-\label{sec:detect-result}\vspace{-.075in}
+% \vspace{-.15in}\subsubsection{Preliminary Results}
+% \label{sec:detect-result}\vspace{-.075in}
 
 % P1: we have implemented part of the dangerous operation. pointer NULL 
 % derefence. Report the results. FP:FN. 
-My collaborators and I have built one basic building block of this detection 
-tool, the path slicer called Woodpecker~\cite{woodpecker:asplos13} in ASPLOS 
-2013. Woodpecker detects 113 programming rule violations in 136 popular systems 
-programs, including 10 serious data loss errors with 2 most serious ones 
-already confirmed by the corresponding developers. My collaborators and I have 
-built a data race detector in our Tern~\cite{cui:tern:osdi10} in OSDI 2010 and 
-Peregrine~\cite{peregrine:sosp11} paper in SOSP 2011. We believe these 
-preliminary results show the potential and practical impact of our proposed 
-detection tool.
+\para{Preliminary Results.} My collaborators and I have built two basic 
+building blocks of this detection approach. First, we have presented a 
+preliminary path slicer called Woodpecker~\cite{woodpecker:asplos13} in 
+in ASPLOS 2013 for detecting single-threaded security violations on system 
+calls (\eg, \texttt{setuid()}). Woodpecker detects 113 programming rule 
+violations in 136 popular systems programs, including 10 serious data loss 
+errors with seven most serious ones already confirmed by the corresponding 
+developers. Second, my collaborators and I have also built a data race detector 
+in our and Peregrine~\cite{peregrine:sosp11} paper in SOSP 2011. This race 
+detector has detected several new data races in heavily-studied 
+programs~\cite{wu:pldi12} in PLDI 2012. We believe that these preliminary 
+results show the feasibility of our proposed concurrency attack detection 
+approach.
 
 % P2: mention our initial work in OSDI '10 and SOSP '11 on precise data race 
 % detection.
@@ -272,13 +280,14 @@ detection tool.
 % how 
 % to prioritize different operations ()? % Third, how to select malicious 
 % inputs and thread schedules that are more likely to triger concurrency bugs?
-We foresee a few open challenges on the continuation of developing this tool. 
-First, how to make path slicing handle non-function calls (\eg, NULL pointer 
-dereference). Second, how to prioritize different operations (\eg, some 
-\v{strcpy} functions do not involve with inputs and should be secure)? Third, 
-how to direct our symbolic execution engine to select malicious inputs and 
-thread schedules that are more likely to trigger concurrency bugs? I believe 
-these challenges will continue to lead to significant work in good conferences.
+\para{Open Research Challenges.} We foresee a few open challenges on the 
+continuation of developing this tool. First, how to make path slicing handle 
+ad-hoc vulnerable instructions (\eg, NULL pointer dereference). Second, how to 
+prioritize different vulnerable instructions (\eg, some \v{strcpy} functions do 
+not involve with inputs and thus are secure)? Third, how to direct our symbolic 
+execution engine to select malicious inputs and thread schedules that are more 
+likely to trigger concurrency bugs? I believe these challenges will continue to 
+lead to significant research work.
 
 \vspace{-.15in}\subsection{Objective 3: Defensing Concurrency Attacks in 
 Deployment Phase} 
