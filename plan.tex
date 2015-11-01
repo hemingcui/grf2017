@@ -332,7 +332,7 @@ practice~\cite{chubby:osdi,zookeeper}.
 % P3: reason 3: we want survive. checkpoint and re-execute, and diversify the 
 % schedules before re-execute. Sell it like a self-healing runtime system.
 Although \smr's fault-tolerant benefit makes it particularly attractive
-on building a general runtime infrastructure for defending tolerating 
+on building a general runtime infrastructure for defending against 
 concurrency attacks, we foresee four research challenges to realize this 
 infrastructure. First, to leverage existing SMR systems such as 
 ZooKeeper~\cite{zookeeper}, program developers have to shoehorn their programs into the 
@@ -365,7 +365,7 @@ addresses the first challenge by
 enabling a general multi-threaded program run in it \emph{transparently} 
 without modifications. A major benefit of transparency is that program 
 developers can focus on implementing their program's functionality, not how to 
-defend concurrency attacks.
+defend against concurrency attacks.
 
 To achieve transparency, within each \smr replica, this 
 infrastructure interposes on the socket and the thread synchronization 
