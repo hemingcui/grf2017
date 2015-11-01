@@ -355,9 +355,9 @@ Infrastructure}
 To address these challenges, Figure~\ref{fig:defense} shows our proposed 
 \smr-based infrastructure. This infrastructure addresses the first challenge by 
 enabling a general multi-threaded program run in it \emph{transparently} 
-without modifications. A major benefit of this transparency is that now the 
-program developers can focus on implementing their program's functionality, not 
-how to defense concurrency attacks.
+without modifications. A major benefit of transparency is that program 
+developers can focus on implementing their program's functionality, not how to 
+defense concurrency attacks.
 
 Specifically, to achieve transparency, within each \smr replica, this 
 infrastructure interposes on the socket and the thread synchronization 
@@ -403,20 +403,19 @@ in parallel.
 % \end{figure}
 
 % Mention the self healing idea.
-To address the third challenge, we plan to leverage recent transparent 
-program checkpoint techniques to checkpoint/restore a program's execution 
-state, including process state (\eg, memory of the program)~\cite{criu} and 
-file system state (\eg, files used by the program)~\cite{lxc}. Each checkpoint 
-operation will be done on a backup replica of the infrastructure so that it 
-will not affect the other replicas to efficiently reach consensus on inputs 
-and send responses. To handle all replicas running into the same buggy 
-schedules (buggys schedules are extremely rare compared to bug-free 
-schedules~\cite{lu:concurrency-bugs}), we plan to build an observer program 
-that runs on a dedicated machine to periodically check the status of the 
-replicas. If all replicas fail, the observer restarts the replicas, 
-retrieves the latest checkpoint of the application program, and restores the 
-program's state on all replicas. If only minor replicas fail, the nature of 
-\smr makes the other replicas run normally.
+To address the third challenge, we plan to leverage recent checkpoint/restore 
+techniques on program execution state, including process state (\eg, 
+memory)~\cite{criu} and file system state~\cite{lxc}. Each 
+checkpoint operation will be done on a backup replica (see 
+Figure~\ref{fig:defense}) so that it will not affect the other replicas to 
+efficiently reach consensus on inputs and send responses. To handle all replicas 
+running into the same buggy schedules (buggys schedules are extremely rare 
+compared to correct schedules~\cite{lu:concurrency-bugs}), we plan to develop an 
+"observer" program that runs on a dedicated machine to periodically check the 
+status of replicas. If a majority of replicas fails, the observer restarts all 
+replicas, retrieves the latest checkpoint of the application program, and 
+restores the program's state on replicas. If only minor replicas fail, 
+\smr's fault-tolerance strength makes the other replicas run.
 
 To address the fourth challenge, we plan to leverage recent work to 
 automatically annotate ad-hoc synchronizations~\cite{syncfinder:osdi10, 
