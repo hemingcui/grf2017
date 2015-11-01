@@ -70,42 +70,45 @@ and made \apache write a request record to mess up another user's HTTP page.
 \vspace{-.15in}\subsubsection{Concurrency Attack Model} 
 \label{sec:attack-phase}\vspace{-.075in}
 
-A key question on modeling concurrency attack is: how does the corrupted memory 
-in a concurrency bug propagate to vulnerable instructions in source code? Since 
+Two key questions on modeling concurrency attacks are: (1) what are the common 
+elments in concurrency attacks, and (2) how does the corrupted memory in a 
+concurrency bug propagate to vulnerable instructions in source code? Since 
 existing reliability tools (\S\ref{sec:others-work}) are already effective on 
-detecting concurrency bugs, if our model can address this question, we can 
-effectively identify which concurrency bugs have the potential to lead to 
-attacks, and we can safely ignore those don't.
+detecting concurrency bugs, if our model can address these two questions, we 
+can build software tools to effectively identify which concurrency bugs have 
+the potential to lead to attacks, and we can safely ignore those don't.
 
 % P3: pattern.
+% \para{Three common elements.}
 Although the two aforementioned examples appear to be diverse, we have 
 identified three common elements in these concurrency attacks. First, it is 
-necessary to have corrupted global memory (\eg, \texttt{dying} in \libsafe, and 
-the \texttt{buf\_len} in \apache) caused by concurrency bugs. Second, it is 
-necessary to have a vulnerable instruction (\eg, \texttt{strcpy()} or 
+necessary to have corrupted global memory (\eg, the \texttt{dying} variable in 
+\libsafe, and the \texttt{buf\_len} buffer in \apache) caused by concurrency 
+bugs. Second, it is necessary to have a vulnerable instruction (\eg, 
+\texttt{strcpy()} or 
 \texttt{setuid()}) to perform an attack. Third, the corrupted values in global 
 memory must cause abnormal behavior on the vulnerable instructions. For 
-example, the abnormal behavior in \libsafe is we must leverage the corrupted 
+example, the abnormal behavior in \libsafe is to leverage the corrupted 
 memory to bypass the stack overflow check, an abnormal control-flow of the 
-execution. For \apache, we must directly corrupt (\ie, overflow) the buffer 
+execution. For \apache, we directly corrupt (\ie, overflow) the buffer 
 log, an abnormal data-flow of the execution.
 
 % In sum, three common elements compose a concurrency attack model: corrupted 
 % memory, security-sensitive operation, and impact (indirect or direct) from 
 % the % memory to the operation.
 % 
-In addition to these two examples, the \nattacks concurrency attacks in recent 
-study~\cite{con:hotpar12} and the \noldattacks ones our own preliminary study 
-\S\ref{sec:examples}) also have the three common elements. For the first 
-element, these attacks have four types of concurrency bugs, including data 
-races, atomicity violations, deadlocks, and order violations. For the second 
-element, we have collected five types of vulnerable instructions, including 
-memory operations (\eg, \texttt{strcpy()}), pointer deferences (\eg, when the 
-pointer is NULL), and privilege operations (\eg, \texttt{setuid()}), file 
-operations (\eg, \texttt{access()}), and miscellaneous operations (\eg, 
-\texttt{eval()} in shell scripts). For the third element, \S\ref{sec:detect} 
-will propose our systematic detection approach to detect abnormal control-flow 
-and data-flow of executions.
+In addition to these two examples, the \noldattacks concurrency 
+attacks in recent study~\cite{con:hotpar12} and the \nattacks ones our own 
+preliminary study (\S\ref{sec:examples}) also have the three common elements. 
+For the first element, these attacks have four types of concurrency bugs, 
+including data races, atomicity violations, deadlocks, and order violations. 
+For the second element, we have collected five types of vulnerable 
+instructions, including memory operations (\eg, \texttt{strcpy()}), pointer 
+deferences (\eg, when the pointer is NULL), privilege operations (\eg, 
+\texttt{setuid()}), file operations (\eg, \texttt{access()}), and miscellaneous 
+operations (\eg, \texttt{eval()} in shell scripts). For the third element, 
+\S\ref{sec:detect} will propose our systematic detection approach to detect 
+abnormal control-flow and data-flow of executions.
 
 % PX: emphasis the contribution/potential value of this model.
 % In a high level, this model treats a concurrency attack as a source-sink 
@@ -155,9 +158,10 @@ Testing Phase}\label{sec:detect}\vspace{-.075in}
 Our proposed detection approach is not only useful for developers to detect 
 concurrency attacks during software testing phase, but also useful for 
 analyzing concurrency bugs and their potential attacks in old releases of 
-software programs. The reason is because even if concurrency bugs were already 
-fixed in the latest software release, if concurrency attacks have occurred and 
-hackers have broken in, simply fixing the bugs won't help.
+software programs. The reason is because even if 
+concurrency bugs were already fixed in the latest software release, if 
+concurrency attacks have occurred and hackers have broken in, simply fixing 
+the bugs can not recover from the attacks (\S\ref{sec:examples}).
 
 % For example, we studied a 
 % few concurrency bugs in old Linux and BSD releases a few years ago, and their 
@@ -182,7 +186,7 @@ data-flow and control-flow relevant for the propagation from corrupted memory
 to vulnerable instructions, and it should discard the irrelevant ones. 
 
 We plan to achieve the first goal with \emph{symbolic 
-execution}~\ref{sec:others-work}, a program analysis technique that 
+execution} (\S\ref{sec:others-work}), a program analysis technique that 
 systematically explore a program's execution paths to find bugs. Unlike normal 
 execution which runs on a concrete input, this technique marks inputs (\eg, 
 command line arguments) as ``symbolic" and tracks input preconditions 
@@ -192,7 +196,8 @@ new execution, let the two executions go down different paths, and tracks input
 preconditions on each execution. This technique has shown to find new bugs in 
 real-world systems programs~\cite{klee:osdi08}.
 
-We plan to achieve the second goal with \emph{path slicing}. Given a 
+We plan to achieve the second goal with \emph{path slicing} 
+(\S\ref{sec:others-work}). Given a 
 trace of executed instructions and an essential instruction in this trace, 
 path slicing starts from this essential instruction, goes backward the trace, 
 and computes a subset of instructions that affect the reachability and operand 
@@ -203,15 +208,16 @@ violations~\cite{woodpecker:asplos13}.
 
 By leveraging the symbolic execution and path slicing, the workflow of our 
 detection approach is shown in Figure~\ref{fig:detection}. This approach takes 
-program source code as input and uses the LLVM compiler framework to compile it 
-to LLVM IR instructions. The symbolic execution engine marks a program input 
-and bytes received from network as symbolic and explore program paths. For each 
-execution, we collect all the the executed instructions as a trace, and run a 
-race detector on the trace: if a concurrency bug is detected, we feed this 
-trace to path slicer to see whether: (1) the trace may have contained a 
-vulnerable instruction, or (2) this trace have any control statements that can 
-lead to vulnerable instruction in the not executed branches. If the trace does 
-not satisfy any of the two conditions, we then safely discard this trace.
+program source code as input. Specifically, we compile the code into 
+LLVM~\cite{llvm} instructions, a popular form of instructions for program 
+anlysis tools. The symbolic execution engine marks a program input and bytes 
+received from network as symbolic and explore program paths. For each execution, 
+we collect all the the executed instructions as a trace, and run a race detector 
+on the trace: if a concurrency bug is detected, we feed this trace to path 
+slicer to see whether: (1) the trace may have contained a vulnerable 
+instruction, or (2) this trace have any control statements that can lead to 
+vulnerable instruction in the not executed branches. If the trace does not 
+satisfy any of the two conditions, we then safely discard this trace.
 
 \begin{figure}[ht]
 \centering
