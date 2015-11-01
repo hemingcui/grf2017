@@ -35,15 +35,15 @@ Study}
 \end{figure}
 
 Figure~\ref{fig:libsafe} shows the code of a concurrency attack in 
-\libsafe, a popular stack overflow protection library. This library 
+\libsafe~\cite{libsafe}, a popular stack overflow protection library. \libsafe
 provides its own safe memory and string operations functions. For instance, the 
 \texttt{libsafe\_strcpy()} function checks whether a stack variable is passed 
 in as the function argument \texttt{dest} before it calls the actual 
 \texttt{strcpy()}. If a program receives a kill signal, Libsafe's internal 
-thread (thread 1) sets a global variable \texttt{dying}, then security checks 
+thread (Thread 1) sets a global variable \texttt{dying}, then security checks 
 are disabled in \texttt{libsafe\_strcpy()}. Unfortunately, \v{dying} was not 
 protected by mutex locks. In our study, we triggered a data race on this 
-variable, bypassed the security check, and overflowed thread 2's stack by 
+variable, bypassed the security check, and overflowed Thread 2's stack by 
 passing malicious code to \texttt{dest}. Ironically, this \libsafe library is 
 no longer ``safe" when facing concurrency attacks.
 
@@ -56,7 +56,8 @@ no longer ``safe" when facing concurrency attacks.
 \end{figure}
 
 Figure~\ref{fig:apache} shows the code of a concurrency attack in 
-the widely used \apache web server for maintaining users' HTTP pages. \apache 
+the widely used \apache~\cite{apache} web server for maintaining users' HTTP 
+pages. \apache 
 spawns a number of threads, each serves a HTTP request. Each thread also 
 records the request in a global log buffer in heap and flushes this buffer to a 
 log file when the buffer is full. However, developers missed a mutex lock to 
