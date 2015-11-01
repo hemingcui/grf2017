@@ -98,11 +98,13 @@ study~\cite{con:hotpar12} and the \noldattacks ones our own preliminary study
 \S\ref{sec:examples}) also have the three common elements. For the first 
 element, these attacks have four types of concurrency bugs, including data 
 races, atomicity violations, deadlocks, and order violations. For the second 
-element, we have collected three types of vulnerable instructions, including 
+element, we have collected five types of vulnerable instructions, including 
 memory operations (\eg, \texttt{strcpy()}), pointer deferences (\eg, when the 
-pointer is NULL), and systems calls (\eg, \texttt{setuid()}). For the third 
-element, \S\ref{sec:detect} will propose our systematic detection 
-approach to detect abnormal control-flow and data-flow of executions.
+pointer is NULL), and privilege operations (\eg, \texttt{setuid()}), file 
+operations (\eg, \texttt{access()}), and miscellaneous operations (\eg, 
+\texttt{eval()} in shell scripts). For the third element, \S\ref{sec:detect} 
+will propose our systematic detection approach to detect abnormal control-flow 
+and data-flow of executions.
 
 % PX: emphasis the contribution/potential value of this model.
 % In a high level, this model treats a concurrency attack as a source-sink 
@@ -181,8 +183,8 @@ to vulnerable instructions, and it should discard the irrelevant ones.
 We plan to achieve the first goal with \emph{symbolic 
 execution}~\ref{sec:others-work}, a program analysis technique that 
 systematically explore a program's execution paths to find bugs. Unlike normal 
-execution which runs on a concrete inputs, this technique marks inputs (\eg, 
-command line arguments) as ``symbolic" and tracks down the input preconditions 
+execution which runs on a concrete input, this technique marks inputs (\eg, 
+command line arguments) as ``symbolic" and tracks input preconditions 
 on control statements (\eg, \texttt{if} and \texttt{while}) during the 
 execution. If a control statement depends on inputs, symbolic execution forks a 
 new execution, let the two executions go down different paths, and tracks input 
@@ -190,7 +192,7 @@ preconditions on each execution. This technique has shown to find new bugs in
 real-world systems programs~\cite{klee:osdi08}.
 
 We plan to achieve the second goal with \emph{path slicing}. Given a 
-trace of executed instructions and one essential instruction in this trace, 
+trace of executed instructions and an essential instruction in this trace, 
 path slicing starts from this essential instruction, goes backward the trace, 
 and computes a subset of instructions that affect the reachability and operand 
 values of this instruction. This path slicing technique has shown to compute 
@@ -471,9 +473,10 @@ the model represents real-world concurrency attacks, and S2 will implement
 the detection approach as a software tool (part of Objective 2). In the third 
 year, S1 will build the runtime defense infrastructure (Objective 3), and S2 
 will apply our model, detection tool, and defense infrastructure to benefit 
-other research areas (\eg, byzantine fault tolerance). Both students will 
-involve theoretical methods, implement real software systems, and 
-perform real-world study.
+related research areas (\eg, byzantine fault tolerance).
+% Both students will 
+% involve theoretical methods, implement real software systems, and 
+% perform real-world study.
 % The PI will supervise the students by providing 
 % advice concerning both theoretical and systems implementation levels.
 
