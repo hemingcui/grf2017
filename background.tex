@@ -25,7 +25,7 @@ behaviors such as crashes, hangs, and wrong outputs.
 % Two examples.
 Worse, a recent study~\cite{con:hotpar12} on 46 real-world concurrency bugs 
 from CVE~\cite{cve-races} and open source software's bug databases has shown 
-that attackers can leverage concurrency bugs to construct \emph{concurrency 
+that hackers can leverage concurrency bugs to construct \emph{concurrency 
 attacks}, including corruption of critical memory, malicious 
 code injection~\cite{libsafe:bug}, and privilege escalation. These attacks 
 affect a wide range of multithreaded programs, ranging from applications such as 
@@ -38,7 +38,8 @@ for single-threaded programs. For example, taint-tracking~\cite{taintdroid:osdi1
 valgrind:pldi}, a runtime technique that tracks sensitive input data by 
 associating security tags as metadata for each data byte, is weakened when running with 
 multithreading programs because a race on data can corrupt the tags. \S\ref{sec:others-work} 
-will discuss how concurrency attacks weaken various defense techniques.
+will discuss how concurrency attacks weaken various defense techniques in 
+details.
 
 % P3: A key reason: a program can run into too many thread interleavings at 
 % runtime.
@@ -49,8 +50,8 @@ difficult to get right is that these programs may exercise too many
 possible thread interleavings (or \emph{schedules}) at runtime, depending on 
 the permutation orders of inter-thread communications (\eg, mutex 
 locks). It is extremely challenging to understand, test, analyze, or verify 
-this huge amount of schedules and make sure they are free of concurrency bugs 
-and exploits.
+this huge amount of schedules and eliminate concurrency bugs or attacks in 
+these schedules.
 % Therefore, to tackle concurrency attacks, our propose models, 
 % detection tools, and defense infrastructures take thread schedules into account 
 % significantly.
@@ -66,18 +67,18 @@ programs (Apache, MySQL, Tomcat, and PgSQL) by causing segmentation faults,
 three bugs caused heap overflows in applications programs (Apache and 
 htmlCleaner), five bugs caused privilege escalations in the FreeBSD or Linux 
 kernels, and one bug bypassed security checks in a security library \libsafe 
-and led to stack overflows. \S\ref{sec:model} will give two concrete 
+and led to stack overflows. \S\ref{sec:model} will give two concrete bug
 examples.
 
-There are two interesting discoveries in our study. First, unlike 
+We have two new discoveries in this study. First, unlike 
 state-of-the-art understanding that triggering a concurrency bug require lots of 
 repeated executions, some concurrency bugs can be triggered and exploited with 
-high probability. For instance, in a MySQL DoS attack, we chose nested 
-\texttt{select} statements to successfully construct a concurrency bug with 
-escalated privileges of MySQL users. Second, even many of the concurrency bugs 
-we studied were old and many of them were fixed by software upgrading, it 
-doesn't help to avoid concurrency attacks because hackers may have already 
-broken in. Therefore, studying existing know concurrency are still crucial.
+high probability. For instance, for a MySQL concurrency bug~\cite{XXX}, we 
+chose nested \texttt{select} statements to trigger this bug and corrupted 
+another MySQL user's privilege table by only 18 runs in average. Second, 
+even many of the concurrency bugs we studied were fixed by upgrading software, 
+it doesn't help to fix the concurrency attacks because hackers may have already 
+broken in. Therefore, studying existing know concurrency bugs are still crucial.
 
 
 
