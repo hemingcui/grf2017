@@ -35,7 +35,7 @@ Windows, MacOS X, Linux, iPhone OS.
 Unfortunately, most existing defense techniques are weakened or completely 
 bypassed by concurrency attacks because these techniques are mainly designed 
 for single-threaded programs. For example, taint-tracking~\cite{taintdroid:osdi10, lift:micro06, myers:information, 
-valgrind:pldi}, a runtime technique that tracks sensitivie input data by 
+valgrind:pldi}, a runtime technique that tracks sensitive input data by 
 associating security tags as metadata for each data byte, is weakened when running with 
 multithreading programs because a race on data can corrupt the tags. \S\ref{sec:others-work} 
 will discuss how concurrency attacks weaken various defense techniques.
@@ -61,12 +61,12 @@ and exploits.
 To guide the development of this \xxx project, we have studied another 23 
 real-world concurrency bugs and their consequence on concurrency attacks. We 
 have written scripts and constructed inputs to reproduce all these 23 
-concurrency bugs: 14 bugs caused Denial of Service (DoS) atttacks in application 
+concurrency bugs: 14 bugs caused Denial of Service (DoS) attacks in application 
 programs (Apache, MySQL, Tomcat, and PgSQL) by causing segmentation faults, 
 three bugs caused heap overflows in applications programs (Apache and 
 htmlCleaner), five bugs caused privilege escalations in the FreeBSD or Linux 
-kernels, and one bug bypassed security checks in a security library Libsafe and 
-led to stack overflows. \S\ref{sec:model} will give two concrete 
+kernels, and one bug bypassed security checks in a security library \libsafe 
+and led to stack overflows. \S\ref{sec:model} will give two concrete 
 examples.
 
 There are two interesting discoveries in our study. First, unlike 
@@ -143,7 +143,7 @@ huge amount of thread interleavings, static analysis usually reports too many
 false positives and bury the real ones.
 
 \noindent {\bf Symbolic Execution.} Symbolic execution is an advanced program 
-analysis technique that can systematicaly explore a program's execution paths 
+analysis technique that can systematically explore a program's execution paths 
 to find bugs.  Researchers have built
 scalable and effective symbolic execution systems to detect
 errors~\cite{dart:pldi,cute:fse,godefroid:grammar-fuzzing,
@@ -168,7 +168,7 @@ execution to construct an automated concurrency attack detection approach.
 in distributed systems~\cite{lamportclock,smr:tutorial}. SMR runs the same program on a set of 
 physical machines (replicas), and it uses the 
 \paxos~\cite{paxos,paxos:simple,paxos:complex} distributed consensus protocol 
-to ensure consistent inputs for replicas as long as a majority of replcas is 
+to ensure consistent inputs for replicas as long as a majority of replicas is 
 working correctly (\ie, even if minor replicas fail, SMR still guarantees 
 availability of a program). \textbf{Objective 3} will leverage SMR to build a 
 defense infrastructure.
