@@ -290,13 +290,12 @@ results show the feasibility of our proposed detection approach.
 % inputs and thread schedules that are more likely to triger concurrency bugs?
 \para{Open research challenges.} To guide the development of our detection 
 approach, we foresee three open research challenges as our future development 
-work. First, how to generalize our path slicing approach to incorporate general 
-vulnerable instructions, including memory access instructions (\eg, NULL pointer 
-dereference)? Second, given the same form of a vulnerable instruction, how to 
-prioritize the more vulnerable ones other than the safe ones (\eg, some 
-\v{strcpy()} functions are just memory operations and do not involve any 
-inputs)? Third, how to guide our symbolic execution engine to select malicious 
-inputs and thread interleavings that are more likely to trigger concurrency 
+work. First, how to generalize our existing path slicing approach to support all the five types of 
+vulnerable instructions we collected (\S\ref{sec:attack-phase})? Second, given the same 
+type of a vulnerable instruction, how to enhance our path slicer to prioritize the more vulnerable ones other 
+than the safe ones (\eg, some \texttt{strcpy()} functions are just 
+manipulation on memory and do not involve inputs)? Third, how to guide our symbolic execution engine 
+to explore malicious inputs and thread interleavings that are more likely to trigger concurrency 
 bugs? We are confident that addressing each of these challenges will spur new 
 significant techniques.
 
@@ -305,7 +304,7 @@ in Deployment Phase}\label{sec:defense}\vspace{-.075in}
 
 % P1: motivation, why runtime detection is important. We want to mostly avoid 
 % exploits by preventing attackers from manipulating the schedules.
-The proposed concurrency attack detection approach (\S\ref{sec:detect}) is not 
+Our detection approach proposed in \S\ref{sec:detect} is not 
 designed to catch 100\% concurrency attacks because exploring 100\% program 
 paths in symbolic execution is still an open research problem. Therefore, to 
 practically prevent concurrency attacks taking over multi-threaded programs 
@@ -314,19 +313,19 @@ infrastructure.
 
 % P2: reason 2: when races occur even if Parrot is enforced, we want to have 
 % fault-tolerance.
-Since a security defense infrastructure requires tolerating program failures, 
+Since a defense infrastructure requires tolerating failures of a program, 
 this project plans to leverage \emph{state machine replication (or \smr)}, a 
 powerful fault-tolerance concept in distributed systems. \smr 
 models a program as a deterministic state machine, where the states are 
 important program data and the transitions are deterministic executions of 
 program code under input requests. SMR runs replicas of the program on 
 different physical computers and invokes a distributed consensus protocol 
-(typically \paxos) to ensure the same input sequence for replicas, 
+(typically \paxos~\cite{paxos,paxos:simple}) to ensure the same input sequence for replicas, 
 as long as a majority of the replicas agrees on the sequence. 
-Under the deterministic execution assumption, this quorum of replicas must reach 
-the same exact state despite various exceptions such as program failures or 
-network partitions. SMR is proven safe in theory and provides high availability 
-in practice.
+Under the deterministic execution assumption, this majority of replicas must reach 
+the same exact state despite various exceptions such as program failures. 
+SMR is proven safe in theory~\cite{paxos,paxos:complex} and provides high availability in 
+practice~\cite{chubby:osdi,zookeeper}.
 
 
 
@@ -334,11 +333,11 @@ in practice.
 % schedules before re-execute. Sell it like a self-healing runtime system.
 Although \smr's fault-tolerant benefit makes it particularly attractive
 on building a general runtime infrastructure for defending tolerating 
-concurrency attacks, we foresee five research challenges to realize this 
-infrastructure. First, to leverage existing SMR systems such as ZooKeeper, 
-program developers often have to shoehorn their programs into the 
-narrowly defined state machine interfaces provided by these SMR systems, a 
-time-consuming and error-prone process.
+concurrency attacks, we foresee four research challenges to realize this 
+infrastructure. First, to leverage existing SMR systems such as 
+ZooKeeper~\cite{zookeeper}, program developers have to shoehorn their programs into the 
+narrowly defined state machine interfaces (\eg, ZooKeeper provides a file IO interface), 
+a time-consuming and error-prone process.
 
 Second, as introduced in \S\ref{sec:background}, even given the same 
 input, multithreaded programs can easily run into too many different thread 
@@ -352,26 +351,25 @@ Third, if all replicas run into the same buggy schedules and trigger
 concurrency attacks, our infrastructure should automatically recover the 
 replicas and make them switch to another schedules.
 
-Fourth, in addition to regular synchronizations (\eg, \mutexlock), our 
-infrastructure should also handle ``ad-hoc synchronizations" (\eg, to enforce 
-execution order, one thread does busy wait to wait a global variable to be true, 
-and the other thread sets the variable to be true).
+Fourth, in addition to regular synchronizations, our infrastructure should also 
+handle various common ad-hoc synchronizations (\eg, to enforce an execution order, 
+one thread does busy wait until a global variable is true, and another thread sets the 
+variable to be true).
 
 \vspace{-.15in}\subsubsection{Architecture of \xxx's Runtime Defense 
 Infrastructure} 
 \label{sec:defense-arch}\vspace{-.075in}
 
-To address these challenges, Figure~\ref{fig:defense} shows our proposed 
-\smr-based infrastructure. This infrastructure addresses the first challenge by 
+Figure~\ref{fig:defense} shows our proposed \smr-based infrastructure. This infrastructure 
+addresses the first challenge by 
 enabling a general multi-threaded program run in it \emph{transparently} 
 without modifications. A major benefit of transparency is that program 
 developers can focus on implementing their program's functionality, not how to 
-defense concurrency attacks.
+defend concurrency attacks.
 
-Specifically, to achieve transparency, within each \smr replica, this 
+To achieve transparency, within each \smr replica, this 
 infrastructure interposes on the socket and the thread synchronization 
-interfaces to keep replicas in sync. Specifically, to address the first 
-challenge, it considers each incoming socket call (e.g., \texttt{accept()} a 
+interfaces to keep replicas in sync. Specifically, it considers each incoming socket call (e.g., \texttt{accept()} a 
 client's connection or \texttt{recv()} a client's data) an input request, and 
 runs a \paxos consensus protocol to ensure that a majority of the replicas sees 
 the same exact sequence of the incoming socket calls.
@@ -381,7 +379,7 @@ the same exact sequence of the incoming socket calls.
 \vspace{-.1in}
 \includegraphics[width=0.35\columnwidth]{figures/defense}
 \vspace{-.05in}
-\caption{{A runtime infrastructure to defense concurrency attacks.}} 
+\caption{{A runtime infrastructure to defend against concurrency attacks.}} 
 \label{fig:defense}
 \vspace{-.2in}
 \end{figure}
@@ -423,13 +421,13 @@ compared to correct schedules~\cite{lu:concurrency-bugs}), we plan to develop an
 "observer" program that runs on a dedicated machine to periodically check the 
 status of replicas. If a majority of replicas fails, the observer restarts all 
 replicas, restores program state on replicas with the latest checkpoint, and 
-enforces a different \dmt policy. If only minor replicas fail, \smr's 
-fault-tolerance strength makes the other replicas run.
+enforces a different \dmt policy. If minor replicas fail, \smr's 
+fault-tolerance strength still makes the other replicas run.
 
-To address the fourth challenge, we plan to leverage recent work to 
-automatically annotate ad-hoc synchronizations~\cite{syncfinder:osdi10, 
-cfix:osdi12}, and then leverage a \dmt scheduler (\eg,~\cite{dthreads:sosp11, 
-parrot:sosp13} to schedule these ad-hoc synchronizations in a deterministic 
+To address the fourth challenge, we plan to leverage recent advances on 
+automatically annotating ad-hoc synchronizations~\cite{syncfinder:osdi10, 
+cfix:osdi12}, and then we leverage a \dmt scheduler (\eg,~\cite{dthreads:sosp11, 
+parrot:sosp13}) to schedule these ad-hoc synchronizations in a deterministic 
 order.
 
 % As a typical security setting, we need to define which components of 
@@ -461,7 +459,7 @@ order.
 \label{sec:defense-result}\vspace{-.075in}
 
 % P1: we have built a replication system. Perf and checkpoint results.
-We have built preliminary systems to address the first two challenges. To 
+We have developed preliminary systems to address the first two challenges. To 
 address the first challenge, we have built a transparent \smr system 
 \crane~\cite{crane:sosp15}. \crane is able to transparently support widely used 
 general programs without modifications. To address the second challenge, we have 
@@ -473,14 +471,14 @@ merely 12.7\% overhead on a wide range of 108 popular multithreaded programs on
 
 This \xxx project will require two PhD students S1 and S2 for a period of 
 three years. In the first year, S1 will develop and refine the concurrency 
-attack model (Objective 1), and S2 will leverage the model to design the 
-detailed workflow of the detection approach (part of Objective 2) by working 
+attack model (part of \textbf{Objective 1}), and S2 will leverage the model to 
+design the detailed workflow of the detection approach (part of \textbf{Objective 2}) by working 
 closely with S1. In the second year, S1 will do an empirical study on how well 
-the model represents real-world concurrency attacks, and S2 will implement 
-the detection approach as a software tool (part of Objective 2). In the third 
-year, S1 will build the runtime defense infrastructure (Objective 3), and S2 
+the model represents real-world concurrency attacks (part of \textbf{Objective 1}), and S2 will implement 
+the detection approach as a software tool (part of \textbf{Objective 2}). In the third 
+year, S1 will build the runtime defense infrastructure (\textbf{Objective 3}), and S2 
 will apply our model, detection tool, and defense infrastructure to benefit 
-related research areas (\eg, byzantine fault tolerance).
+related research areas (\eg, byzantine fault tolerance~\cite{pbft:osdi99}).
 % Both students will 
 % involve theoretical methods, implement real software systems, and 
 % perform real-world study.
