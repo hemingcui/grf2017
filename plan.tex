@@ -219,14 +219,83 @@ instruction, or (2) this trace have any control statements that can lead to
 vulnerable instruction in the not executed branches. If the trace does not 
 satisfy any of the two conditions, we then safely discard this trace.
 
-\begin{figure}[ht]
-\centering
-\vspace{-.1in}
-\includegraphics[width=0.8\columnwidth]{figures/detection}
-\vspace{-.1in}
-\caption{{Workflow of the concurrency attack detection scheme.}} 
-\label{fig:detection}
-\vspace{-.1in}
+% \begin{figure}[ht]
+% \centering
+% \vspace{-.1in}
+% \includegraphics[width=0.8\columnwidth]{figures/detection}
+% \vspace{-.1in}
+% \caption{{Workflow of the concurrency attack detection scheme.}} 
+% \label{fig:detection}
+% \vspace{-.1in}
+% \end{figure}
+
+% \begin{figure}[ht]
+% \centering
+% % \begin{minipage}{.5\textwidth}
+% \lgrindfile{code/explore.cpp.tex}
+% % \end{minipage}
+% \caption{{\em The \xxx search algorithm.}} \label{fig:alg}
+% \end{figure}
+
+% \input{code/explore.algo.tex}
+
+% \begin{figure}[t]
+% \begin{center}
+% \subfloat[{\em Detection 
+% workflow.}]{\includegraphics[width=.20\linewidth]{figures/detection}
+% \label{fig:workflow}}
+% \subfloat[{\em Path slicing 
+% algorithm.}]{\includegraphics[width=.20\linewidth]{figures/detection}
+% \label{fig:algo}}
+% \vspace{-.05in}
+% \caption{{\em \xxx's Concurrency Attack Detection Approach.}\label{fig:detect}
+% \vspace{-.2in}
+% \end{center}
+% \end{figure}
+
+\begin{figure}[!htb]
+%     \centering
+    \begin{minipage}{.5\textwidth}
+        \centering
+        \includegraphics[width=0.3\textheight]{figures/detection}
+        \caption{Workflow}
+        \label{fig:prob1_6_2}
+    \end{minipage}%
+    \begin{minipage}{0.5\textwidth}
+      \begin{algorithm}[H]
+      \DontPrintSemicolon
+      \scriptsize
+      \SetCommentSty{textrm}
+      \SetKwInOut{Input}{Input}\SetKwInOut{Output}{Output}
+      \Input{execuion trace $trace$, concurrency bug instructions $bug$}
+      \Output{branch statements relevant to concurrency attacks}
+      
+      \SetKwBlock{Titlea}{Slicing($trace$)}{end}
+      \Titlea {
+        $slice$ $\leftarrow$ empty sequence \;
+        \For {{\rm $i$ $\in$ reverse($trace$)}} {
+          \If {{\rm $i$ $\in$ $bug$}} {
+            {\bf break} \;
+          }
+          \If {{\rm any $e \in slice$ transitively depends on $i$}} {
+            $slice$.push\_front($i$) \;
+          }
+          \ElseIf {{\rm $i$ is a branch instruction}} {
+            \For {{\rm $j$ $\in$ instructions $i$ reaches off $trace$}} {
+              \If {{\rm mayBeVulnerable($j$)}} {
+                $slice$.push\_front($i$) \;
+                {\bf break} \;
+              }
+            }
+          }
+        }
+        \Return $slice$.branches() \;
+      }
+      \end{algorithm}
+    \vspace{-.15in}
+    \caption{Sketch of path slicing algorithm}
+        \label{fig:algo}
+\end{minipage}
 \end{figure}
 
 
