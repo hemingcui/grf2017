@@ -518,19 +518,20 @@ moderate because most code is not synchronization and can still run in parallel.
 % \end{figure}
 
 % Mention the self healing idea.
-To address the third challenge, we plan to leverage recent checkpoint/restore 
-techniques on program execution state, including process state (\eg, 
-memory)~\cite{criu} and file system state~\cite{lxc}. Each 
+To address the third challenge, we plan to leverage recent 
+Linux process checkpoint/restore techniques, including process state (\eg, 
+memory)~\cite{criu} and file system state~\cite{lxc}. Our each 
 checkpoint operation will be done on a backup replica (see 
 Figure~\ref{fig:defense}) so that it will not affect the other replicas to 
 efficiently reach consensus on inputs and send responses. To handle all replicas 
 running into the same buggy schedules (buggy schedules are extremely rare 
-compared to correct schedules~\cite{lu:concurrency-bugs}), we plan to develop an 
+compared to correct schedules~\cite{lu:concurrency-bugs}), we will develop an 
 "observer" program that runs on a dedicated machine to periodically check the 
 status of replicas. If a majority of replicas fails, the observer restarts all 
 replicas, restores program state on replicas with the latest checkpoint, and 
-enforces a different \dmt policy. If minor replicas fail, \smr's 
-fault-tolerance strength still makes the other replicas run.
+enforces a different \dmt policy.
+% If minor replicas fail, \smr's 
+% fault-tolerance strength still makes the other replicas run.
 
 To address the fourth challenge, we plan to leverage recent advances on 
 automatically annotating ad-hoc synchronizations~\cite{syncfinder:osdi10, 
@@ -569,24 +570,24 @@ order.
 % P1: we have built a replication system. Perf and checkpoint results.
 We have developed preliminary systems to address the first two challenges. To 
 address the first challenge, we have built a transparent \smr system 
-\crane~\cite{crane:sosp15}. \crane is able to transparently support widely used 
-general programs without modifications. To address the second challenge, we have 
-built an efficient \dmt runtime \parrot~\cite{parrot:sosp13}. \parrot incurred 
-merely 12.7\% overhead on a wide range of 108 popular multithreaded programs on 
-24-core machines.
+\crane~\cite{crane:sosp15}. \crane is able to transparently support five widely 
+used server programs, with 34.2\% overhead in average (see 
+Figure~\ref{fig:normalize-perf}). To address the second challenge, we have built 
+an efficient \dmt runtime \parrot~\cite{parrot:sosp13}, which incurred merely 
+12.7\% overhead on a wide range of 108 popular multithreaded programs on 24-core 
+machines.
 
 \vspace{-.15in}\subsection{Research Plan} \label{sec:plan}\vspace{-.075in}
 
-This \xxx project will require two PhD students S1 and S2 for a period of 
+This project will require two PhD students S1 and S2 for a period of 
 three years. In the first year, S1 will develop and refine the concurrency 
 attack model (part of \textbf{Objective 1}), and S2 will leverage the model to 
 design the detailed workflow of the detection approach (part of \textbf{Objective 2}) by working 
 closely with S1. In the second year, S1 will do an empirical study on how well 
 the model represents real-world concurrency attacks (part of \textbf{Objective 1}), and S2 will implement 
 the detection approach as a software tool (part of \textbf{Objective 2}). In the third 
-year, S1 will build the runtime defense infrastructure (\textbf{Objective 3}), and S2 
-will apply our model, detection tool, and defense infrastructure to benefit 
-related research areas (\eg, byzantine fault tolerance~\cite{pbft:osdi99}).
+year, S1 will build the defense infrastructure (\textbf{Objective 3}), and S2 
+will study the detection tool on broad real-world programs to find new attacks.
 % Both students will 
 % involve theoretical methods, implement real software systems, and 
 % perform real-world study.
