@@ -25,15 +25,6 @@ our model (\S\ref{sec:attack-phase}).
 Study} 
 \label{sec:examples}\vspace{-.075in}
 
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.8\columnwidth]{figures/libsafe}
-\vspace{-.05in}
-\caption{{A concurrency attack in the \libsafe security library.}} 
-\label{fig:libsafe}
-\vspace{-.15in}
-\end{figure}
-
 Figure~\ref{fig:libsafe} shows the code of a concurrency attack in 
 \libsafe~\cite{libsafe}, a popular stack overflow protection library. \libsafe
 provides its own safe memory and string operations functions. For instance, the 
@@ -48,22 +39,33 @@ passing malicious code to \texttt{dest}. Ironically, this \libsafe library is
 no longer ``safe" when facing concurrency attacks.
 
 \begin{figure}[h]
+\vspace{-.1in}
 \centering
-\includegraphics[width=0.8\columnwidth]{figures/apache}
-\vspace{-.05in}
-\caption{{A concurrency attack in the \apache web server.}} \label{fig:apache}
+\includegraphics[width=0.8\columnwidth]{figures/libsafe}
+\vspace{-.1in}
+\caption{{A concurrency attack in the \libsafe security library.}} 
+\label{fig:libsafe}
 \vspace{-.15in}
 \end{figure}
 
 Figure~\ref{fig:apache} shows the code of a concurrency attack in 
 the widely used \apache~\cite{apache} web server for maintaining users' HTTP 
-pages. \apache 
-spawns a number of threads, each serves a HTTP request. Each thread also 
-records the request in a global log buffer in heap and flushes this buffer to a 
-log file when the buffer is full. However, developers missed a mutex lock to 
-protect this buffer, so the buffer can overflow and corrupt adjacent memory, 
-including the log file's descriptor. In our study, we corrupted this descriptor 
-and made \apache write a request record to mess up another user's HTTP page.
+pages. \apache spawns a number of threads, each serves a HTTP request. Each 
+thread also records the request in a global log buffer in heap and flushes this 
+buffer to a log file when the buffer is full. However, developers missed a 
+mutex lock to protect this buffer, so the buffer can overflow and corrupt 
+adjacent memory, including the log file's descriptor. In our study, we 
+corrupted this descriptor and made \apache write a request record to mess up 
+another user's HTTP page.
+
+\begin{figure}[h]
+\vspace{-.05in}
+\centering
+\includegraphics[width=0.8\columnwidth]{figures/apache}
+\vspace{-.1in}
+\caption{{A concurrency attack in the \apache web server.}} \label{fig:apache}
+\vspace{-.15in}
+\end{figure}
 
 
 
@@ -256,13 +258,14 @@ satisfy any of the two conditions, we then safely discard this trace.
 \begin{figure}[!htb]
 %     \centering
     \begin{minipage}{.5\textwidth}
-        \centering
-        \includegraphics[width=0.3\textheight]{figures/detection}
-        \caption{Workflow}
-        \label{fig:prob1_6_2}
+%         \centering
+        \includegraphics[width=0.34\textheight]{figures/detection}
+        \caption{Workflow of detection approach}
+        \label{fig:detection}
     \end{minipage}%
     \begin{minipage}{0.5\textwidth}
       \vspace{-.1in}
+      \centering
       \begin{algorithm}[H]
       \DontPrintSemicolon
       \scriptsize
