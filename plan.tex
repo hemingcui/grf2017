@@ -199,14 +199,12 @@ input preconditions on each execution. This technique has shown to find new
 bugs in real-world systems programs~\cite{klee:osdi08}.
 
 We plan to achieve the second goal with \emph{path slicing} 
-(\S\ref{sec:others-work}). Given a 
-trace of executed instructions and an essential instruction in this trace, 
-path slicing starts from this essential instruction, goes backward the trace, 
-and computes a subset of instructions that affect the reachability and operand 
-values of this instruction. This path slicing technique has shown to compute 
-compact input preconditions to block malicious inputs~\cite{castro:bouncer} and 
-compute relevant instructions for programming rule 
-violations~\cite{woodpecker:asplos13}.
+(\S\ref{sec:others-work}). Given a trace of executed instructions, path slicing 
+starts from this essential instruction, goes backward the trace, and computes a 
+subset of instructions that affect the reachability and operand 
+values of the last instruction in the trace. This path slicing technique has 
+been used to compute precise input preconditions to block malicious 
+inputs~\cite{castro:bouncer}.
 
 By leveraging the symbolic execution and path slicing, the workflow of our 
 detection approach is shown in Figure~\ref{fig:detection}. This approach takes 
@@ -308,13 +306,15 @@ are shaded.}
 
 
 
-The path slicer is our core technique to track the propagation 
-(\S\ref{sec:model}) from a concurrency bug to potential vulnerable instruction. 
-The path slicer goes backward from the last execution of the trace and collects 
-branch instructions that may lead to a vulnerable instruction in the 
-not-executed branches. The path slicer then notifies symbolic execution to 
-explore these branch instructions with high priority to increase the 
-probability that following executions hit vulnerable instructions.
+Algorithm 1 shows the algorithm of the path slicer, our core 
+technique to track the propagation (\S\ref{sec:model}) from a concurrency bug 
+to vulnerable instruction. This algorithm goes backward from the 
+last execution of the trace and collects branch instructions relevant to a 
+vulnerable instruction. To do so, \texttt{mayBeVulnerable()} does 
+static analysis (\S\ref{sec:others-work}) on the non-executed branches to 
+detect vulnerable instructions. The path slicer then asks symbolic execution 
+to explore these branch instructions with high priority to increase the 
+chance hitting vulnerable instructions in following explorations.
 
 % P1: why need a detection scheme. First, capture as many as exploits in 
 % testing phase. And call for re-install if there is any potential exploit. 
