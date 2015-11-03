@@ -436,18 +436,18 @@ Infrastructure}
 \label{sec:defense-arch}\vspace{-.075in}
 
 Figure~\ref{fig:defense} shows our proposed \smr-based infrastructure. This infrastructure 
-addresses the first challenge by 
-enabling a general multi-threaded program run in it \emph{transparently} 
-without modifications. A major benefit of transparency is that program 
-developers can focus on implementing their program's functionality, not how to 
-defend against concurrency attacks.
+addresses the first challenge by enabling a general multi-threaded program run 
+in it \emph{transparently} without modifications. The major benefit of 
+transparency is that program developers can focus on implementing their 
+program's functionality, not how to defend against concurrency attacks.
 
-To achieve transparency, within each \smr replica, this 
-infrastructure interposes on the socket and the thread synchronization 
-interfaces to keep replicas in sync. Specifically, it considers each incoming socket call (e.g., \texttt{accept()} a 
-client's connection or \texttt{recv()} a client's data) an input request, and 
-runs a \paxos consensus protocol to ensure that a majority of the replicas sees 
-the same exact sequence of the incoming socket calls.
+To achieve transparency, this infrastructure interposes on the socket and the 
+thread synchronization interfaces to keep replicas in sync. Specifically, it 
+considers each incoming socket call (e.g., \texttt{recv()} a client's data) an 
+input, and runs a \paxos distributed consensus protocol~\cite{paxos:practical} 
+to ensure the same sequence of clients' socket calls for replicas. For 
+efficiency, \paxos assigns one replica as the primary to request input 
+consensus; the other replicas are backup and they agree on the requests.
 
 % \begin{figure}[t]
 % \centering
