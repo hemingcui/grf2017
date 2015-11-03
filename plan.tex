@@ -32,8 +32,8 @@ provides its own safe memory and string operations functions. For instance, the
 in as the function argument \texttt{dest} before it calls the actual 
 \texttt{strcpy()}. If a program receives a kill signal, Libsafe's internal 
 thread (Thread 1) sets a global variable \texttt{dying}, then security checks 
-are disabled in \texttt{libsafe\_strcpy()}. Unfortunately, \v{dying} was not 
-protected by mutex locks. In our study, we triggered a data race on this 
+are disabled in \texttt{libsafe\_strcpy()}. Unfortunately, \texttt{dying} was 
+not protected by mutex locks. In our study, we triggered a data race on this 
 variable, bypassed the security check, and overflowed Thread 2's stack by 
 passing malicious code to \texttt{dest}. Ironically, this \libsafe library is 
 no longer ``safe" when facing concurrency attacks.
@@ -192,11 +192,11 @@ execution} (\S\ref{sec:others-work}), a program analysis technique that
 systematically explore a program's execution paths to find bugs. Unlike normal 
 execution which runs on a concrete input, this technique marks inputs (\eg, 
 command line arguments) as ``symbolic" and tracks input preconditions 
-on control statements (\eg, \texttt{if} and \texttt{while}) during the 
-execution. If a control statement depends on inputs, symbolic execution forks a 
-new execution, let the two executions go down different paths, and tracks input 
-preconditions on each execution. This technique has shown to find new bugs in 
-real-world systems programs~\cite{klee:osdi08}.
+on branch instructions (\eg, \texttt{if} and \texttt{while}) during the 
+execution. If a branch instruction depends on inputs, symbolic execution forks 
+a new execution, let the two executions go down different paths, and tracks 
+input preconditions on each execution. This technique has shown to find new 
+bugs in real-world systems programs~\cite{klee:osdi08}.
 
 We plan to achieve the second goal with \emph{path slicing} 
 (\S\ref{sec:others-work}). Given a 
@@ -217,7 +217,7 @@ received from network as symbolic and explore program paths. For each execution,
 we collect all the the executed instructions as a trace, and run a race detector 
 on the trace: if a concurrency bug is detected, we feed this trace to path 
 slicer to see whether: (1) the trace may have contained a vulnerable 
-instruction, or (2) this trace have any control statements that can lead to 
+instruction, or (2) this trace have any branch instruction that can lead to 
 vulnerable instruction in the not executed branches. If the trace does not 
 satisfy any of the two conditions, we then safely discard this trace.
 
@@ -260,7 +260,8 @@ satisfy any of the two conditions, we then safely discard this trace.
     \begin{minipage}{.5\textwidth}
 %         \centering
         \includegraphics[width=0.34\textheight]{figures/detection}
-        \caption{Workflow of detection approach}
+        \caption{Workflow of detection approach. Three basic building blocks 
+are shaded.}
         \label{fig:detection}
     \end{minipage}%
     \begin{minipage}{0.5\textwidth}
@@ -306,17 +307,13 @@ satisfy any of the two conditions, we then safely discard this trace.
 
 
 
-The path slicer is our core technique to track the propagation from a 
-concurrency bug to potential vulnerable instruction (see the concurrency attack 
-model (\S\ref{sec:model}). The slicer first checks whether this trace already 
-contains a vulnerable instruction, if so, it reports this trace as a potential 
-concurrency attack with input preconditions for developers to reproduce this 
-execution. If this trace does not contain a vulnerable instruction, the 
-path slicer goes backward from the last execution of the trace and
-collects control statements that may lead to a vulnerable instruction in the 
-not-executed branches. The path slicer then notifies symbolic execution 
-to explore these control statements with high priority and sees whether 
-following executions exercise vulnerable instructions.
+The path slicer is our core technique to track the propagation 
+(\S\ref{sec:model}) from a concurrency bug to potential vulnerable instruction. 
+The path slicer goes backward from the last execution of the trace and collects 
+branch instructions that may lead to a vulnerable instruction in the 
+not-executed branches. The path slicer then notifies symbolic execution to 
+explore these branch instructions with high priority to increase the 
+probability that following executions hit vulnerable instructions.
 
 % P1: why need a detection scheme. First, capture as many as exploits in 
 % testing phase. And call for re-install if there is any potential exploit. 
@@ -351,8 +348,10 @@ programs, including seven serious ones already confirmed by developers. Second,
 we have also presented a data race detector in our 
 and Peregrine~\cite{peregrine:sosp11} work in SOSP 2011. This race 
 detector has detected several new data races in 
-heavily-studied programs~\cite{wu:pldi12}. These preliminary techniques and 
-results show the feasibility of our proposed detection approach.
+heavily-studied programs~\cite{wu:pldi12}.
+
+% These preliminary results show the 
+% feasibility of our proposed detection approach.
 
 % P2: mention our initial work in OSDI '10 and SOSP '11 on precise data race 
 % detection.
@@ -453,10 +452,10 @@ the same exact sequence of the incoming socket calls.
 \centering
 \vspace{-.1in}
 \includegraphics[width=0.35\columnwidth]{figures/defense}
-\vspace{-.05in}
+\vspace{-.1in}
 \caption{{A runtime infrastructure to defend against concurrency attacks.}} 
 \label{fig:defense}
-\vspace{-.2in}
+\vspace{-.15in}
 \end{figure}
 
 
