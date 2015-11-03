@@ -206,18 +206,17 @@ values of the last instruction in the trace. This path slicing technique has
 been used to compute precise input preconditions to block malicious 
 inputs~\cite{castro:bouncer}.
 
-By leveraging the symbolic execution and path slicing, the workflow of our 
-detection approach is shown in Figure~\ref{fig:detection}. This approach takes 
+Figure~\ref{fig:detection} shows the workflow of our proposed
+detection approach with three basic building blocks (shaded). This approach takes 
 program source code as input. Specifically, we compile the code into 
 LLVM~\cite{llvm} instructions, a popular form of instructions for program 
-anlysis tools. The symbolic execution engine marks a program input and bytes 
+anlysis tools. Symbolic execution marks a program input and bytes 
 received from network as symbolic and explore program paths. For each execution, 
 we collect all the the executed instructions as a trace, and run a race detector 
-on the trace: if a concurrency bug is detected, we feed this trace to path 
-slicer to see whether: (1) the trace may have contained a vulnerable 
-instruction, or (2) this trace have any branch instruction that can lead to 
-vulnerable instruction in the not executed branches. If the trace does not 
-satisfy any of the two conditions, we then safely discard this trace.
+on the trace. If a concurrency bug is detected, we check whether the trace 
+contains a vulnerable instructoin: if yes, we report a concurrency attack; if 
+no, we feed the trace to the path slicer to collect branch instructions that 
+are relevant to reach vulnerable instructions.
 
 % \begin{figure}[ht]
 % \centering
@@ -307,14 +306,14 @@ are shaded.}
 
 
 Algorithm 1 shows the algorithm of the path slicer, our core 
-technique to track the propagation (\S\ref{sec:model}) from a concurrency bug 
+technique to track the abnormal propagation (\S\ref{sec:attack-phase}) from a concurrency bug 
 to vulnerable instruction. This algorithm goes backward from the 
 last execution of the trace and collects branch instructions relevant to a 
 vulnerable instruction. To do so, \texttt{mayBeVulnerable()} does 
-static analysis (\S\ref{sec:others-work}) on the non-executed branches to 
+static analysis (\S\ref{sec:others-work}) on the not-executed branches to 
 detect vulnerable instructions. The path slicer then asks symbolic execution 
-to explore these branch instructions with high priority to increase the 
-chance hitting vulnerable instructions in following explorations.
+to explore these branch instructions with high priority so that we can increase the 
+probability of hitting vulnerable instructions in following explorations.
 
 % P1: why need a detection scheme. First, capture as many as exploits in 
 % testing phase. And call for re-install if there is any potential exploit. 
@@ -340,15 +339,13 @@ chance hitting vulnerable instructions in following explorations.
 
 % P1: we have implemented part of the dangerous operation. pointer NULL 
 % derefence. Report the results. FP:FN. 
-\para{Preliminary results.} We have developed two preliminary techniques for 
-this detection approach. First, we have presented a precise path slicer called 
-Woodpecker~\cite{woodpecker:asplos13} in in ASPLOS 2013 for detecting 
-single-threaded security violations on system calls (\eg, \texttt{setuid()}). 
-Woodpecker detects 113 programming rule violations in 136 popular systems 
-programs, including seven serious ones already confirmed by developers. Second, 
-we have also presented a data race detector in our 
-and Peregrine~\cite{peregrine:sosp11} work in SOSP 2011. This race 
-detector has detected several new data races in 
+\para{Preliminary results.} We have developed two preliminary building blocks for 
+this detection approach. First, we have presented the path slicer (Algorithm 1)
+in ASPLOS 2013~\cite{woodpecker:asplos13} for detecting security bugs on one type of 
+vulnenarable instructions: privilege operations (\eg, \texttt{setuid()}). 
+We have detected seven new serious bugs and reported to developers, and they 
+have confirmed or fixed these bugs. Second, we have presented a data race detector in 
+SOSP 2011~\cite{peregrine:sosp11}. This race detector has also detected several new data races in 
 heavily-studied programs~\cite{wu:pldi12}.
 
 % These preliminary results show the 
@@ -363,15 +360,16 @@ heavily-studied programs~\cite{wu:pldi12}.
 % how 
 % to prioritize different operations ()? % Third, how to select malicious 
 % inputs and thread schedules that are more likely to triger concurrency bugs?
-\para{Open research challenges.} To guide the development of our detection 
-approach, we foresee three open research challenges as our future development 
-work. First, how to generalize our existing path slicing approach to support all the five types of 
+\para{Open research challenges.} Towards the complete development of our detection 
+approach, we foresee three open research challenges as our future work. 
+First, how to generalize our existing path slicing approach to support all the five types of 
 vulnerable instructions we collected (\S\ref{sec:attack-phase})? Second, given the same 
-type of a vulnerable instruction, how to enhance our path slicer to prioritize the more vulnerable ones other 
-than the safe ones (\eg, some \texttt{strcpy()} functions are just 
+type of a vulnerable instruction, how to enhance our path slicer to precisely identify the vulnerable 
+ones over the safe ones (\eg, some \texttt{strcpy()} functions are just 
 manipulation on memory and do not involve inputs)? Third, how to guide our symbolic execution engine 
 to explore malicious inputs and thread interleavings that are more likely to trigger concurrency 
-bugs? We are confident that addressing each of these challenges will spur new 
+bugs? Some of these challenges require careful co-design of the three building 
+blocks, and we are confident that addressing these challenges will spur new 
 significant techniques.
 
 \vspace{-.15in}\subsection{Objective 3: Defending against Concurrency 
