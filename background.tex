@@ -23,18 +23,20 @@ behaviors such as crashes, hangs, and wrong outputs.
 % leader to exploits, concurrency bugs can lead to concurrency attacks.
 % Mention HotPart, found XX exploits. We: found YY exploits. patterns.
 % Two examples.
-Worse, a recent study~\cite{con:hotpar12} on 46 real-world concurrency bugs 
-from CVE~\cite{cve-races} and open source software's bug databases has shown 
-that hackers can leverage concurrency bugs to construct \emph{concurrency 
-attacks}, including corruption of critical memory, malicious 
-code injection~\cite{libsafe:bug}, and privilege escalation. These attacks 
-affect a wide range of multithreaded programs, ranging from applications such as 
-KDE, Internet Explorer, Firefox, and Google Chrome, to OS kernels such as 
-Windows, MacOS X, Linux, iPhone OS.
+Worse, recent research~\cite{con:hotpar12} on 46 real-world concurrency bugs 
+from CVE~\cite{cve-races} and open source software's bug databases reveals 
+that hackers have leveraged concurrency bugs to construct \emph{concurrency 
+attacks}, including corrupting critical memory~\cite{apache-bug-25520}, 
+injecting malicious code~\cite{libsafe:bug}, and escalating 
+privilege~\cite{uselib-bug-12791}. These 46 attacks affect a wide range of 
+multithreaded programs, ranging from applications such as KDE, Internet 
+Explorer, Firefox, and Google Chrome, to OS kernels such as Windows, MacOS X, 
+Linux, iPhone OS.
 
 Unfortunately, most existing defense techniques are weakened or completely 
 bypassed by concurrency attacks because these techniques are mainly designed 
-for single-threaded programs. For example, taint-tracking~\cite{taintdroid:osdi10, lift:micro06, myers:information, 
+for single-threaded programs. For example, 
+taint-tracking~\cite{taintdroid:osdi10, lift:micro06, myers:information, 
 valgrind:pldi}, a runtime technique that tracks sensitive input data by 
 associating security tags as metadata for each data byte, is weakened when running with 
 multithreading programs because a race on data can corrupt the tags. \S\ref{sec:others-work} 
@@ -45,16 +47,18 @@ details.
 % runtime.
 % Hard to make sure all thread intleravings are correct. Mention our previous 
 % work Parrot, exponentially many.
-A key reason~\cite{smt:cacm, parrot:sosp13} why multithreaded programs are so 
-difficult to get right is that these programs may exercise too many 
-possible thread interleavings (or \emph{schedules}) at runtime, depending on 
-the permutation orders of inter-thread communications (\eg, mutex 
-locks). It is extremely challenging to understand, test, analyze, or verify 
-this huge amount of schedules and eliminate concurrency bugs or attacks in 
-these schedules.
+% A key reason~\cite{smt:cacm, parrot:sosp13} why multithreaded programs are so 
+% difficult to get right is that these programs may exercise too many 
+% possible thread interleavings (or \emph{schedules}) at runtime, depending on 
+% the permutation orders of inter-thread communications (\eg, mutex 
+% locks). It is extremely challenging to understand, test, analyze, or verify 
+% this huge amount of schedules and eliminate concurrency bugs or attacks in 
+% these schedules.
 % Therefore, to tackle concurrency attacks, our propose models, 
 % detection tools, and defense infrastructures take thread schedules into account 
 % significantly.
+
+
 
 \vspace{-.15in}\subsubsection{Our Preliminary Study on Concurrency Attacks} 
 \label{sec:out-study}\vspace{-.075in}
@@ -65,22 +69,33 @@ have written scripts and constructed inputs to reproduce all these 23
 concurrency bugs: 14 bugs caused Denial of Service (DoS) attacks in application 
 programs (Apache, MySQL, Tomcat, and PgSQL) by causing segmentation faults, 
 three bugs caused heap overflows in applications programs (Apache and 
-htmlCleaner), five bugs caused privilege escalations in the FreeBSD or Linux 
-kernels, and one bug bypassed security checks in a security library \libsafe 
-and led to stack overflows. \S\ref{sec:model} will give two concrete bug
-examples.
+htmlCleaner), five bugs caused privilege escalations in MySQL or Linux kernels, 
+and one bug bypassed security checks in a security library \libsafe and led to 
+stack overflows. \S\ref{sec:model} will give two concrete bug examples.
 
-We have two new discoveries in this study. First, unlike 
-state-of-the-art understanding that triggering a concurrency bug require lots of 
+We have two new discoveries in this study. First, unlike state-of-the-art 
+understanding that triggering a concurrency bug require lots of 
 repeated executions, some concurrency bugs can be triggered and exploited with 
-high probability. For instance, in a MySQL concurrency bug we studied, we 
-chose nested \texttt{select} statements to trigger this bug and corrupted 
-another MySQL user's privilege table by only 18 runs in average. Second, 
-even many of the concurrency bugs we studied were fixed by upgrading software, 
-it doesn't help to fix the concurrency attacks because hackers may have already 
-broken in. Therefore, studying existing know concurrency bugs are still crucial.
+high probability. For instance, in a MySQL privilege escalation 
+attack~\cite{mysql-bug-14747}, we chose nested \texttt{select} statements to 
+trigger this bug and corrupted another MySQL user's privilege table by only 18 
+runs in average. Second, even many of the concurrency bugs we studied were 
+fixed by upgrading software,it doesn't help to recover from the attacks because 
+hackers may have already broken in. Therefore, studying existing known
+concurrency bugs is still crucial.
 
+\vspace{-.15in}\subsubsection{Motivation of our \xxx proposal} 
+\label{sec:out-study}\vspace{-.075in}
 
+State-of-the-art has not presented any effective approache to 
+tackle concurrency attacks, probably due to three major difficulties.  
+First, state-of-the-art may still consider concurrency bugs and attacks are 
+orthogonal behaviors because people lack a rigorous model to describe how 
+bugs propagate to vulnerable instructions. Second, detecting a concurrency bug 
+requires a systematic approach that can carefully choose both inputs and thread 
+interleavings. Third, people lack a runtime defense infrastructure to 
+extensively study the behaviors of concurrency attacks. 
+Therefore, this proposal addresses each difficulty with an objective. 
 
 
 % This proposed \xxx project takes a thorough approach to cope with concurrency 
@@ -104,27 +119,28 @@ broken in. Therefore, studying existing know concurrency bugs are still crucial.
 \vspace{-.15in}\subsection{Related Work by Others} 
 \label{sec:others-work}\vspace{-.075in}
 
-\para{Reliability tools.} There are various prior work on concurrency error 
+\para{Reliability tools.} There are various prior works on concurrency error 
 detection~\cite{yu:racetrack:sosp,savage:eraser,racerx:sosp03,lu:muvi:sosp,
 avio:asplos06,conmem:asplos10}, diagnosis~\cite{racefuzzer:pldi08,
 ctrigger:asplos09,atomfuzzer:fse08}, 
 and correction~\cite{dimmunix:osdi08,gadara:osdi08,wu:loom:osdi10,cfix:osdi12}. 
-These work focus on the concurrency errors themselves, while \xxx's 
-proposed concurrency attack detection approach mainly focuses on the security 
-consequence of concurrency bugs, so these prior work are complementary to our 
-objectives in this proposed project.
+These works mainly focus on the concurrency bugs themselves, and our
+proposed objectvies focus on the security consequence of concurrency 
+bugs. Therefore, these works are complementary to ours.
 
-\para{TOCTTOU attacks.} TOCTTOU (Time Of Check To Time Of Use) 
+\para{TOCTTOU attacks.} TOCTTOU (time-of-check-to-time-of-use) 
 attacks~\cite{bishop:tocttou,toctou:fast08,toctou:fast05,toctou:usec03} target 
-mainly the file system interface, and leverage the non-atomicity bug on 
-time-of-check to time-of-use of a file to gain illegal file access. Concurrency 
-attacks are much more challenging than TOCTTOU attacks for two main reasons. 
+mainly the file system interface, and leverage the non-atomic nature on 
+time-of-check (\eg, \texttt{access()}) to time-of-use (\eg, \texttt{open()}) of 
+a file to gain illegal file access. The concurrency attacks we target in this 
+proposal are much more challenging than TOCTTOU attacks for two main reasons. 
 First, TOCTTOU mainly causes illegal file access, while concurrency attacks can 
 cause a much broader range of security vulnerabilities, ranging from gaining 
-root privileges, injecting malicious code, to bypassing authentication checks. 
-Second, concurrency attacks are mainly caused by concurrency bugs 
-on global memory accesses, which is a much more difficult to track than the 
-file access API of TOCTTOU attacks.
+root privileges~\cite{uselib-bug-12791}, injecting malicious 
+code~\cite{uselib-bug-12791}, to corrupting 
+critical memory~\cite{apache-bug-25520}. Second, concurrency attacks are mainly 
+triggered by global memory access, much more difficult to track than the file 
+access in TOCTTOU attacks.
 
 \para{Security defense techniques.} Defense techniques for 
 single-threaded programs have been well studied, including meta-data 
@@ -134,14 +150,13 @@ detection~\cite{taskrecycling:ppopp90,schonberg:pldi89}, address space
 randomization~\cite{ aslr-fail:ccs04}, and static 
 analysis~\cite{seth:pldi,engler:vmcai,wagner:syscall:ids,coverity:cacm, 
 klee:osdi08}. However, with the presence of 
-multithreading, these tools may be largely weakened. For instance, concurrency 
+multithreading, these tools can be largely weakened. For instance, concurrency 
 bugs in global memory may corrupt meta data tags in metadata tracking 
-techniques. Anomaly detection lacks a model for buggy thread interleavings to 
-reasoning about concurrency bugs and their consequence on attacks, which the 
-attack model in this proposed project may help. Static analysis has shown to 
-find numerous bugs in real-world programs, however, when facing a program's 
-huge amount of thread interleavings, static analysis usually reports too many 
-false positives and bury the real ones.
+techniques. Anomaly detection lacks a concurrency model to reason about 
+concurrency bugs and attacks. Static analysis has shown to find numerous bugs in 
+real-world programs, however, when facing a program's huge amount of thread 
+interleavings, static analysis usually reports too many false positives and bury 
+the real ones.
 
 \noindent {\bf Symbolic execution.} Symbolic execution is an advanced program 
 analysis technique that can systematically explore a program's execution paths 
@@ -152,8 +167,8 @@ godefroid:whitebox-fuzzing,
 klee:osdi08,yang:malicious-disk:oakland06,cadar:exe:ccs06,s2e:hotdep09,
 taas:socc10}, block malicious inputs~\cite{castro:bouncer}, and preserve 
 privacy in error reports~\cite{castro:bug-report-privacy}. 
-\textbf{Objective 2} will leverage symbolic execution to construct an automated 
-concurrency attack detection approach.
+\textbf{Objective 2} will leverage symbolic execution to automatically find 
+inputs that may trigger concurrency bugs and attacks.
 
 \para{Program slicing.}  Program slicing~\cite{Tip:slicing} is a general
 technique to prune irrelevant statements from a program or trace.
@@ -162,8 +177,8 @@ techniques to block malicious input~\cite{castro:bouncer}, synthesize
 executions for better error diagnosis~\cite{esd:eurosys10}, infer source
 code paths from log messages for postmortem analysis~\cite{sherlog:asplos10}, 
 and identify critical inter-thread reads that may lead to concurrency 
-errors~\cite{conseq:asplos11}. \textbf{Objective 2} will leverage symbolic 
-execution to construct an automated concurrency attack detection approach.
+errors~\cite{conseq:asplos11}. \textbf{Objective 2} will leverage program 
+slicing to track the propagation from bugs to attacks.
 
 \para{State machine replication (SMR).}  SMR is a powerful fault-tolerant technique 
 in distributed systems~\cite{lamportclock,smr:tutorial}. SMR runs the same program on a set of 
