@@ -101,7 +101,7 @@ log, an abnormal data-flow of the execution.
 % 
 In addition to these two examples, the \noldattacks concurrency 
 attacks in recent study~\cite{con:hotpar12} and the \nattacks ones our own 
-preliminary study (\S\ref{sec:examples}) also have the three common elements. 
+preliminary study (\S\ref{sec:examples}) also have the three general elements. 
 For the first element, these attacks have four types of concurrency bugs, 
 including data races, atomicity violations, deadlocks, and order violations. 
 For the second element, we have collected five types of vulnerable 
@@ -111,6 +111,15 @@ deferences (\eg, when the pointer is NULL), privilege operations (\eg,
 operations (\eg, \texttt{eval()} in shell scripts). For the third element, 
 \S\ref{sec:detect} will propose our systematic detection approach to detect 
 abnormal control-flow and data-flow of executions.
+
+\para{Future work.} Above model is based on our preliminary study on \nattacks 
+concurrency attacks. We will further study 10 times more concurrency attacks 
+and refine our model with these research questions: (1) Are there other 
+types of vulnerable instructions? (2) Is there malicious data propagation among 
+vulnerable instructions? (3) How does a program's concurrency attack affect other programs? 
+
+%so that we can collect more types of vulnerable instructions and make the 
+%model's elements more comprehensive. During this further study, we will
 
 % PX: emphasis the contribution/potential value of this model.
 % In a high level, this model treats a concurrency attack as a source-sink 
@@ -339,14 +348,14 @@ probability of hitting vulnerable instructions in following explorations.
 
 % P1: we have implemented part of the dangerous operation. pointer NULL 
 % derefence. Report the results. FP:FN. 
-\para{Preliminary results.} We have developed two preliminary building blocks for 
-this detection approach. First, we have presented the path slicer (Algorithm 1)
+\para{Preliminary results.} We have presented a preliminary path slicer (Algorithm 1)
 in ASPLOS 2013~\cite{woodpecker:asplos13} for detecting security bugs on one type of 
 vulnenarable instructions: privilege operations (\eg, \texttt{setuid()}). 
-We have detected seven new serious security bugs and reported to developers, and they 
-have confirmed or fixed these bugs. Second, we have presented a precise data 
-race detector in SOSP 2011~\cite{peregrine:sosp11}. This data race 
-detector has detected several new data races in heavily-tested programs~\cite{wu:pldi12}.
+This path slicer has detected seven new security bugs in widely used programs.
+
+%Second, we have presented a precise data 
+%race detector in SOSP 2011~\cite{peregrine:sosp11}. This data race 
+%detector has detected several new data races in heavily-tested programs~\cite{wu:pldi12}.
 
 % These preliminary results show the 
 % feasibility of our proposed detection approach.
@@ -360,17 +369,14 @@ detector has detected several new data races in heavily-tested programs~\cite{wu
 % how 
 % to prioritize different operations ()? % Third, how to select malicious 
 % inputs and thread schedules that are more likely to triger concurrency bugs?
-\para{Open research challenges.} Towards the complete development of our detection 
-approach, we foresee three open research challenges as our future work. 
-First, how to generalize our existing path slicing approach to support all the five types of 
+\para{Future work.} We foresee three open research questions for our detection approach. First, how 
+to generalize our existing path slicer to support all the five types of 
 vulnerable instructions we collected (\S\ref{sec:attack-phase})? Second, given the same 
-type of a vulnerable instruction, how to enhance our path slicer to precisely identify the vulnerable 
+type of a vulnerable instruction, how to enhance our path slicer to identify the vulnerable 
 ones over the safe ones (\eg, some \texttt{strcpy()} functions are just 
-manipulation on memory and do not involve inputs)? Third, how to guide our symbolic execution engine 
+memory manipulation and do not involve inputs)? Third, how to guide symbolic execution 
 to explore malicious inputs and thread interleavings that are more likely to trigger concurrency 
-bugs? These challenges may require innovative co-design of the three building 
-blocks, and we are confident that addressing each of these challenges will spur 
-significant research work.
+bugs? Addressing these challenges will probably lead to innovative techniques.
 
 \vspace{-.15in}\subsection{Objective 3: Defending against Concurrency 
 Attacks}\label{sec:defense}\vspace{-.075in}
@@ -562,12 +568,12 @@ order.
 % of DMT is typically moderate because most code is not synchronization and can 
 % still run in parallel.
 
-\vspace{-.15in}\subsubsection{Preliminary Results} 
-\label{sec:defense-result}\vspace{-.075in}
+%\vspace{-.15in}\subsubsection{Preliminary Results} 
+%\label{sec:defense-result}\vspace{-.075in}
 
 % P1: we have built a replication system. Perf and checkpoint results.
-We have developed preliminary systems to address the first two challenges. For 
-the first challenge, we have presented a transparent \smr system 
+\para{Preliminary results.} We have developed preliminary systems to address the 
+first and the second challenges. For the first challenge, we have presented a transparent \smr system 
 \crane~\cite{crane:sosp15} in SOSP 2015. \crane is able to transparently 
 support widely used server programs with 34.2\% overhead in average 
 (see Figure~\ref{fig:normalize-perf}). For the second challenge, we have 
