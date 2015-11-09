@@ -31,7 +31,7 @@ injecting malicious code~\cite{libsafe:bug}, and escalating
 privilege~\cite{uselib-bug-12791}. These 46 attacks affect a wide range of 
 multithreaded programs, ranging from applications such as KDE, Internet 
 Explorer, Firefox, and Google Chrome, to OS kernels such as Windows, MacOS X, 
-Linux, iPhone OS.
+Linux, and iPhone OS.
 
 Unfortunately, most existing defense techniques are weakened or completely 
 bypassed by concurrency attacks because these techniques are mainly designed 
@@ -41,7 +41,7 @@ valgrind:pldi}, a runtime technique that tracks sensitive input data by
 associating security tags as metadata for each data byte, is weakened when running with 
 multithreading programs because a race on data can corrupt the tags. \S\ref{sec:others-work} 
 will discuss how concurrency attacks weaken various defense techniques in 
-details.
+detail.
 
 % P3: A key reason: a program can run into too many thread interleavings at 
 % runtime.
