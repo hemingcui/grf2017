@@ -84,18 +84,19 @@ studied were already fixed by upgrading program code or executables, the
 programs are still in danger because hackers have already broken in. Therefore, 
 studying existing known concurrency bugs is still crucial.
 
-\vspace{-.15in}\subsubsection{Motivation of our \xxx proposal} 
+\vspace{-.15in}\subsubsection{Motivation of \xxx's Objectives} 
 \label{sec:out-study}\vspace{-.075in}
 
-State-of-the-art has not presented any effective approach to 
-tackle concurrency attacks, probably due to three major difficulties.  
-First, state-of-the-art may still consider concurrency bugs and attacks are 
-orthogonal behaviors because people lack a rigorous model to describe how 
-bugs propagate to vulnerable instructions. Second, detecting a concurrency bug 
-requires a systematic approach that can carefully choose both inputs and thread 
-interleavings. Third, people lack a runtime defense infrastructure to 
-extensively study the behaviors of concurrency attacks. 
-Therefore, this proposal addresses each difficulty with an objective. 
+To the best of our knowledge, state-of-the-art has no effective approach to 
+tackle concurrency attacks due to three major difficulties.  First, 
+people may still consider concurrency bugs and attacks are orthogonal 
+behaviors because people lack a rigorous model to describe how concurrency bugs 
+propagate to vulnerable instructions. Second, detecting a concurrency bug 
+requires a systematic approach to carefully choose relevant inputs and thread 
+interleavings, and to precisely identify vulnerable instructions in program 
+code. Third, defending against concurrency attacks at runtime requires a 
+reliable defense infrastructure. This proposal addresses each difficulty with 
+an objective.
 
 
 % This proposed \xxx project takes a thorough approach to cope with concurrency 

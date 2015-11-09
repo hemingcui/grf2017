@@ -73,7 +73,7 @@ another user's HTTP page.
 \vspace{-.15in}\subsubsection{Concurrency Attack Model} 
 \label{sec:attack-phase}\vspace{-.075in}
 
-Two key questions on modeling concurrency attacks are: (1) what are the common 
+Two key questions on modeling concurrency attacks are: (1) what are the general 
 elements in concurrency attacks, and (2) how does the corrupted memory in a 
 concurrency bug propagate to vulnerable instructions in source code? Since 
 existing reliability tools (\S\ref{sec:others-work}) are already effective on 
@@ -84,7 +84,7 @@ the potential to lead to attacks, and we can safely ignore those don't.
 % P3: pattern.
 % \para{Three common elements.}
 Although the two aforementioned examples appear to be diverse, we have 
-identified three common elements in these concurrency attacks. First, it is 
+identified three general elements in these concurrency attacks. First, it is 
 necessary to have corrupted global memory (\eg, the \texttt{dying} variable in 
 \libsafe, and the \texttt{buf\_len} buffer in \apache) caused by concurrency 
 bugs. Second, it is necessary to have a vulnerable instruction (\eg, 
