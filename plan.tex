@@ -22,7 +22,7 @@ section first gives two concurrency attack examples our preliminary study
 successfully constructed (\S\ref{sec:examples}), and then proposes 
 our model (\S\ref{sec:attack-phase}).
 
-\vspace{-.15in}\subsubsection{Concurrency Attacks Examples In Our Preliminary 
+\vspace{-.15in}\subsubsection{Concurrency Attacks Examples in Our Preliminary 
 Study} 
 \label{sec:examples}\vspace{-.075in}
 
@@ -117,8 +117,9 @@ abnormal control-flow and data-flow of executions.
 concurrency attacks. We will further study 10 times more concurrency attacks 
 and refine our model by asking ourselves these research questions: (1) Are 
 there other types of vulnerable instructions? (2) Is there malicious data 
-propagation among vulnerable instructions? (3) How does a program's concurrency 
-attack propagate to other programs through network and file system?
+propagation among vulnerable instructions? (3) How does a concurrency 
+attack in a program propagate to other programs through network and file 
+system?
 
 %so that we can collect more types of vulnerable instructions and make the 
 %model's elements more comprehensive. During this further study, we will
@@ -371,14 +372,15 @@ This path slicer has detected seven new security bugs in widely used programs.
 % how 
 % to prioritize different operations ()? % Third, how to select malicious 
 % inputs and thread schedules that are more likely to triger concurrency bugs?
-\para{Future work.} We foresee three open research questions for our detection approach. First, how 
-to generalize our existing path slicer to support all the five types of 
-vulnerable instructions we collected (\S\ref{sec:attack-phase})? Second, given the same 
-type of a vulnerable instruction, how to enhance our path slicer to identify the vulnerable 
-ones over the safe ones (\eg, some \texttt{strcpy()} functions are just 
-memory manipulation and do not involve inputs)? Third, how to guide symbolic execution 
-to explore malicious inputs and thread interleavings that are more likely to trigger concurrency 
-bugs? Addressing these challenges will probably lead to innovative techniques.
+\para{Future work.} We foresee three open research challenges for our detection 
+approach. First, how to generalize our existing path slicer to support all the 
+five types of vulnerable instructions we collected (\S\ref{sec:attack-phase})? 
+Second, given the same type of a vulnerable instruction, how to enhance our 
+path slicer to identify the vulnerable ones over the safe ones (\eg, some 
+\texttt{strcpy()} functions are just memory manipulation and do not involve 
+inputs)? Third, how to guide symbolic execution to explore malicious inputs and 
+thread interleavings that are more likely to trigger concurrency bugs? 
+Addressing these challenges will probably lead to innovative techniques.
 
 \vspace{-.15in}\subsection{Objective 3: Defending against Concurrency 
 Attacks}\label{sec:defense}\vspace{-.075in}
