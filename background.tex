@@ -73,21 +73,21 @@ htmlCleaner), five bugs caused privilege escalations in MySQL or Linux kernels,
 and one bug bypassed security checks in a security library \libsafe and led to 
 stack overflows. \S\ref{sec:model} will give two concrete bug examples.
 
-We have two new discoveries in this study. First, unlike state-of-the-art 
-understanding that triggering a concurrency bug require lots of 
-repeated executions, some concurrency bugs can be triggered and exploited with 
-high probability. For instance, in a MySQL privilege escalation 
-attack~\cite{mysql-bug-14747}, we chose nested \texttt{select} statements to 
-trigger this bug and corrupted another MySQL user's privilege table by only 18 
-runs in average. Second, even many of the concurrency bugs we studied were 
-fixed by upgrading software,it doesn't help to recover from the attacks because 
-hackers may have already broken in. Therefore, studying existing known
-concurrency bugs is still crucial.
+We have two new discoveries in this study. First, many concurrency bugs can be 
+triggered and exploited easily with crafted inputs. For instance, in a MySQL 
+concurrency attack~\cite{mysql-bug-14747}, we chose nested 
+\texttt{select} statements to trigger the bug and corrupted another 
+MySQL user's privilege table by only 18 repeated executions. In a Linux kernel 
+exploit~\cite{uselib-bug-12791}, we easily got root privilege with 
+crafted systems call arguments. Second, although many concurrency bugs we 
+studied were already fixed by upgrading program code or executables, the 
+programs are still in danger because hackers have already broken in. Therefore, 
+studying existing known concurrency bugs is still crucial.
 
 \vspace{-.15in}\subsubsection{Motivation of our \xxx proposal} 
 \label{sec:out-study}\vspace{-.075in}
 
-State-of-the-art has not presented any effective approache to 
+State-of-the-art has not presented any effective approach to 
 tackle concurrency attacks, probably due to three major difficulties.  
 First, state-of-the-art may still consider concurrency bugs and attacks are 
 orthogonal behaviors because people lack a rigorous model to describe how 
@@ -125,7 +125,7 @@ avio:asplos06,conmem:asplos10}, diagnosis~\cite{racefuzzer:pldi08,
 ctrigger:asplos09,atomfuzzer:fse08}, 
 and correction~\cite{dimmunix:osdi08,gadara:osdi08,wu:loom:osdi10,cfix:osdi12}. 
 These works mainly focus on the concurrency bugs themselves, and our
-proposed objectvies focus on the security consequence of concurrency 
+proposed objectives focus on the security consequence of concurrency 
 bugs. Therefore, these works are complementary to ours.
 
 \para{TOCTTOU attacks.} TOCTTOU (time-of-check-to-time-of-use) 

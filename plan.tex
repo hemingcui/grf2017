@@ -74,7 +74,7 @@ another user's HTTP page.
 \label{sec:attack-phase}\vspace{-.075in}
 
 Two key questions on modeling concurrency attacks are: (1) what are the common 
-elments in concurrency attacks, and (2) how does the corrupted memory in a 
+elements in concurrency attacks, and (2) how does the corrupted memory in a 
 concurrency bug propagate to vulnerable instructions in source code? Since 
 existing reliability tools (\S\ref{sec:others-work}) are already effective on 
 detecting concurrency bugs, if our model can address these two questions, we 
@@ -220,11 +220,11 @@ Figure~\ref{fig:detection} shows the workflow of our proposed
 detection approach with three basic building blocks (shaded). This approach takes 
 program source code as input. Specifically, we compile the code into 
 LLVM~\cite{llvm} instructions, a popular form of instructions for program 
-anlysis tools. Symbolic execution marks a program input and bytes 
+analysis tools. Symbolic execution marks a program input and bytes 
 received from network as symbolic and explore program paths. For each execution, 
 we collect all the the executed instructions as a trace, and run a concurrency 
 bug detector on the trace. If a concurrency bug is detected, we check whether the trace 
-contains a vulnerable instructoin: if yes, we report a concurrency attack; if 
+contains a vulnerable instruction: if yes, we report a concurrency attack; if 
 no, we feed the trace to the path slicer to collect branch instructions that 
 are relevant to reach vulnerable instructions.
 
@@ -280,7 +280,7 @@ are shaded.}
       \scriptsize
       \SetCommentSty{textrm}
       \SetKwInOut{Input}{Input}\SetKwInOut{Output}{Output}
-      \Input{execuion trace $trace$, concurrency bug instructions $bug$}
+      \Input{execution trace $trace$, concurrency bug instructions $bug$}
       \Output{branch statements relevant to concurrency attacks}
       
       \SetKwBlock{Titlea}{Slicing($trace$)}{end}
@@ -351,7 +351,7 @@ probability of hitting vulnerable instructions in following explorations.
 % derefence. Report the results. FP:FN. 
 \para{Preliminary results.} We have presented a preliminary path slicer (Algorithm 1)
 in ASPLOS 2013~\cite{woodpecker:asplos13} for detecting security bugs on one type of 
-vulnenarable instructions: privilege operations (\eg, \texttt{setuid()}). 
+vulnerable instructions: privilege operations (\eg, \texttt{setuid()}). 
 This path slicer has detected seven new security bugs in widely used programs.
 
 %Second, we have presented a precise data 
