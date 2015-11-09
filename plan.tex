@@ -511,10 +511,10 @@ coredet:asplos10,
 dos:osdi10,ddos:asplos13,ics:oopsla13}.  This technique typically maintains a 
 \emph{logical time}, that advances deterministically on each thread's 
 synchronization. By serializing thread synchronizations with a specific policy 
-(\eg, round-robin or first-come-first-serve), \dmt practically enforces the 
+(\eg, round-robin or first-come-first-serve), \dmt always enforces the 
 same schedule on the same input (see Figure~\ref{fig:defense}). The overhead of 
-\dmt is typically moderate because most code is not synchronization and can 
-still run in parallel.
+\dmt is typically moderate because most program code is not 
+synchronization and can still run in parallel.
 
 
 % \begin{figure}[ht]
