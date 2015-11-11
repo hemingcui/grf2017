@@ -15,12 +15,10 @@ research plan (\S\ref{sec:plan}).
 % P1: as mentioned in background, a key reason is thread interleavings, 
 % so we need to reason about the general patterns we have. Or we say our 
 % methodology is just like pattern matching.
-As mentioned in \S\ref{sec:background}, state-of-the-art lacks a rigorous model 
-for concurrency attacks. Specifically, people lack understanding on how 
-concurrency bugs propagate to vulnerable instructions in source code. This 
-section first gives two concurrency attack examples our preliminary study 
-successfully constructed (\S\ref{sec:examples}), and then proposes 
-our model (\S\ref{sec:attack-phase}).
+State-of-the-art lacks a general, rigorous model to describe how concurrency 
+attacks manifest. In this section, \S\ref{sec:examples} gives two concurrency 
+attack examples from our preliminary study (\S\ref{sec:our-study}), and then 
+\S\ref{sec:attack-phase} proposes our model based on this study.
 
 \vspace{-.15in}\subsubsection{Concurrency Attack Examples in Our Preliminary 
 Study} 
@@ -70,7 +68,8 @@ another user's HTTP page.
 
 
 
-\vspace{-.15in}\subsubsection{Concurrency Attack Model} 
+\vspace{-.15in}\subsubsection{Concurrency Attack Model based on Our 
+Preliminary Study} 
 \label{sec:attack-phase}\vspace{-.075in}
 
 Two key questions on modeling concurrency attacks are: (1) what are the general 
@@ -114,12 +113,12 @@ operations (\eg, \texttt{eval()} in shell scripts). For the third element,
 abnormal control-flow and data-flow of executions.
 
 \para{Future work.} Above model is based on our preliminary study on \nattacks 
-concurrency attacks. We will further study 10 times more concurrency attacks 
-and refine our model by asking ourselves these research questions: (1) Are 
-there other types of vulnerable instructions? (2) Is there malicious data 
-propagation among vulnerable instructions? (3) How does a concurrency 
-attack in a program propagate to other programs through network and file 
-system?
+concurrency attacks (\S\ref{sec:our-study}). We will further study 10 times 
+more concurrency attacks and refine our model by asking ourselves these 
+research questions: (1) Are there other general elements or other types of 
+vulnerable instructions? (2) Is there malicious data propagation among 
+vulnerable instructions? (3) How does a concurrency attack in a program 
+propagate to other programs through network or file system?
 
 %so that we can collect more types of vulnerable instructions and make the 
 %model's elements more comprehensive. During this further study, we will
