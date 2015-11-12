@@ -374,8 +374,8 @@ This path slicer has detected seven new security bugs in widely used programs.
 approach. First, how to generalize our existing path slicer to support all the 
 five types of vulnerable instructions we collected (\S\ref{sec:attack-phase})? 
 Second, given the same type of a vulnerable instruction, how to enhance our 
-path slicer to smartly identify the vulnerable ones among the safe ones (\eg, 
-some \texttt{strcpy()} functions are safe if they only manipulate memory 
+path slicer to smartly identify the vulnerable instructions among the safe ones 
+(\eg, some \texttt{strcpy()} functions are safe if they only manipulate memory 
 and do not involve program inputs)? Third, how to guide symbolic execution 
 to explore malicious inputs and thread interleavings that are more likely to 
 trigger concurrency bugs? Addressing these challenges will cultivate 
