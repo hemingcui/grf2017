@@ -349,10 +349,11 @@ probability of hitting vulnerable instructions in following explorations.
 
 % P1: we have implemented part of the dangerous operation. pointer NULL 
 % derefence. Report the results. FP:FN. 
-\para{Preliminary results.} We have presented a preliminary path slicer (Algorithm 1)
-in ASPLOS 2013~\cite{woodpecker:asplos13} for detecting security bugs on one type of 
+\para{Preliminary results.} We have presented a preliminary path slicing 
+algorithm in ASPLOS 2013~\cite{woodpecker:asplos13} for detecting one type of 
 vulnerable instructions: privilege operations (\eg, \texttt{setuid()}). 
-This path slicer has detected seven new security bugs in widely used programs.
+This work has detected seven new security bugs in widely used programs, 
+including \texttt{useradd}.
 
 %Second, we have presented a precise data 
 %race detector in SOSP 2011~\cite{peregrine:sosp11}. This data race 
