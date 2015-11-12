@@ -370,10 +370,10 @@ This path slicer has detected seven new security bugs in widely used programs.
 % how 
 % to prioritize different operations ()? % Third, how to select malicious 
 % inputs and thread schedules that are more likely to triger concurrency bugs?
-\para{Future work.} We foresee three open research challenges for our detection 
-approach. First, how to generalize our existing path slicer to support all the 
+\para{Future work.} We foresee three open challenges for our detection 
+approach. First, how to generalize the path slicer to support all the 
 five types of vulnerable instructions we collected (\S\ref{sec:attack-phase})? 
-Second, given the same type of a vulnerable instruction, how to enhance our 
+Second, given the same vulnerable instruction, how to enhance the 
 path slicer to smartly identify the vulnerable instructions among the safe ones 
 (\eg, some \texttt{strcpy()} functions are safe if they only manipulate memory 
 and do not involve program inputs)? Third, how to guide symbolic execution 
