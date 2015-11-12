@@ -373,14 +373,15 @@ including \texttt{useradd}.
 % inputs and thread schedules that are more likely to triger concurrency bugs?
 \para{Future work.} We foresee three open challenges for our detection 
 approach. First, how to generalize the path slicer to support all the 
-five types of vulnerable instructions we collected (\S\ref{sec:attack-phase})? 
-Second, given the same vulnerable instruction, how to enhance the 
-path slicer to smartly identify the vulnerable instructions among the safe ones 
-(\eg, some \texttt{strcpy()} functions are safe if they only manipulate memory 
-and do not involve program inputs)? Third, how to guide symbolic execution 
-to explore malicious inputs and thread interleavings that are more likely to 
-trigger concurrency bugs? Addressing these challenges will cultivate 
-new techniques.
+five diverse types of vulnerable instructions we collected 
+(\S\ref{sec:attack-phase})? 
+Second, given the same type of vulnerable instructions, how to enhance the 
+path slicer to smartly identify the indeed vulnerable ones among the 
+safe ones (\eg, some \texttt{strcpy()} functions are safe if they only 
+manipulate memory and do not involve program inputs)? Third, how to guide 
+symbolic execution to explore malicious inputs and thread interleavings that are 
+more likely to trigger concurrency bugs? Addressing these challenges will 
+cultivate new techniques.
 
 \vspace{-.15in}\subsection{Objective 3: Defending against Concurrency 
 Attacks}\label{sec:defense}\vspace{-.075in}
