@@ -1,5 +1,5 @@
-\para{Greatly Improving the Reliability of Datacenter Computing via Fast, 
-Scalable State Machine Replication}
+\para{Improving the Reliability of Datacenter Computing via Fast, 
+Scalable Distribute Consensus}
 
 % \newline
 \para{Abstract:}
@@ -8,9 +8,15 @@ Scalable State Machine Replication}
 % virtual machines. Many applications are mission critical. However, existing 
 % schedulers or virtual machines did not provide satisfactory fault tolerence 
 % to applications, causing big unavailable time window.
-Driven by the dramatically increasing computational demand, more and more 
-real-world applications are being run in datacenter which consists of hundreds 
-or thousands of computers.
+To deal with the rapidly increasing volume of data, more and more software
+applications run in a datacenter with numerous computers. To harness the 
+massive datacenter computing resources, applications are deployed with two major 
+types of infrastructures, schedulers and virtual machines. These infrastructures 
+have brought many benefits, including improving resource utlization, balancing 
+loads, and saving energy. Unfortunately, as an application runs on more 
+computers, minor computer failures will happen more likely and can turn down 
+the entire application, causing severe disasters such as the NYSE Trading halts 
+in 2015 and several Facebook outages in recent years.
 
 % P2: This project aims to greatly improve the availability of datacenter 
 % computing % with three objectives with a computer theory called state machine 
