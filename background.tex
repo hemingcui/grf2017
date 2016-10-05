@@ -47,15 +47,61 @@ DPDK~\cite{dpdk} and Arrakis~\cite{arrakis:osdi14}).
 \vspace{-.15in}\subsection{Datacenter Computing Infrastrutures}
 \label{sec:datacenter}\vspace{-.075in}
 
-Schedulers: TBD.
 
-VM: TBD.
+
+Driven by the drastically increasing computational demands and the volumes of 
+data, more and more applications are deployed using two complementary types of 
+datacenter infrastrutures: 
+schedulers and virtual machines 
+(VM). The first type is 
+schedulers~\cite{borg:eurosys15,mesos:nsdi11,tupperware, yarn:socc13,
+autopilot:sosp07,quincy:sosp09,apollo:osdi14,fuxi:vldb14}. They incorporate 
+many critical applications, including trading, 
+fraud detection, health care, social-networking, and military applications, and 
+these applications naturally require high-availability 
+and low performance overhead in deployments. For instance, a high-frequency 
+trading application tends to be highly-available during its operation hours, 
+and adding merely hundreds of \us to its response time means big money 
+lost~\cite{nosql:finance}. Another instance is social-networking: minor machine 
+errors in Facebook cluster have led to several whole-site outage 
+events~\cite{facebook:outage}.
+
+
+Existing scheduler infrastrutures only make their own critical components 
+highly available, but the applications are not. Therefore, if an application 
+crashes or a computational resource goes down (\eg, hardware errors), these 
+systems have to reschedule or recompute jobs, leaving an arbitrary unavailable 
+time window for these applications.
+
+% 
+The second infrastruture type is VM~\cite{amazon:ec2, openstack, vmware}. VM 
+has abstract away the heterougous physical computing resources and provide a 
+clean, easy to use virtualized resources for applications. Moreover, VM 
+deployments provide many benefits such as better resource utilization, energy 
+saving. Although some VMs provide primary-backup manner of fault-tolerance, 
+this manner has limitations on bandwidth consumption, consistency, etc.
+
+Schedulers and VMs are largely complementary depending on the nature of 
+applications such as performance and security. Many schedulers simply use 
+partly virtualization techniques such as Docker containers for better 
+performance, while many other deployments (\eg, Amazon EC2, OpenStack) simply 
+deploy fully virtualized VMs without schedulers or containers, because VMs 
+provide better and more complete isolation and security guarantees than 
+containers.
 
 
 \vspace{-.15in}\subsubsection{Motivation of Proposed Objectives} 
 \label{sec:motivation}\vspace{-.075in}
 
-TBD.
+Several open problems. First, application is not highly-available. Second, when 
+application runs on large number of machines, existing replication systems, 
+which mainly target single-machine deployments, can not deploy such 
+applications with both properly replication and resource utilization 
+considerations. Therefore, we take a holistic approach: first create a fast, 
+scable, yet still general consensus protocol (Objective 1), and then we 
+integrate this protocol with two major infrastrutures (Objective 2 and 3). This 
+novel integratation provides a clean high-availability support for general  
+applications.
 
 \vspace{-.15in}\subsection{Related Work by Others} 
 \label{sec:others-work}\vspace{-.075in}
