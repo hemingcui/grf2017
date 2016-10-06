@@ -104,17 +104,55 @@ novel integratation provides a clean high-availability support for general
 applications.
 
 \vspace{-.15in}\subsection{Related Work by Others} 
-\label{sec:others-work}\vspace{-.075in}
+\para{Various Consensus Protocols.} \label{sec:others-work}\vspace{-.075in} 
+There are a rich set of
+\paxos algorithms~\cite{paxos:practical,paxos,paxos:simple,paxos:complex,
+epaxos:sosp13} and 
+implementations~\cite{paxos:live,paxos:practical,chubby:osdi,crane:sosp15}. 
+\paxos is notoriously difficult to be fast and 
+scalable~\cite{ellis:thesis,manos:hotdep10,scatter:sosp11}. Since consensus 
+protocols play a core role in datacenters~\cite{matei:hotcloud11, mesos:nsdi11, 
+datacenter:os} and worldwide 
+distributed systems~\cite{spanner:osdi12,mencius:osdi08}, a variety of study 
+have been conducted to improve specific aspects of consensus protocols, 
+including order commutativity~\cite{epaxos:sosp13}, 
+understandability~\cite{raft:usenix14,paxos}, and verifiable reliability 
+rules~\cite{modist:nsdi09,demeter:sosp11}.
 
-\para{Various Consensus Protocols.}
+To make \paxos's throughput scalable (\ie, more replicas, higher throughput), 
+various systems leverage \paxos as a core building block to develop advanced 
+replication approaches, including partitioning program 
+states~\cite{scatter:sosp11,ssmr:dsn14}, splitting consensus 
+leadership~\cite{mencius:osdi08,spaxos:srds12}, and hierarchical 
+replication~\cite{manos:hotdep10,scatter:sosp11}. Theses approaches have shown 
+to largely improve throughput. However, the core of these systems, 
+\paxos, still faces an unscalable consensus 
+latency~\cite{ellis:thesis,scatter:sosp11,manos:hotdep10}. By using \xxx as a 
+building block, these system may scale even better.
 
-\para{Fault-tolerance in datacenter schedulers.} 
+\para{Fault-tolerance in datacenter schedulers.} Cluster management 
+schedulers~\cite{borg:eurosys15,mesos:nsdi11,tupperware,yarn:socc13,
+autopilot:sosp07,quincy:sosp09,apollo:osdi14,fuxi:vldb14} are widespread 
+because they can transparently support many diverse applications (\eg, 
+Hadoop~\cite{hadoop}, Dryad~\cite{dryad}, and key-value stores~\cite{redis}). 
+These existing systems mainly focus on high availability for themselves by 
+replicating important components (\eg, controllers) within these systems, or 
+focus on fault-recovery of applications~\cite{fuxi:vldb14}. To the best of our 
+knowledge, no existing system provides efficient and general high-availability 
+service to applications. Although \xxx's current design leverages an existing 
+system Mesos~\cite{mesos:nsdi11}, its general \paxos protocol design can also 
+be integrated in other systems.
 
-\para{Primary-backup in VM.} 
+\para{Primary-backup in VM.} TBD.
 
-\para{HPC.} HPC already has a replication study. Most of them are in the MP 
-mannor so not our focus, although the techniques developed in this proposal can 
-be applied to HPC.
+\para{HPC.} RDMA techniques have been implemented in various 
+architectures, including Infiniband~\cite{infiniband}, RoCE~\cite{roce}, and 
+iWRAP~\cite{iwrap}. RDMA have been leveraged in many systems to improve 
+application-specific latency and throughput, including high performance 
+computing~\cite{openmpi}, key-value 
+stores~\cite{pilaf:usenix14,herd:sigcomm14,farm:nsdi14,memcached:rdma}, 
+transactional processing systems~\cite{drtm:sosp15,farm:sosp15}, and file 
+systems~\cite{gibson:nfs}. These systems are largely complementary to \xxx.
 
 \vspace{-.15in}\subsection{Related Work by the PI} 
 \label{sec:my-work}\vspace{-.075in}
@@ -123,16 +161,14 @@ be applied to HPC.
 % Then mention security exploits found in Woodpecker.
 % Then mention runtime systems.
 
-The PI is an expert on program analysis algorithms and 
-tools~\cite{wu:pldi12, woodpecker:asplos13, repframe:apsys15}, reliable and 
-secure multithreading runtime systems~\cite{smt:cacm, cui:tern:osdi10, 
-peregrine:sosp11, parrot:sosp13}, and fault-tolerant distributed 
-systems~\cite{crane:sosp15}. The PI's works are published in 
-premier conferences on systems software (OSDI 2010, SOSP 2011, SOSP 2013, and 
-SOSP 2015) and programming languages (PLDI 2012 and ASPLOS 2013). In connection 
-to this project, the PI has developed a precise program slicing algorithm (a 
-key technique for \textbf{Objective 2}) and two reliable runtime systems (key 
-techniques for \textbf{Objective 3}).
+The PI is an expert on fault-tolerant distributed systems and datacenter 
+computing~\cite{crane:sosp15, tripod:apsys16} and reliable parallel 
+runtime systems~\cite{smt:cacm, cui:tern:osdi10, peregrine:sosp11, 
+parrot:sosp13}. The PI's works are published in premier conferences on systems 
+software (OSDI 2010, SOSP 2011, SOSP 2013, and SOSP 2015) and programming 
+languages (PLDI 2012 and ASPLOS 2013). Specifically, the PI has developed a 
+general consensus protocol (part of \textbf{Objective 1}) and a preliminary 
+fault-tolerant datacenter scheduler (part of \textbf{Objective 2}).
 
 
 
