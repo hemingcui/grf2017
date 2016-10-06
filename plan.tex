@@ -160,9 +160,34 @@ TBD.
 Two figures: one is TRIPOD arch. The other is TRIPOD results from the workshop 
 paper.
 
-\para{Preliminary results.} Workshop paper.
+\begin{figure}[!htb]
+    \begin{minipage}{.49\textwidth}
+        \includegraphics[width=0.34\textheight]{figures/arch.ps}
+        \vspace{0.1in}
+        \caption{The \falcon architecture.}
+        \label{fig:falcon-arch}
+    \end{minipage}
+    \begin{minipage}{0.51\textwidth}
+        \includegraphics[width=0.34\textheight]{figures/consensus.ps}
+        \vspace{0.1in}
+        \caption{\falcon protocol in normal case.}
+        \label{fig:falcon-protocol}
+    \end{minipage}
+\end{figure}
 
-\para{Future work.} New algorithm on scheduling and replication. Others?
+\para{Primilinary results.} Crane. Falcon. Say Crane is first version. Falcon 
+totally subsumes Crane. Falcon also has initial results.
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=0.34\textheight]{figures/traditional_paxos_latency.ps}
+        \vspace{0.1in}
+        \caption{Consensus latency of six \paxos protocols. \falcon is fastest 
+and scales the best.}
+        \label{fig:scalability}
+\end{figure}
+
+\para{Open challenges.} New algorithm on scheduling and replication. Others?
 
 \vspace{-.15in}\subsection{Objective 3: 
 Strenghening VM to improve application 
