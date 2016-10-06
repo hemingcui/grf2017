@@ -121,14 +121,26 @@ inputs across replicas.
     \begin{minipage}{0.51\textwidth}
         \includegraphics[width=0.34\textheight]{figures/consensus.ps}
         \vspace{0.1in}
-        \caption{Workflow of detection approach. \\Three basic building blocks
-are shaded.}
+        \caption{\falcon protocol in normal case.}
         \label{fig:falcon-protocol}
     \end{minipage}
 \end{figure}
 
-Primilinary results: Crane. Falcon. Say Crane is first version. Falcon totally 
-subsumes Crane. Falcon also has initial results.
+\para{Primilinary results.} Crane. Falcon. Say Crane is first version. Falcon 
+totally subsumes Crane. Falcon also has initial results.
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=0.34\textheight]{figures/traditional_paxos_latency.ps}
+        \vspace{0.1in}
+        \caption{Consensus latency of six \paxos protocols. \falcon is fastest 
+and scales the best.}
+        \label{fig:scalability}
+\end{figure}
+
+\para{Future work.} Evaluate its scalability on thousands or even more 
+machines. Evaluate its generality on more applications. Evaluate the RDMA-based 
+failure recovery sub-protocols on various failure scenarios.
 
 \vspace{-.15in}\subsection{Objective 2: 
 Integrating Falcon with Datacenter Schedulers}\label{sec:detect}\vspace{-.075in}
