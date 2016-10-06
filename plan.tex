@@ -1,13 +1,13 @@
 \vspace{-.15in}\section{Research Plan and Methodology}
 \label{sec:rep}\vspace{-.075in}
 
-This \xxx project tackles concurrency attacks with a thorough, systematic 
-methodology. To this end, this section presents three objectives, including a 
-general, rigorous concurrency attack model (\S\ref{sec:model}), a systematic 
-concurrency attack detection approach (\S\ref{sec:detect}) by following this 
-model, and a runtime defense infrastructure (\S\ref{sec:defense}). Each 
-objective includes our preliminary results. Finally, this section describes our 
-research plan (\S\ref{sec:plan}).
+This \xxx project strenghens the reliability of datacenter computing with a 
+holistic, thorough methodology. To this end, this section first proposes a 
+fast, scalable consensus protocol (\S\ref{sec:protocol}). With this protocol, 
+it presents a scheduler that makes general applications fault-tolerant 
+(\S\ref{sec:scheduler}) and a new VM replication architecture (\S\ref{sec:vm}). 
+The first two objectives include preliminary results. Finally, this section 
+describes our research plan (\S\ref{sec:plan}).
 
 \vspace{-.15in}\subsection{Objective 1: Building Fast, Scalable Consensus via
 RDMA} 
@@ -16,19 +16,23 @@ RDMA}
 % P1: as mentioned in background, a key reason is thread interleavings, 
 % so we need to reason about the general patterns we have. Or we say our 
 % methodology is just like pattern matching.
-State-of-the-art lacks a general, rigorous model to describe how concurrency 
-attacks manifest. In this section, \S\ref{sec:examples} gives two concurrency 
-attack examples in our preliminary study (\S\ref{sec:our-study}), and then 
-\S\ref{sec:attack-phase} proposes our model based on this study.
+Traditional \paxos protocols incur high consensus latency because they run on 
+TCP/IP, which go through OS kernels and software network layers. In this 
+section, \S\ref{sec:problem} analyzes this latency problem and its poor 
+scalability in detail, and then presents our new RDMA-based \paxos 
+protocol called \falcon (\S\ref{sec:falcon}).
 
-\vspace{-.15in}\subsubsection{Problem: Consensus Latency Scales poorly to 
-Replica Group Size} 
+\vspace{-.15in}\subsubsection{Problem: Consensus Latency of existing \paxos 
+protocols scale poorly} 
 \label{sec:examples}\vspace{-.075in}
 
+First, mainly introduce the problems in traditional protocols.
 
+Second, briefly mention the problem in DARE. and its scalability bottleneck.
 
-\vspace{-.15in}\subsubsection{Falcon: A new RDMA-based Consensus Protocol} 
-\label{sec:attack-phase}\vspace{-.075in}
+\vspace{-.15in}\subsubsection{Falcon: a fast, scalable RDMA-based \paxos 
+protocol} 
+\label{sec:falcon}\vspace{-.075in}
 
 TBD.
 
@@ -41,13 +45,17 @@ subsumes Crane. Falcon also has initial results.
 \vspace{-.15in}\subsection{Objective 2: 
 Integrating Falcon with Datacenter Schedulers}\label{sec:detect}\vspace{-.075in}
 
-
+\vspace{-.15in}\subsubsection{\tripod: the fault-tolerant scheduler 
+architecture} 
+\label{sec:scheduler-arch}\vspace{-.075in}
 
 TBD.
 
 
-\vspace{-.15in}\subsubsection{TRIPOD Architecture}
+\vspace{-.15in}\subsubsection{The replication-aware resource allocation scheme}
 \label{sec:detect-arch}\vspace{-.075in}
+
+TBD.
 
 Two figures: one is TRIPOD arch. The other is TRIPOD results from the workshop 
 paper.
@@ -61,12 +69,13 @@ Strenghening VM to improve application
 availability}\label{sec:defense}\vspace{-.075in}
 
 
+% TBD: need a new replication approach name.
 \vspace{-.15in}\subsubsection{Idea I: Hybrid Replication} 
 \label{sec:defense-arch}\vspace{-.075in}
 
 TBD.
 
-\vspace{-.15in}\subsubsection{Idea II: Paxos-based Live Migration} 
+\vspace{-.15in}\subsubsection{Idea II: \paxos-based Live Migration} 
 \label{sec:defense-arch}\vspace{-.075in}
 
 TBD.
