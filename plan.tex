@@ -145,21 +145,132 @@ failure recovery sub-protocols on various failure scenarios.
 \vspace{-.15in}\subsection{Objective 2: 
 Integrating Falcon with Datacenter Schedulers}\label{sec:detect}\vspace{-.075in}
 
+A naive approach to achieve high-availability for critical applications could 
+be integrating \paxos within every application. However, this integration 
+approach has two major issues. First, \paxos is notoriously difficult 
+to understand~\cite{raft:usenix14}, implement~\cite{paxos:practical}, and 
+verify~\cite{demeter:sosp11}.
+
+Second, running a \paxos-enabled application with a 
+cluster management system can be problematic because the system is unaware 
+of replication logic. For instance, if an application submits three copies of 
+the same job to the system, the system may happen to schedule all three 
+copies on the same machine (although it should schedule them on 
+different machines to tolerate machine failures).
+
 \vspace{-.15in}\subsubsection{\tripod: the fault-tolerant scheduler 
 architecture} 
 \label{sec:scheduler-arch}\vspace{-.075in}
 
-TBD.dddddd
+This paper proposes the design of \tripod,\footnote{We name our system after 
+the ancient Chinese three-legged tripod, a reliable, multi-purpose container.} 
+a cluster management system that automatically provides high-availability to 
+general applications. \tripod maintains replicas of controllers with a new 
+RDMA-enabled \paxos protocol~\cite{falcon:github}. Unlike existing systems 
+which let only the leader controller schedule jobs, \tripod runs replicas of 
+the same job using the replicas of controllers: after controllers agree on a 
+new job, \tripod lets each controller schedule an independent copy of this job.
 
+To avoid the two aforementioned integration issues, \tripod chooses to 
+integrate 
+\paxos in the cluster system, not in applications. Doing so has two benefits. 
+First, \tripod's \paxos acts as a single, general SMR service to applications. 
+We 
+can just leverage existing verification 
+tools~\cite{modist:nsdi09,demeter:sosp11} to make sure that this \paxos 
+protocol is robust and correct, and then we can benefit many applications. 
+Second, now \tripod's own scheduler can handle the replication logic and do 
+careful, replication-aware scheduling for jobs.
+
+In an implementation level, \tripod integrates \mesos~\cite{mesos:nsdi11}, a 
+widely 
+used cluster management system, with a new RDMA-enabled \paxos 
+protocol~\cite{falcon:github}. Compared to a prior RDMA-enabled \paxos 
+protocol~\cite{dare:hpdc15}, our new protocol can support general programs 
+transparently without modifications.
+
+Figure~\ref{fig:arch} depicts \tripod's architecture, and its key components 
+are 
+shaded (and in blue). To illustrate how \tripod works in an application 
+perspective, this figure shows two applications, Hadoop and MPI. Each 
+application has a \emph{replica strength} (\v{R}) to denote the level of 
+fault-tolerance it demands. This value is either 1 or equals the number of 
+replicas of controllers in \tripod.
+
+By default, each application has \v{\v{R}=1}, which means that this application 
+does not need replication. For such a default setting, \tripod runs the job as 
+is 
+without replication, like a typical cluster management system (\eg, Mesos).
+
+In this figure, Hadoop's \v{R} is 3, which means that it wants to replicate 
+each of its job with three copies for high-availability. Suppose Hadoop 
+submits two jobs to the leader controller, each has different shapes (triangle 
+or hexagon). The leader controller then invokes a consensus on each job across 
+controllers. Once a consensus is reached, each controller assigns the same job 
+on different slave machines.
+
+The leader controller directly returns its computation result to the Hadoop 
+scheduler unless a tail-tolerance mechanism is triggered 
+(\S\ref{sec:workflow}). 
+Standby controllers ignore the results unless the same mechanism is triggered.
 
 \vspace{-.15in}\subsubsection{The replication-aware resource allocation scheme}
 \label{sec:detect-arch}\vspace{-.075in}
 
-TBD.
+Figure~\ref{fig:workflow} shows \xxx's workflow on scheduling jobs with four 
+steps. This workflow is similar to that in Mesos except the second and fourth 
+steps. These two steps \tripod abstract away the replication logic in its 
+resource offers and allocations from the application. An application runs as if 
+\xxx does not replicate any of its jobs, and \tripod transparently handles all 
+the replication logic.
+
+In the first step, slave machines periodically report their available computing 
+resources (\eg, CPU cores and memory) to the leader controller. In the second 
+step, instead of offering the available resources aggregated from slave 
+machines, \tripod divides the amount of resources by each application's \v{R} 
+value and then sends a resource offer to the application. The goal is to 
+reserve enough resources for \tripod to replicate a job with \v{R} copies.
+
+In the third step, an application scheduler submits jobs to the leader 
+controller. The leader controller then invokes a consensus on this job by 
+carrying the resource offer made to the application.
+
+Once a majority of controllers agrees on executing this job, each controller 
+does the fourth step. It schedules this job on an available slave machine 
+according to the resource offer. To prevent controllers putting the same job on 
+the same slave machine, the leader controller first makes an assignment on 
+which controller should run this job on which slave machine, it then carries 
+this assignment in its consensus request. Once a consensus on this job is 
+reached, each controller follows this assignment.
 
 Two figures: one is TRIPOD arch. The other is TRIPOD results from the workshop 
 paper. Figure~\ref{fig:scheduler-arch} and Figure~\ref{fig:scheduler-workflow} 
 and Figure~\ref{fig:scheduler-latency}.
+
+
+\para{Reliability v.s. resource consumption} The main goal of \xxx is to 
+provide high-availability to critical applications 
+running in clusters. On one hand, clusters are included more and more computing 
+resources (\eg, machines), where failures of these resources and applications 
+are already commonplace~\cite{facebook:outage}. On the other hand, 
+high requirements on response times and availability become more and more 
+important to critical applications.
+
+For instance, Both NYSE and Nasdaq have experienced outage of their whole 
+site~\cite{nyse:halt} or specific IPO events~\cite{facebook:ipo:delay} due to 
+minor machine errors.  Even social-networking applications like Facebook has 
+strong fault-tolerance requirements, because minor machine failures have turned 
+down the whole Facebook site for several times in the last few 
+years~\cite{facebook:outage}, costing huge 
+money lost. 
+
+Therefore, \tripod's design favors more on availability and performance 
+(low consensus latency). It's design tends to use \v{R} times of resources 
+compared to traditional applications. We argue that this extra resource 
+utilizations are acceptable for critical applications, because if they have 
+high 
+demand on availability and response times, they can often tolerate costs on 
+computing resources (\eg, trading and medical platforms).
 
 \begin{figure}[!htb]
     \begin{minipage}{.49\textwidth}
@@ -179,6 +290,13 @@ and Figure~\ref{fig:scheduler-latency}.
 \para{Primilinary results.} change redis to memcached. used in financial 
 platform and social networking.
 
+To emulate a typical social-networking application, we ran this protocol with 
+\redis~\cite{redis}, a popular key-value store used by Twitter. Evaluation 
+showed that, compared to \redis's unreplicated execution, \xxx incurred merely 
+a \tputoverhead overhead in throughput and \latencyoverhead in response time. 
+This protocol was 40.1X faster than a \zookeeper-based
+SMR protocol~\cite{calvin:sigmod12} which runs on TCP/IP.
+
 \begin{figure}[!htb]
 \centering
 \includegraphics[width=0.34\textheight]{figures/scheduler_latency.ps}
@@ -187,7 +305,8 @@ platform and social networking.
         \label{fig:scheduler-latency}
 \end{figure}
 
-\para{Open challenges.} New algorithm on scheduling and replication. Others?
+\para{Open challenges.} New algorithm on scheduling and replication. Others? 
+Apply them to do tail tolerance.
 
 \vspace{-.15in}\subsection{Objective 3: 
 Strenghening VM to improve application 
