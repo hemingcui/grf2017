@@ -56,15 +56,25 @@ used in social network and financial trading platforms.
 % P5: Third, strenghten virtual machine with this protocol. Challenge: it is 
 % difficult to enforce execute states efficiently at the same 
 % time. We: hybrid replication. Or some other name. Fine-grained replication?
-Third, we will make our protocol and virtual machines form a novel 
-mutual-beneficial eco-system. This eco-system replicates the same virtual 
-machine on different computers and enforces same external inputs 
-across these virtual machine copies. With benefits from the hypervior layer, 
-our protocol can efficiently, precisely detect and resolve different 
-application execution states across virtual machines and make them run in sync. 
-With the help from our protocol, virtual machine migration, a widely deployed 
-load balance scheme, can enjoy much shorter operation time and much fewer 
-transfered states during migration.
+% Third, we will make our protocol and virtual machines form a novel 
+% mutual-beneficial eco-system. This eco-system replicates the same virtual 
+% machine on different computers and enforces same external inputs 
+% across these virtual machine copies. With benefits from the hypervior layer, 
+% our protocol can efficiently, precisely detect and resolve different 
+% application execution states across virtual machines and make them run in sync. 
+% With the help from our protocol, virtual machine migration, a widely deployed 
+% load balance scheme, can enjoy much shorter operation time and much fewer 
+% transfered states during migration.
+
+Third, we will make our protocol and VMs form a novel eco-system. This 
+eco-system not only leverages the hypervisor layer to automatically replicates 
+applications running in VMs, but it leads to a new VM live migration approach 
+which is designed for load balance. In order to migrate an application's 
+execution states to remote computers, prior live migration approachs incur 
+substantial application down time and resource consumption on local computer. In 
+our new approach, we only need to migrate the leadership of our protocol, which 
+consumes almost zero time and resource.
+
 
 % P6: We envision that... impact, of the project.
 We envision that our expertise on building reliable distributed protocols and 

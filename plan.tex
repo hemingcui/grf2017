@@ -308,35 +308,88 @@ SMR protocol~\cite{calvin:sigmod12} which runs on TCP/IP.
 \para{Open challenges.} New algorithm on scheduling and replication. Others? 
 Apply them to do tail tolerance.
 
-\vspace{-.15in}\subsection{Objective 3: 
-Strenghening VM to improve application 
+\vspace{-.15in}\subsection{Objective 3: Strenghening VM to improve application 
 availability}\label{sec:defense}\vspace{-.075in}
 
+Mainly introduce EC2, Openstak. VM only.
 
-% TBD: need a new replication approach name.
-\vspace{-.15in}\subsubsection{Idea I: Hybrid Replication} 
+Briefly introduce VM fault-tolerance techniques. Primary-backup. Remus. 
+Hypervisor replication (old paper). FaRM.
+
+Talk about migration. It is similar to primary-backup, but mainly for load 
+balance, not to overcome failures. Main approach is live migration that aims to 
+reduce application down time. VMotion.
+
+However, there is still substantial down time and resource consumption. E.g., 
+vMotion, for memory intensive applications, the down time can be up to 30 
+seconds. As migration tends to invoke frequently for load balancing, 
+consolidation, energy saving, this downtime may incur big money lost for cloud 
+deployers.
+
+When doing migration, both the local computer and the migration destination 
+computer incur big resource consumption. This is contraditive to the motivation 
+of migration: reduing computer loads on the local computer.
+
+\vspace{-.15in}\subsubsection{Make applications running in VMs 
+highly-available} 
 \label{sec:defense-arch}\vspace{-.075in}
 
-TBD.
+Describe the infrastructure. Take Ning's figure. Hypervisor. tap\_send().
 
-\vspace{-.15in}\subsubsection{Idea II: \paxos-based Live Migration} 
+\vspace{-.15in}\subsubsection{\paxos-based Live Migration} 
 \label{sec:defense-arch}\vspace{-.075in}
 
-TBD.
+% We propose our own replication approach. The non-leader only agree on new 
+% inputs, they can opt to execute requests or absorb periodic checkpoints.
+
+
+This approach is othorgnal to the VM replication. Normal case: a leader means 
+the current computing instance. The leader does a lightweight checkpoint when 
+it's idle (no incoming requests), and sends the checkpoint to the backups. A 
+set of backups run on hightly loaded computers and agree on inputs (also record 
+the inputs persistantly). The backups only keeps the latest checkpoint and 
+discards prior ones.
+
+When the VM invokes a migration on the leader computer, it uses extra mechanism 
+to determine which backups should be the migration destination (the next 
+leader). Then, the destination extracts the lastes checkpoint from the leader, 
+restores the application state, and then follow with executing the recorded but 
+not executed inputs. Once this is done, we invoke a \falcon protocol 
+level operation: migration the leadership, which is similar to a traditional 
+\paxos leader election process, but just explicitly decides the destination 
+computer as the new leader.
+
+% TBD: mention the leader election latency in Objective 2.
+Analysis: this approach incurs almost zero time and resource for a few reasons. 
+First, the leadership migration is fast (tens of micro seconds). Second, no 
+frequent execution state transfer during the migration time, only at the 
+leader's idle time. Third, robust to various scenarios (\eg, destination fails 
+during the migration), thanking to \paxos.
+
+\para{Future work}. Fully implement the novel leader migration operation. 
+Evaluate them on various applications with intensive memory usage. Precisely 
+compare the time and resource usage with traditional live migration approaches 
+(\eg, vMotion).
+
+
+% % TBD: need a new replication approach name.
+% \vspace{-.15in}\subsubsection{Idea I: Hybrid Replication} 
+% \label{sec:defense-arch}\vspace{-.075in}
+% 
+% TBD.
 
 \vspace{-.15in}\subsection{Research Plan} \label{sec:plan}\vspace{-.075in}
 
 This project will require two PhD students S1 and S2 to work for 
-three years. In the first year, S1 will develop and refine the concurrency 
-attack model (part of \textbf{Objective~1}), and S2 will leverage the model to 
-design the detailed workflow of the detection approach (part of 
-\textbf{Objective~2}) by working closely with S1. In the second year, S1 will 
-do an empirical study on how well the model represents real-world concurrency 
-attacks (part of \textbf{Objective~1}), and S2 will implement the detection 
-approach as a software tool (part of \textbf{Objective~2}). In the third year, 
-S1 will implement the defense infrastructure (\textbf{Objective~3}), and S2 
-will study the detection tool on a broad range of real-world multithreaded 
-programs to find new attacks.
+three years. In the first year, S1 will design and fully implement the \falcon 
+protocol (part of \textbf{Objective~1}), and S2 will evaluate its performance 
+and robustness on various real-world storage applications (part of 
+\textbf{Objective~2}). In the second year, S1 will 
+integrate \falcon to a scheduler \mesos (part of \textbf{Objective~2}), and S2 
+will make \falcon and KVM form an eco-system (part of \textbf{Objective~3}). In 
+the third year, S1 and S2 will respectively study the efficacy of their systems 
+built Object 2 and Object 3 with real-world applications, including big data 
+applications.
 % Both students will 
 % involve theoretical methods, implement real software systems, and 
 % perform real-world study.
