@@ -1,4 +1,84 @@
 % \newline
 \para{Long term impact:}
 
-TBD.
+To deal with the rapidly increasing volume of data, more and more software
+applications run within a datacenter with numerous computers. To harness the 
+massive datacenter computing resources, applications are deployed with two 
+major 
+types of infrastructures: schedulers and virtual machines. These 
+infrastructures have brought many benefits, including improving resource 
+utlization, balancing loads, and saving energy. Unfortunately, as an 
+application 
+runs on more computers, minor computer failures will happen more likely and can 
+turn down the entire application, causing severe disasters such as the NYSE 
+Trading halts in 2015 and several Facebook outages in recent years. Existing 
+infrastructures lack support to ensure high-availability for applications.
+
+% P2: This project aims to greatly improve the availability of datacenter 
+% computing % with three objectives with a computer theory called state machine 
+% replication. Introduce basic of the theory: replica, majority, consensus, 
+% etc. 
+This GAIA project takes a holistic approach to improve the the availability of 
+datacenter applications, with three objectives. First, we will create a fast, 
+scalable distributed consensus protocol for general applications. Distributed 
+consensus consensus is a fault-tolerance theory: it replicates the same 
+application on different computers and always enforces the same input for the 
+program, as long as a majority of computers are alive and agree on the input. A 
+key challenge is that traditional consensus protocols are too slow (over 300 
+micro seconds), because their messages go through OS kernels and software 
+TCP/IP layers. We tackle this challenge by creating a fast consensus protocol 
+with an advanced networking technique called Remote Direct Memory Access 
+(RDMA). Our initial results published in [SOSP '15] showed that our protocol 
+can support diverse real-world applications, and our latest protocol was 
+20X~31X faster than traditional protocols even running on 35X more computers.
+
+
+% P3: First, build a fast, scalable SMR protocol. 
+% Key challenge, scalability. We propose a new RDMA-based % protocol. Making 
+% replicas agree on inputs on bare memory. Also, our protocol is general, cite 
+% Crane.
+
+% P4: Second, strength schedulers with this protocol. Challenge: ? Our approach?
+Second, we will construct the first fault-tolerent scheduler by integrating our 
+new protocol with widely used datacenter schedulers. In order to seamleessly 
+achieve computation replication by our protocol and resource allocation by the 
+schedule, we propose a replication-aware, resource allocation workflow for the 
+scheduler. Our initial results published in [APSys '16] showed that this 
+scheduler can efficiently support Redis, a key-value store application widely 
+used in social network and financial trading platforms.
+
+% Eco-system.
+% P5: Third, strenghten virtual machine with this protocol. Challenge: it is 
+% difficult to enforce execute states efficiently at the same 
+% time. We: hybrid replication. Or some other name. Fine-grained replication?
+% Third, we will make our protocol and virtual machines form a novel 
+% mutual-beneficial eco-system. This eco-system replicates the same virtual 
+% machine on different computers and enforces same external inputs 
+% across these virtual machine copies. With benefits from the hypervior layer, 
+% our protocol can efficiently, precisely detect and resolve different 
+% application execution states across virtual machines and make them run in 
+% sync. 
+% With the help from our protocol, virtual machine migration, a widely deployed 
+% load balance scheme, can enjoy much shorter operation time and much fewer 
+% transfered states during migration.
+
+Third, we will make our protocol and VMs form a novel eco-system. This 
+eco-system not only leverages the hypervisor layer to automatically replicates 
+applications running in VMs, but it leads to a new VM live migration approach 
+which is designed for load balance. In order to migrate an application's 
+execution states to remote computers, prior live migration approachs incur 
+substantial application down time and resource consumption on local computer. 
+In 
+our new approach, we only need to migrate the leadership of our protocol, which 
+consumes almost zero time and resource.
+
+
+% P6: We envision that... impact, of the project.
+We envision that our expertise on building reliable distributed protocols and 
+our initial results will help us achieve all the three objectives. By greatly 
+improving the availability of many applications running in a datacenter, this 
+project will benefit almost all computer users and software vendors, including 
+social networking, military software services, and financial platforms. This 
+project will also greatly advance existing datacenter techniques (\eg, 
+migration) and attract more researchers to build more fault-tolerant 
+infrastructures.
