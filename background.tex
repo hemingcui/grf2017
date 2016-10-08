@@ -15,29 +15,30 @@ role in datacenters, including
 ordering services~\cite{ellis:thesis,manos:hotdep10,scatter:sosp11},
 leader election~\cite{zookeeper, chubby:osdi}, and
 fault-tolerance~\cite{eve:osdi12,rex:eurosys14,crane:sosp15}. A \paxos protocol
-replicates the same application on a group of computers (or replicas) and 
-enforces a strongly consistent order of inputs for this application, as long as 
-a majority of replicas still behave correctly. This makes \paxos tolerate 
-various faults, including minor replica and network failures.
+replicates the same application on a group of computers (or \emph{replicas}) 
+and enforces the same order of inputs for this application, as long as 
+a majority of replicas are still alive. Therefore, \paxos tolerates 
+various faults, including minor replica failures and packet losses.
 
-Due to this strong fault-tolerance, \paxos is widely served in many systems.
-For instance, Scatter~\cite{scatter:sosp11} runs 8$\sim$12 replicas in each
-\paxos group to order client requests, and it lets replicas respond requests
+\paxos is widely served in many systems. For instance, 
+Scatter~\cite{scatter:sosp11} runs 8$\sim$12 replicas in a
+\paxos group to order client requests, and it lets replicas reply requests
 in parallel. A bigger group size will improve Scatter throughput. 
-Moreover, recent state machine replication (SMR) 
-systems~\cite{eve:osdi12,rex:eurosys14,crane:sosp15} use \paxos to greatly 
-improve the availability of general server applications (\eg, \mysql).
+Moreover, state machine replication (SMR) 
+systems~\cite{eve:osdi12,rex:eurosys14,crane:sosp15} use \paxos to 
+improve the availability of server applications (\eg, \mysql~\cite{mysql}).
 
 Unfortunately, despite much effort, the group size of traditional \paxos 
 protocols can hardly go up to a dozen because their consensus messages 
-go through TCP/IP layers (an RTT often takes hundreds of \us), causing the 
-consensus latency to increase almost linearly to the group size.
+go through TCP/IP layers (a round-trip takes hundreds of \us), causing the 
+consensus latency to increase almost linearly to the group 
+size~\cite{scatter:sosp11,zookeeper,manos:hotdep10,crane:sosp15}.
 
-To address this \paxos performance problem, RDMA networking (\eg, 
-Infiniband~\cite{infiniband}) becomes a promising direction because its recent 
-commonplace in datacenters and and its decreasing prices. An RDMA RTT takes 
-only about 3 \us~\cite{pilaf:usenix14}. This ultra low latency not only comes 
-from its kernel bypassing feature, but also its dedicated network stack 
+To address this \paxos performance problem, Remote Direct Memory Access (RDMA) 
+(\eg, Infiniband~\cite{infiniband}) is a promising solution due to its 
+commonplace in datacenters and and its decreasing prices. An RDMA round-trip 
+takes only 3 \us~\cite{pilaf:usenix14}. This ultra low latency not only 
+comes from its kernel bypassing feature, but also its dedicated network stack 
 implemented in hardware. Therefore, RDMA is considered the fastest kernel 
 bypassing technique~\cite{herd:sigcomm14,pilaf:usenix14,dare:hpdc15}; it is 
 several times faster than software-only kernel bypassing techniques (\eg, 
