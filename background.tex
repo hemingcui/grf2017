@@ -135,10 +135,10 @@ to largely improve throughput. However, the core of these systems,
 latency~\cite{ellis:thesis,scatter:sosp11,manos:hotdep10}. By using \xxx as a 
 building block, these prior systems can scale even better.
 
-\para{Fault-tolerance for schedulers.} Datacenter
+\para{Fault-tolerance in schedulers.} Datacenter
 schedulers~\cite{borg:eurosys15,mesos:nsdi11,tupperware,yarn:socc13,
 autopilot:sosp07,quincy:sosp09,apollo:osdi14,fuxi:vldb14} are widespread 
-because they can support many diverse applications (\eg, 
+because they can support diverse applications (\eg, 
 Hadoop~\cite{hadoop}, Dryad~\cite{dryad}, and key-value stores~\cite{redis}). 
 These existing systems mainly focus on high availability for themselves by 
 replicating their own important components, or focus on fault-recovery of 
@@ -148,7 +148,8 @@ applications.
 % \xxx's consensus protocol design is general to application and 
 % schedulers so it can be integrated in other systems.
 
-\para{Primary-backup in VM.} TBD.
+%  Migration and primary-backup.
+\para{Fault-tolerance in VM.}
 
 \para{RDMA techniques.} RDMA has been realized in various types of datacenter 
 networks, including Infiniband~\cite{infiniband}, RoCE~\cite{roce}, and 
