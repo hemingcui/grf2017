@@ -28,16 +28,16 @@ Moreover, state machine replication (SMR)
 systems~\cite{eve:osdi12,rex:eurosys14,crane:sosp15} use \paxos to 
 improve the availability of server applications (\eg, \mysql~\cite{mysql}).
 
-Unfortunately, despite much effort, the group size of traditional \paxos 
-protocols can hardly go up to a dozen because their consensus messages 
-go through TCP/IP layers (a round-trip takes hundreds of \us), causing the 
-consensus latency to increase almost linearly to the group 
-size~\cite{scatter:sosp11,zookeeper,manos:hotdep10,crane:sosp15}.
+Unfortunately, the group size of existing \paxos protocols can hardly go up 
+to a dozen because their consensus messages go through OS kernels and software 
+TCP/IP layers (a round-trip takes about 200 \us), causing the consensus 
+latency to increase almost linearly to 
+group size~\cite{scatter:sosp11,zookeeper,crane:sosp15}.
 
 To address this \paxos performance problem, Remote Direct Memory Access (RDMA) 
 (\eg, Infiniband~\cite{infiniband}) is a promising solution due to its 
 commonplace in datacenters and and its decreasing prices. An RDMA round-trip 
-takes only 3 \us~\cite{pilaf:usenix14}. This ultra low latency not only 
+takes only about 3 \us~\cite{pilaf:usenix14}. This ultra low latency not only 
 comes from its kernel bypassing feature, but also its dedicated network stack 
 implemented in hardware. Therefore, RDMA is considered the fastest kernel 
 bypassing technique~\cite{herd:sigcomm14,pilaf:usenix14,dare:hpdc15}; it is 
@@ -49,45 +49,38 @@ DPDK~\cite{dpdk} and Arrakis~\cite{arrakis:osdi14}).
 
 
 
-Driven by the drastically increasing computational demands and the volumes of 
-data, more and more applications are deployed using two complementary types of 
-datacenter infrastrutures: 
-schedulers and virtual machines 
-(VM). The first type is 
-schedulers~\cite{borg:eurosys15,mesos:nsdi11,tupperware, yarn:socc13,
-autopilot:sosp07,quincy:sosp09,apollo:osdi14,fuxi:vldb14}. They incorporate 
-many critical applications, including trading, 
-fraud detection, health care, social-networking, and military applications, and 
-these applications naturally require high-availability 
-and low performance overhead in deployments. For instance, a high-frequency 
-trading application tends to be highly-available during its operation hours, 
-and adding merely hundreds of \us to its response time means big money 
-lost~\cite{nosql:finance}. Another instance is social-networking: minor machine 
-errors in Facebook cluster have led to several whole-site outage 
-events~\cite{facebook:outage}.
+To deal with the rapidly increasing volume of data, more and more applications 
+are deployed in a datacenter with two complementary types of infrastrutures. The 
+first type is schedulers~\cite{borg:eurosys15,mesos:nsdi11,tupperware, 
+yarn:socc13, autopilot:sosp07,quincy:sosp09,apollo:osdi14,fuxi:vldb14}. Many 
+applications are mission critical and demand both high performance
+and availability, including financial trading, health care, social networks, 
+and military applications. For instance, a high-frequency trading platform 
+must be highly-available during operation hours, and adding merely hundreds of 
+\us to its latency means big money lost~\cite{nosql:finance}. Another 
+instance is social networks: minor computer errors in Facebook cluster led to 
+several outages in recent years~\cite{facebook:outage}.
 
 
-Existing scheduler infrastrutures only make their own critical components 
-highly available, but the applications are not. Therefore, if an application 
-crashes or a computational resource goes down (\eg, hardware errors), these 
-systems have to reschedule or recompute jobs, leaving an arbitrary unavailable 
-time window for these applications.
+Although existing schedulers themselves have are made available with 
+\paxos (\eg,~\cite{mesos:nsdi11}), their applications are not. Therefore, if an 
+application crashes or hardware errors occur, these schedulers have to 
+reschedule applications, leading to substantial application unavailability.
 
 % 
 The second infrastruture type is VM~\cite{amazon:ec2, openstack, vmware}. VM 
-has abstract away the heterougous physical computing resources and provide a 
-clean, easy to use virtualized resources for applications. Moreover, VM 
-deployments provide many benefits such as better resource utilization, energy 
-saving. Although some VMs provide primary-backup manner of fault-tolerance, 
-this manner has limitations on bandwidth consumption, consistency, etc.
+abstracts away the heterougous physical computing resources, making 
+computing resources easy to isolate, utilize, and balance loads (\eg, 
+via live migration~\cite{vmotion,xen:migration}). Although some application 
+fault-tolerance approaches such as primary-backup~\cite{remus:nsdi08}, these 
+approaches still often consume prohibitive resources (\eg, CPU and network 
+bandwith) and have weaker availability guarantee than \paxos.
 
-Schedulers and VMs are largely complementary depending on the nature of 
-applications such as performance and security. Many schedulers simply use 
-partly virtualization techniques such as Docker containers for better 
-performance, while many other deployments (\eg, Amazon EC2, OpenStack) simply 
-deploy fully virtualized VMs without schedulers or containers, because VMs 
-provide better and more complete isolation and security guarantees than 
-containers.
+Schedulers and VMs are largely complementary infrastrutures depending on 
+application requirements such as performance and security. Many schedulers 
+use lightweight containers~\cite{docker,lxc} for isolation, while many other 
+cloud deployments (\eg, Amazon EC2) simply use VMs without schedulers. 
+Therefore, this proposal strenghtens the two infrastrutures respectively.
 
 
 \vspace{-.15in}\subsection{Motivation of Proposed Objectives} 
