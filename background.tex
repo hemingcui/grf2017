@@ -86,22 +86,34 @@ Therefore, this proposal strenghtens the two infrastrutures respectively.
 \vspace{-.15in}\subsection{Motivation of Proposed Objectives} 
 \label{sec:motivation}\vspace{-.075in}
 
-Several open problems. First, application is not highly-available. Second, when 
-application runs on large number of machines, existing replication systems, 
-which mainly target single-machine deployments, can not deploy such 
-applications with both properly replication and resource utilization 
-considerations. Therefore, we take a holistic approach: first create a fast, 
-scable, yet still general consensus protocol (Objective 1), and then we 
-integrate this protocol with two major infrastrutures (Objective 2 and 3). This 
-novel integratation provides a clean high-availability support for general  
-applications.
+% Several open problems. First, application is not highly-available. Second, when 
+% application runs on large number of machines, existing replication systems, 
+% which mainly target single-machine deployments, can not deploy such 
+% applications with both properly replication and resource utilization 
+% considerations. Therefore, we take a holistic approach: first create a fast, 
+% scable, yet still general consensus protocol (Objective 1), and then we 
+% integrate this protocol with two major infrastrutures (Objective 2 and 3). This 
+% novel integratation provides a clean high-availability support for general  
+% applications.
+The proposed objectives stem from two research problems in datacenter 
+computing. First, despite the core role and wide deployments of \paxos, it 
+suffers from high consensus latency and poor scalability. Therefore, 
+\textbf{Objective 1} addresses this problem by leveraging RDMA to create a 
+fast, scalable consensus protocol. Second, although many 
+datacenter applications demand high availability, existing infrastrutures lack 
+such support. Therefore, \textbf{Object 2 and 3} take a holistic methodology to 
+integrate our protocol with two major infrastrutures, potentially benefiting 
+almost all applications.
+
 
 \vspace{-.15in}\subsection{Related Work by Others} 
-\para{Various Consensus Protocols.} \label{sec:others-work}\vspace{-.075in} 
-There are a rich set of
-\paxos algorithms~\cite{paxos:practical,paxos,paxos:simple,paxos:complex,
-epaxos:sosp13} and 
-implementations~\cite{paxos:live,paxos:practical,chubby:osdi,crane:sosp15}. 
+\label{sec:others-work}\vspace{-.075in}
+
+\para{Various Consensus Protocols.}  
+There are a rich set of \paxos 
+algorithms~\cite{paxos:practical,paxos,paxos:simple,paxos:complex,
+epaxos:sosp13} 
+and implementations~\cite{paxos:live,paxos:practical,chubby:osdi,crane:sosp15}. 
 \paxos is notoriously difficult to be fast and 
 scalable~\cite{ellis:thesis,manos:hotdep10,scatter:sosp11}. Since consensus 
 protocols play a core role in datacenters~\cite{matei:hotcloud11, mesos:nsdi11, 
@@ -121,27 +133,27 @@ replication~\cite{manos:hotdep10,scatter:sosp11}. Theses approaches have shown
 to largely improve throughput. However, the core of these systems, 
 \paxos, still faces an unscalable consensus 
 latency~\cite{ellis:thesis,scatter:sosp11,manos:hotdep10}. By using \xxx as a 
-building block, these system may scale even better.
+building block, these prior systems can scale even better.
 
-\para{Fault-tolerance in datacenter schedulers.} Cluster management 
+\para{Fault-tolerance for schedulers.} Datacenter
 schedulers~\cite{borg:eurosys15,mesos:nsdi11,tupperware,yarn:socc13,
 autopilot:sosp07,quincy:sosp09,apollo:osdi14,fuxi:vldb14} are widespread 
-because they can transparently support many diverse applications (\eg, 
+because they can support many diverse applications (\eg, 
 Hadoop~\cite{hadoop}, Dryad~\cite{dryad}, and key-value stores~\cite{redis}). 
 These existing systems mainly focus on high availability for themselves by 
-replicating important components (\eg, controllers) within these systems, or 
-focus on fault-recovery of applications~\cite{fuxi:vldb14}. To the best of our 
-knowledge, no existing system provides efficient and general high-availability 
-service to applications. Although \xxx's current design leverages an existing 
-system Mesos~\cite{mesos:nsdi11}, its general \paxos protocol design can also 
-be integrated in other systems.
+replicating their own important components, or focus on fault-recovery of 
+applications~\cite{fuxi:vldb14}. To the best of our knowledge, no existing 
+schedulers provide fast and general high-availability service to 
+applications.
+% \xxx's consensus protocol design is general to application and 
+% schedulers so it can be integrated in other systems.
 
 \para{Primary-backup in VM.} TBD.
 
-\para{RDMA.} RDMA techniques have been implemented in various 
-architectures, including Infiniband~\cite{infiniband}, RoCE~\cite{roce}, and 
-iWRAP~\cite{iwrap}. RDMA have been leveraged in many systems to improve 
-application-specific latency and throughput, including high performance 
+\para{RDMA techniques.} RDMA has been realized in various types of datacenter 
+networks, including Infiniband~\cite{infiniband}, RoCE~\cite{roce}, and 
+iWRAP~\cite{iwrap}. RDMA has been leveraged in many software systems to improve 
+different performance aspects, including high performance 
 computing~\cite{openmpi}, key-value 
 stores~\cite{pilaf:usenix14,herd:sigcomm14,farm:nsdi14,memcached:rdma}, 
 transactional processing systems~\cite{drtm:sosp15,farm:sosp15}, and file 
