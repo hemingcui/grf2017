@@ -10,42 +10,46 @@ Finally, this section describes research plan (\S\ref{sec:plan}).
 % The first two objectives include preliminary results. 
 
 \vspace{-.15in}\subsection{Objective 1: Building Fast, Scalable Consensus via
-RDMA} 
-\label{sec:protocol}\vspace{-.075in}
+RDMA}\label{sec:protocol}\vspace{-.075in}
+
+This section describes a performance problem (\S\ref{sec:latency-problem}) in 
+existing \paxos procotols and presents \falcon (\S\ref{sec:falcon}), a 
+fast, scalable \paxos protocol by leveraging RDMA.
+
+\vspace{-.15in}
+\subsubsection{Problem: Consensus latency of existing \paxos 
+protocols scale poorly} 
+\label{sec:latency-problem}\vspace{-.075in}
 
 % P1: as mentioned in background, a key reason is thread interleavings, 
 % so we need to reason about the general patterns we have. Or we say our 
 % methodology is just like pattern matching.
-Traditional \paxos protocols incur high consensus latency because they run on 
-TCP/IP, which go through OS kernels and software network layers. In this 
-section, \S\ref{sec:problem} analyzes this latency problem and its poor 
-scalability in detail, and then presents our new RDMA-based \paxos 
-protocol called \falcon (\S\ref{sec:falcon}).
-
-\vspace{-.15in}\subsubsection{Problem: Consensus Latency of existing \paxos 
-protocols scale poorly} 
-\label{sec:examples}\vspace{-.075in}
+% Traditional \paxos protocols incur high consensus latency because they go 
+% through OS kernels and software TCP/IP layers. In this 
+% section, \S\ref{sec:problem} analyzes this latency problem and its poor 
+% scalability in detail, and then presents our new RDMA-based \paxos 
+% protocol called \falcon (\S\ref{sec:falcon}).
 
 % First, mainly introduce the problems in traditional protocols.
-Due to the strong fault-tolerance of \paxos, it is widely served in many 
-systems. For instance, Scatter~\cite{scatter:sosp11} runs 8$\sim$12 replicas in 
-each \paxos group to order client requests, and it lets replicas respond 
-requests in parallel. A bigger group size will improve Scatter throughput. 
-Moreover, recent state machine replication (SMR) 
-systems~\cite{eve:osdi12,rex:eurosys14,crane:sosp15} use \paxos to greatly 
-improve the availability of
-general server programs.
+% Due to the strong fault-tolerance of \paxos, it is widely served in many 
+% systems. For instance, Scatter~\cite{scatter:sosp11} runs 8$\sim$12 replicas in 
+% each \paxos group to order client requests, and it lets replicas respond 
+% requests in parallel. A bigger group size will improve Scatter throughput. 
+% Moreover, recent state machine replication (SMR) 
+% systems~\cite{eve:osdi12,rex:eurosys14,crane:sosp15} use \paxos to greatly 
+% improve the availability of
+% general server programs.
 
-Unfortunately, despite these great advances, the high consensus latency of 
-\paxos makes systems suffer. For efficiency, \paxos typically assigns one 
-replica as the leader to invoke consensus requests, and the other replicas as 
-backups to agree on requests. To agree on an input, at least one message 
-round-trip is required between the leader and a backup. A round-trip causes big 
-latency as it goes through TCP/IP layers such as software network stack and OS 
-kernel. This latency could be acceptable for leader 
-election~\cite{chubby:osdi,zookeeper} or
-heavyweight transactions~\cite{crane:sosp15,eve:osdi12}, but undesirable for
-key-value stores~\cite{redis,memcached}.
+Despite the wide deployments of \paxos (\S\ref{sec:consensus}), its high 
+consensus latency makes many software systems suffer. For efficiency, \paxos 
+typically assigns one replica as the leader to invoke consensus requests, and 
+the other replicas as backups to simply agree on requests. To agree on an 
+input, at least one message round-trip is required between the leader and a 
+backup. A round-trip causes big latency (hundreds of \us) as it goes through 
+TCP/IP layers such as software network stack and OS kernel. This latency may 
+be acceptable for leader election~\cite{chubby:osdi,zookeeper} or heavyweight 
+transactions~\cite{crane:sosp15,eve:osdi12}, but undesirable for
+key-value store applications~\cite{redis,memcached}.
 
 As replica group size increases, \paxos consensus latency often increases
 drastically~\cite{scatter:sosp11} due to the linearly increasing number of 
@@ -53,26 +57,28 @@ consensus messages. One common approach to improve \paxos scalability is
 leveraging parallel techniques such as multithreading~\cite{zookeeper, 
 spaxos:srds12} or asynchronous IO~\cite{crane:sosp15, libpaxos}. However, the 
 high TCP/IP round-trip latency still exists, and synchronizations in these 
-techniques frequently invoke expensive OS events such as context switches. We 
-ran four \paxos-like protocols~\cite{zookeeper, spaxos:srds12, crane:sosp15, 
-libpaxos} on 40Gbps network with only one client sending consensus requests. We 
-found that, when replica group size increased from 3 to 9, the consensus 
-latency of three protocols increased by \tradlatencyincreaselow to 
+techniques frequently invoke expensive OS events such as context switches.
+
+Our preliminary study (Figure~\ref{fig:scalability}) ran four \paxos-like 
+protocols~\cite{zookeeper, spaxos:srds12, crane:sosp15, libpaxos} on 40Gbps 
+network with only one client sending consensus requests. We found that, when 
+replica group size increased from 3 to 9, the consensus latency of three 
+protocols increased by \tradlatencyincreaselow to 
 \tradlatencyincreasehigh, and \systemcostlow to \systemcosthigh of the increase 
 was in OS kernel.
 
 % Second, briefly mention the problem in DARE. and its scalability bottleneck.
-As RDMA becomes increasingly popular and cheap, it becomes a promising approach 
-to address the \paxos scalability problem. However, due to the unrich RDMA 
-operation types, fully exploiting RDMA speed in software systems is widely 
-considered challenging by the community~\cite{pilaf:usenix14,herd:sigcomm14,
+As the increasing popularity of RDMA, it becomes a promising 
+approach to address the \paxos performance problem. However, fully exploiting 
+RDMA speed in software systems is widely considered challenging by 
+the community~\cite{pilaf:usenix14,herd:sigcomm14,
 farm:sosp15,dare:hpdc15}. For instance, \dare~\cite{dare:hpdc15} presents a
 two-round, RDMA-based \paxos protocol in a sole-leader manner: leader does all 
-RDMA workloads and backups do nothing. \dare was fast with 3 or 5 
-replicas. However, our evaluation shows that, as replica group grows, the 
-leader met scalability bottlenecks (\eg, polling ACKs). \dare's consensus 
-latency increased by \darescalability as the group grows by 35x
-(\S\ref{sec:eval-dare}).
+RDMA workloads and backups do nothing. \dare was fast with 3$\sim$5 
+replicas. However, our study shows that, as replica group grows, \dare's 
+sole-leader and two-round protocol incurred scalability bottlenecks: the 
+consensus latency increased by \darescalability as the group growed by 35x (a 
+linear increase, Figure~\ref{fig:scalability}).
 
 \vspace{-.15in}\subsubsection{Falcon: a fast, scalable RDMA-based \paxos 
 protocol} 
@@ -88,59 +94,92 @@ Although doing so will consume more CPU resources than a sole-leader
 protocol~\cite{dare:hpdc15}, it has three major benefits. First, the leader 
 has less workloads. Second, both leader and backups participate in consensus, 
 which makes it possible to reach consensus with only one 
-round~\cite{paxos:practical}. Third, all replicas can get rid of 
-the expensive RDMA ACK polling and just receive consensus messages on their 
-bare, local memory. An analogy is threads receiving other threads' data via 
-bare memory, a fast and scalable computation pattern.
+round~\cite{paxos:practical}. Third, all replicas can just receive consensus 
+messages on their bare, local memory. An analogy is threads receiving other 
+threads' data via bare memory, a fast and scalable computation pattern.
 
-We present \xxx,\footnote{We name our system after
+We present \falcon,\footnote{We name our protocol after
 falcon, one of the fastest birds.} a new RDMA-based \paxos protocol and its
 runtime system. In \xxx, all replicas directly write to destination
 replicas' memory and poll messages from local memory to receive messages, and 
-our runtime system handles other technical challenges such as message 
-atomicity (\S\ref{sec:normal}), efficient input logging (\S\ref{sec:logging}), 
-and failure recovery (\S\ref{sec:checkpoint}).
+our runtime system handles other technical challenges such as cheecking message 
+delivery and recovering replica failures.
 
-Inheritated from our general SMR system \crane~\cite{crane:sosp15}, \xxx's 
-design supports general, unmodified server programs. Within \xxx, a program 
-runs as is. \xxx automatically deploys this program on replicas, intercepts 
-inputs from a server program's inbound socket calls (\eg, \recv) with a Linux 
-technique called LD\_PRELOAD, and invokes its \paxos protocol to enforce same 
-inputs across replicas.
+To support general, unmodified applications, \falcon stems from our preliminary 
+general protocol, \crane~\cite{crane:sosp15}. Within \falcon, an application 
+runs as is. \falcon automatically deploys this program on replicas, intercepts 
+inputs from an application's inbound socket calls (\eg, \recv) with a Linux 
+technique called LD\_PRELOAD, and invokes its consensus protocol to enforce same 
+application inputs across replicas. Figure~\ref{fig:falcon-arch} shows 
+\falcon's architecture with four key components: our consensus protocol for 
+enforcing same inputs across replicas, an output checker for checking network 
+outputs across replicas with our same protocol, an in-memory consensus 
+log, and a guard process that handles checkpointing and recovering application 
+execute states.
+
+Figure~\ref{fig:falcon-protocol} shows \falcon's consensus protocol in normal 
+case. The leader first executes the actual inbound socket call to get the 
+actual inputs (\textbf{L1}, not shown), it then invokes consensus across 
+replicas. All solid arrows (\textbf{L3} and \textbf{B2}) are ultra-fast RDMA 
+direct writes to remote replicas' memory. All replicas poll from their own bare 
+memory to receive consensus messages. To handle replica failures, all replicas 
+persitently log inputs to local storage. For these writes, because the sending 
+replicas only need to copy the sent data to local RDMA network interface card 
+and then the writes finish on local site, \falcon is scalable when more backup 
+replicas are added.
 
 % Three figures. First, falcon arch. Second, consensus protocol. Third, falcon 
 % results compared to traditional ones and DARE.
 
 \begin{figure}[!htb]
-    \begin{minipage}{.49\textwidth}
+    \begin{minipage}{.4\textwidth}
+        \vspace{-.2in}
         \includegraphics[width=0.34\textheight]{figures/arch.ps}
-        \vspace{0.1in}
+        \vspace{-.4in}         
         \caption{The \falcon architecture.}
         \label{fig:falcon-arch}
     \end{minipage}
-    \begin{minipage}{0.51\textwidth}
+    \begin{minipage}{0.4\textwidth}
+        \vspace{-.2in}
         \includegraphics[width=0.34\textheight]{figures/consensus.ps}
-        \vspace{0.1in}
-        \caption{\falcon protocol in normal case.}
+        \vspace{-.4in}
+        \caption{\falcon consensus protocol.}
         \label{fig:falcon-protocol}
     \end{minipage}
 \end{figure}
 
-\para{Primilinary results.} Crane. Falcon. Say Crane is first version. Falcon 
-totally subsumes Crane. Falcon also has initial results.
+\para{Primilinary results.} Our preliminary results include two steps. First, 
+to justify whether such a general, socket-intercepting protocol can support 
+general applications, we have developed \crane~\cite{crane:sosp15}. \crane was 
+able to support five widely used server applications (\eg, \mysql) without 
+modifying them. Second, we built \falcon, a much faster and more scalable 
+version of \crane, by leveraging RDMA. Figure shoes \falcon performance with 
+existing consensus protocols. \falcon was one order of magnitude faster latency 
+than the literature. \falcon's consensus latency outperforms 4 popular \paxos 
+protocols by \comptradlow to \comptradhigh on 3 to 9 replicas. \falcon is 
+faster than \dare by up to \fasterDARE. When changing the replica group size 
+from 3 to 105 (a 35x increase), \falcon's consensus latency increases merely 
+from \xxxlatencythree \us to \xxxlatencyonezerofive \us (a \xxxscalability, 
+sub-linear increase).
+% Crane. Falcon. Say Crane is first version. Falcon 
+% totally subsumes Crane. Falcon also has initial results.
 
 \begin{figure}[!htb]
 \centering
 \includegraphics[width=0.34\textheight]{figures/traditional_paxos_latency.ps}
-        \vspace{0.1in}
+        \vspace{-.2in}
         \caption{Consensus latency of six \paxos protocols. \falcon is fastest 
 and scales the best.}
         \label{fig:scalability}
 \end{figure}
 
-\para{Future work.} Evaluate its scalability on thousands or even more 
-machines. Evaluate its generality on more applications. Evaluate the RDMA-based 
-failure recovery sub-protocols on various failure scenarios.
+\para{Future work.} Since \falcon is the keystone of our objectives, this 
+proposal plans to further study and improve its practicality in three aspects: 
+(1) study its performance and potential bottlenecks on thousands of replicas, 
+and propose new solutions; (2) study its protocol robustness on failure 
+scenarios, including leader election and adding/removing replicas; and (3) 
+evaluate its generality on more diverse real-world applications (\eg, big-data 
+applications~\cite{spark:nsdi12}). 
 
 \vspace{-.15in}\subsection{Objective 2: Integrating \falcon with datacenter 
 schedulers}\label{sec:scheduler}\vspace{-.075in}
@@ -297,13 +336,14 @@ a \tputoverhead overhead in throughput and \latencyoverhead in response time.
 This protocol was 40.1X faster than a \zookeeper-based
 SMR protocol~\cite{calvin:sigmod12} which runs on TCP/IP.
 
-\begin{figure}[!htb]
-\centering
-\includegraphics[width=0.34\textheight]{figures/scheduler_latency.ps}
-        \vspace{0.1in}
-        \caption{Performance overhead of scheduler.}
-        \label{fig:scheduler-latency}
-\end{figure}
+% Disable the figure for now. Not much information.
+% \begin{figure}[!htb]
+% \centering
+% \includegraphics[width=0.34\textheight]{figures/scheduler_latency.ps}
+%         \vspace{0.1in}
+%         \caption{Performance overhead of scheduler.}
+%         \label{fig:scheduler-latency}
+% \end{figure}
 
 \para{Open challenges.} New algorithm on scheduling and replication. Others? 
 Apply them to do tail tolerance.
