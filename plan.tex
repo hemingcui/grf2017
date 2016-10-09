@@ -1,17 +1,17 @@
 \vspace{-.15in}\section{Research Plan and Methodology}
 \label{sec:rep}\vspace{-.075in}
 
-This \xxx project strenghens the reliability of datacenter computing with a 
-holistic, thorough methodology. To this end, this section first proposes a 
-fast, scalable consensus protocol (\S\ref{sec:protocol}). With this protocol, 
-it presents a scheduler that makes general applications fault-tolerant 
-(\S\ref{sec:scheduler}) and a new VM replication architecture (\S\ref{sec:vm}). 
-The first two objectives include preliminary results. Finally, this section 
-describes our research plan (\S\ref{sec:plan}).
+\xxx strenghens the reliability of datacenter computing with a holistic 
+methodology. This section first proposes \falcon (\S\ref{sec:protocol}), a fast 
+and scalable consensus protocol, it then leverages \falcon to build a scheduler 
+(\S\ref{sec:scheduler}) and a VM replication infrastructure (\S\ref{sec:vm}) to 
+improve the availability of applications running in these infrastructures. 
+Finally, this section describes research plan (\S\ref{sec:plan}).
+% The first two objectives include preliminary results. 
 
 \vspace{-.15in}\subsection{Objective 1: Building Fast, Scalable Consensus via
 RDMA} 
-\label{sec:model}\vspace{-.075in}
+\label{sec:protocol}\vspace{-.075in}
 
 % P1: as mentioned in background, a key reason is thread interleavings, 
 % so we need to reason about the general patterns we have. Or we say our 
@@ -142,8 +142,8 @@ and scales the best.}
 machines. Evaluate its generality on more applications. Evaluate the RDMA-based 
 failure recovery sub-protocols on various failure scenarios.
 
-\vspace{-.15in}\subsection{Objective 2: 
-Integrating Falcon with Datacenter Schedulers}\label{sec:detect}\vspace{-.075in}
+\vspace{-.15in}\subsection{Objective 2: Integrating \falcon with datacenter 
+schedulers}\label{sec:scheduler}\vspace{-.075in}
 
 A naive approach to achieve high-availability for critical applications could 
 be integrating \paxos within every application. However, this integration 
@@ -309,7 +309,7 @@ SMR protocol~\cite{calvin:sigmod12} which runs on TCP/IP.
 Apply them to do tail tolerance.
 
 \vspace{-.15in}\subsection{Objective 3: Strenghening VM to improve application 
-availability}\label{sec:defense}\vspace{-.075in}
+availability}\label{sec:vm}\vspace{-.075in}
 
 Mainly introduce EC2, Openstak. VM only.
 
