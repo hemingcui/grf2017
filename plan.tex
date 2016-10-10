@@ -384,7 +384,31 @@ resource consumption.
 \vspace{-.15in}\subsection{Objective 3: Strenghening VM to improve application 
 availability}\label{sec:vm}\vspace{-.075in}
 
-Mainly introduce EC2, Openstak. VM only.
+
+
+
+Virtual machines (VM) infrastructures (\eg, Amazon EC2~\cite{amazon:ec2} and 
+OpenStack~\cite{openstack}) are widely deployed in datacenters and clouds 
+because they can provide a virtualized abstraction of computing resources to 
+different applications and enforce strong utiilization isolation and security. 
+
+As mentioned in related work (\S\ref{sec:others-work}), two approaches, 
+primary-backup and live migration, exist for improving VM fault-tolerance, 
+resource utilization, and energy saving. Both these approaches face problems on 
+substantial application down time (\eg, 8 seconds in a live migration system 
+vMotion~\cite{vmotion}) and network bandwidth. The downtime hurts application 
+availability even if there is no replica failure. The bandwidth consumption 
+often aggravates resource burdens because these approaches are often invoked 
+when resources are tight.
+
+A main reason that causes these two problems is that these approaches have only 
+one actual execution of an application. Therefore, once execution states is 
+required to transfered to a remote computer, the local execution has to be 
+disturbed.
+
+
+% Therefore
+% Mainly introduce EC2, Openstak. VM only.
 
 % Briefly introduce VM fault-tolerance techniques. Primary-backup. Remus. 
 % Hypervisor replication (old paper). FaRM.
@@ -393,55 +417,118 @@ Mainly introduce EC2, Openstak. VM only.
 % balance, not to overcome failures. Main approach is live migration that aims to 
 % reduce application down time. VMotion.
 
-However, there is still substantial down time and resource consumption. E.g., 
-vMotion, for memory intensive applications, the down time can be up to 30 
-seconds. As migration tends to invoke frequently for load balancing, 
-consolidation, energy saving, this downtime may incur big money lost for cloud 
-deployers.
+% However, there is still substantial down time and resource consumption. E.g., 
+% vMotion, for memory intensive applications, the down time can be up to 30 
+% seconds. As migration tends to invoke frequently for load balancing, 
+% consolidation, energy saving, this downtime may incur big money lost for cloud 
+% deployers.
 
-When doing migration, both the local computer and the migration destination 
-computer incur big resource consumption. This is contraditive to the motivation 
-of migration: reduing computer loads on the local computer.
+% When doing migration, both the local computer and the migration destination 
+% computer incur big resource consumption. This is contraditive to the motivation 
+% of migration: reduing computer loads on the local computer.
 
 \vspace{-.15in}\subsubsection{Forming an eco-system with VM and \falcon} 
-\label{sec:defense-arch}\vspace{-.075in}
+\label{sec:vm-arch}\vspace{-.075in}
 
-Describe the infrastructure. Take Ning's figure. Hypervisor. tap\_send().
+\begin{figure}[!htb]
+\centering
+\vspace{-.2in}
+\includegraphics[width=0.34\textheight]{figures/vm_arch.ps}
+        \vspace{-.3in}
+        \caption{Performance overhead of scheduler. Our key components are 
+shaded (and in blue color).}
+        \label{fig:vm-arch}
+\end{figure}
+
+Fortunately, \paxos-based replication can construct multiple, equivalent 
+executions for the same application, thanking to its robustness and 
+consistency. To ensure high application avaialbility, we can just run \paxos to 
+make replicas of VMs see the same sequence of inputs, and doing so is feasible 
+because many VM architectures have input interception layers by default.
+
+We make \falcon and VM form a mutual-beneficial eco-system. In this eco-system, 
+VM provides a hypervisor layer to automatically capture incoming inputs and 
+application execution state changes for \falcon, and \falcon benefits a VM by: 
+(1) improving avaialbility of applications running in this VM, and (2) greatly 
+improving application downtime and bandwidth consumption for the VM's live 
+migration.
+
+Figure~\ref{fig:vm-arch} shows the architecture of the eco-system. To provide 
+the same fault-tolerance guarantee with primary-backup, a typical replication 
+factor of this eco-system is \v{R=3}. This eco-system chooses KVM~\cite{kvm} 
+due to two main reasons. First, KVM is an open source hypervisor carried in 
+Linux. Second, it provides \v{tap\_send()}, an input capturing API at its QEMU 
+component running at user space. Compared to other types of hypervisors, this 
+API enables \falcon to coordinate inputs with RDMA, because currently RDMA only 
+supports user space.
+
+A key benefit of such a \paxos-based VM replication over primary-backup is that 
+its leadership is strongly consistent (through a majority aggrement, which 
+primary-backup lacks), and it saves the bandwidth consumption for transfering 
+application execution states in primary-backup.
+
+% Describe the infrastructure. Take Ning's figure. Hypervisor. tap\_send().
 
 \vspace{-.15in}\subsubsection{\paxos-based Live Migration} 
-\label{sec:defense-arch}\vspace{-.075in}
+\label{sec:vm-migration}\vspace{-.075in}
+
+Interestingly, this replication ability not only provides high 
+availability for fault-tolerance (suitable for the primary-backup scenario), 
+but can also greatly save resource consumption if fault-tolerence is not a 
+major concern (suitable for the live migration scenario). Consider the live 
+migration scenario, \paxos backups can only agree on inputs without actually 
+executing them, then the overall application execution consumes almost same 
+resources as the unreplicated one. A backup now can just absorb occasional, 
+periodical application checkpoints from the leader when the leader replica is 
+idle, and catches up with the leader when a migration destination is decided on 
+this backup.
 
 % We propose our own replication approach. The non-leader only agree on new 
 % inputs, they can opt to execute requests or absorb periodic checkpoints.
+Leveraging this idea, we propose a fast, network bandwidth-friendly live 
+migration approach called ``\paxos-based live migration". A key benefit of this 
+approach is that, now migration does not require transfering all execution 
+states of application, but only tranferfing the \paxos leadership (almost as 
+fast as \paxos consensus latency) to a destination backup which has idle 
+resources. To increase the chance on finding a proper destination, we can 
+leverage \falcon's high availability to run many backups within a datacenter.
 
+% This approach is othorgnal to the VM replication. 
+This \paxos-based live migration approach contains four steps. First, in 
+normal case, the current computing instance (the leader) just agrees on 
+incoming inputs with backups using \falcon. A set of backups run on hightly 
+loaded computers and agree on inputs (also record the inputs persistantly). 
 
-This approach is othorgnal to the VM replication. Normal case: a leader means 
-the current computing instance. The leader does a lightweight checkpoint when 
-it's idle (no incoming requests), and sends the checkpoint to the backups. A 
-set of backups run on hightly loaded computers and agree on inputs (also record 
-the inputs persistantly). The backups only keeps the latest checkpoint and 
-discards prior ones.
+Second, the leader does a periodical checkpoint when it's idle (no incoming 
+requests), and sends the checkpoint to the backups. The backups only keeps 
+the latest checkpoint and discards prior ones.
 
-When the VM invokes a migration on the leader computer, it uses extra mechanism 
-to determine which backups should be the migration destination (the next 
-leader). Then, the destination extracts the lastes checkpoint from the leader, 
-restores the application state, and then follow with executing the recorded but 
-not executed inputs. Once this is done, we invoke a \falcon protocol 
-level operation: migration the leadership, which is similar to a traditional 
-\paxos leader election process, but just explicitly decides the destination 
-computer as the new leader.
+Third, when the VM invokes a migration on the leader computer, it uses a 
+standard migration mechanism to determine which backup should be the migration 
+destination (the next leader). Then, the destination extracts the lastest
+checkpoint on local computer, restores the application state, and then catches 
+up with the leader with executing the recorded but not executed inputs.
+
+Fourth, we invoke a \falcon protocol level operation: migration the 
+leadership, which is similar to a traditional \paxos leader election 
+process~\cite{paxos:practical}, but we just explicitly decide the destination 
+computer as the new leader. \falcon's protocol handles various failure 
+scenarios (\eg, the destination computer crashes during the migration) as its 
+\paxos nature.
 
 % TBD: mention the leader election latency in Objective 2.
-Analysis: this approach incurs almost zero time and resource for a few reasons. 
-First, the leadership migration is fast (tens of micro seconds). Second, no 
-frequent execution state transfer during the migration time, only at the 
-leader's idle time. Third, robust to various scenarios (\eg, destination fails 
-during the migration), thanking to \paxos.
+% Analysis: this approach incurs almost zero time and resource for a few reasons. 
+% First, the leadership migration is fast (tens of micro seconds). Second, no 
+% frequent execution state transfer during the migration time, only at the 
+% leader's idle time. Third, robust to various scenarios (\eg, destination fails 
+% during the migration), thanking to \paxos.
 
-\para{Future work}. Fully implement the novel leader migration operation. 
-Evaluate them on various applications with intensive memory usage. Precisely 
-compare the time and resource usage with traditional live migration approaches 
-(\eg, vMotion).
+\para{Future work}. We plan to fully implement the eco-system, including both 
+the replication architecture (\S\ref{sec:vm-arch}) and the novel live 
+migration approach (\S\ref{sec:vm-migration}). We will compare the 
+performance overhead of our replication approach with existing open-source VM 
+infrastructure (\eg, OpenStack). We will also compare the performance of our 
+migration approach with existing live migration approaches (\eg, vMotion).
 
 
 % % TBD: need a new replication approach name.
