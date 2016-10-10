@@ -184,84 +184,99 @@ applications~\cite{spark:nsdi12}).
 \vspace{-.15in}\subsection{Objective 2: Integrating \falcon with datacenter 
 schedulers}\label{sec:scheduler}\vspace{-.075in}
 
-A naive approach to achieve high-availability for critical applications could 
-be integrating \paxos within every application. However, this integration 
-approach has two major issues. First, \paxos is notoriously difficult 
-to understand~\cite{raft:usenix14}, implement~\cite{paxos:practical}, and 
-verify~\cite{demeter:sosp11}.
+Indeed, many existing schedulers have adopted \paxos to improve availability 
+for themselves. Typically, they use \paxos to run multiple copies of their 
+controllers, which works on scheduling computation jobs with resources. In 
+normal case, only one leading controller does the real work, and the others 
+standby to cope with the leader's failure. Unfortnately, most applications 
+running by these schedulers have not been made highly-available (although minor 
+applications implement a replication 
+approach~\cite{mapreduce:osdi04,dolly:nsdi12}).
 
-Second, running a \paxos-enabled application with a 
-cluster management system can be problematic because the system is unaware 
-of replication logic. For instance, if an application submits three copies of 
-the same job to the system, the system may happen to schedule all three 
-copies on the same machine (although it should schedule them on 
-different machines to tolerate machine failures).
+A naive approach to achieve high application availability could be implementing 
+a \paxos within each application. However, this approach has two major issues. 
+First, \paxos is notoriously difficult to 
+understand~\cite{raft:usenix14,paxos:simple}, implement~\cite{paxos:practical, 
+paxos:live}, or test~\cite{modist:nsdi11,demeter:sosp11}, thus developing a 
+\paxos protocol for each application is widely considered a 
+nightmare~\cite{modist:nsdi11,demeter:sosp11,paxos:live} for application 
+developers.
+
+The second issue is, the scheduler may defeat \paxos due to unawareness of the 
+application's \paxos replication logic. For instance, if an application submits 
+multiple copies of the same computation job to the scheduler, the scheduler may 
+incorrectly schedule several copies on the same computer (it should schedule 
+each copy on different computers to achieve \paxos fault-tolerance).
 
 \vspace{-.15in}\subsubsection{\tripod: the fault-tolerant scheduler 
 architecture} 
 \label{sec:scheduler-arch}\vspace{-.075in}
 
-This paper proposes the design of \tripod,\footnote{We name our system after 
-the ancient Chinese three-legged tripod, a reliable, multi-purpose container.} 
-a cluster management system that automatically provides high-availability to 
-general applications. \tripod maintains replicas of controllers with a new 
-RDMA-enabled \paxos protocol~\cite{falcon:github}. Unlike existing systems 
-which let only the leader controller schedule jobs, \tripod runs replicas of 
-the same job using the replicas of controllers: after controllers agree on a 
-new job, \tripod lets each controller schedule an independent copy of this job.
+% ,\footnote{We name our system after 
+% the ancient Chinese three-legged tripod, a reliable, multi-purpose container.}
+This section proposes the design of \tripod, a scheduler infrastructure that 
+automatically provides high-availability to general applications. \tripod 
+is integrated with a widely used scheduler \mesos~\cite{mesos:nsdi11} and 
+\falcon (\textbf{Objective 1}). To avoid the two aforementioned issues 
+(\S\ref{sec:scheduler}), \tripod chooses 
+to integrate \paxos in a scheduler, not in applications. To achieve high
+application availability, unlike existing schedulers which let only one 
+controller schedule jobs, \tripod runs replicas of the same job using replicas 
+of controllers: after controllers agree on a new job with \falcon, \tripod lets 
+each controller independently schedule an copy of this job.
 
-To avoid the two aforementioned integration issues, \tripod chooses to 
-integrate 
-\paxos in the cluster system, not in applications. Doing so has two benefits. 
-First, \tripod's \paxos acts as a single, general SMR service to applications. 
-We 
-can just leverage existing verification 
-tools~\cite{modist:nsdi09,demeter:sosp11} to make sure that this \paxos 
-protocol is robust and correct, and then we can benefit many applications. 
-Second, now \tripod's own scheduler can handle the replication logic and do 
-careful, replication-aware scheduling for jobs.
+Doing so has three benefits. First, \tripod's \paxos acts as a single, general 
+fault-tolerance service to applications. We can just leverage existing 
+verification tools~\cite{modist:nsdi09,demeter:sosp11} to make sure that our 
+\falcon protocol is robust and correct, and then we can benefit many 
+applications. Second, application developers can now just focus on their own 
+application logic, greatly saving development time and money. Third, now 
+\tripod's own scheduler can handle the replication logic and do careful, 
+replication-aware scheduling for jobs  (\S\ref{sec:workflow}). 
 
-In an implementation level, \tripod integrates \mesos~\cite{mesos:nsdi11}, a 
-widely 
-used cluster management system, with a new RDMA-enabled \paxos 
-protocol~\cite{falcon:github}. Compared to a prior RDMA-enabled \paxos 
-protocol~\cite{dare:hpdc15}, our new protocol can support general programs 
-transparently without modifications.
 
-Figure~\ref{fig:arch} depicts \tripod's architecture, and its key components 
-are 
-shaded (and in blue). To illustrate how \tripod works in an application 
-perspective, this figure shows two applications, Hadoop and MPI. Each 
-application has a \emph{replica strength} (\v{R}) to denote the level of 
+% To 
+% ahieve application fault-tolerance, 
+
+
+
+% In an implementation level, \tripod integrates \mesos~\cite{mesos:nsdi11}, a 
+% widely used cluster management system, with a new RDMA-enabled \paxos 
+% protocol~\cite{falcon:github}. Compared to a prior RDMA-enabled \paxos 
+% protocol~\cite{dare:hpdc15}, our new protocol can support general programs 
+% transparently without modifications.
+
+Figure~\ref{fig:scheduler-arch} depicts \tripod's architecture, and its key 
+components are shaded (and in blue). To illustrate how \tripod works in an 
+application perspective, this figure shows two applications, Hadoop and MPI. 
+Each application has a \emph{replica strength} (\v{R}) to denote the level of 
 fault-tolerance it demands. This value is either 1 or equals the number of 
 replicas of controllers in \tripod.
 
 By default, each application has \v{\v{R}=1}, which means that this application 
 does not need replication. For such a default setting, \tripod runs the job as 
-is 
-without replication, like a typical cluster management system (\eg, Mesos).
+is without replication, like a typical cluster management system (\eg, Mesos).
 
 In this figure, Hadoop's \v{R} is 3, which means that it wants to replicate 
 each of its job with three copies for high-availability. Suppose Hadoop 
 submits two jobs to the leader controller, each has different shapes (triangle 
 or hexagon). The leader controller then invokes a consensus on each job across 
 controllers. Once a consensus is reached, each controller assigns the same job 
-on different slave machines.
+on different slave machines. The leader controller directly returns its 
+computation result to the Hadoop scheduler. Standby controllers ignore the 
+results unless the same mechanism is triggered.
+%  unless a tail-tolerance mechanism is triggered 
+% (\S\ref{sec:workflow})
 
-The leader controller directly returns its computation result to the Hadoop 
-scheduler unless a tail-tolerance mechanism is triggered 
-(\S\ref{sec:workflow}). 
-Standby controllers ignore the results unless the same mechanism is triggered.
+\vspace{-.15in}\subsubsection{Replication-aware resource allocation workflow}
+\label{sec:workflow}\vspace{-.075in}
 
-\vspace{-.15in}\subsubsection{The replication-aware resource allocation scheme}
-\label{sec:detect-arch}\vspace{-.075in}
-
-Figure~\ref{fig:workflow} shows \xxx's workflow on scheduling jobs with four 
-steps. This workflow is similar to that in Mesos except the second and fourth 
-steps. These two steps \tripod abstract away the replication logic in its 
-resource offers and allocations from the application. An application runs as if 
-\xxx does not replicate any of its jobs, and \tripod transparently handles all 
-the replication logic.
+Figure~\ref{fig:scheduler-workflow} shows \tripod's workflow on scheduling jobs 
+with four steps. This workflow is similar to that in Mesos except the second 
+and fourth steps. These two steps \tripod abstract away the replication logic 
+in its resource offers and allocations from the application. An application runs 
+as if \xxx does not replicate any of its jobs, and \tripod transparently 
+handles all the replication logic.
 
 In the first step, slave machines periodically report their available computing 
 resources (\eg, CPU cores and memory) to the leader controller. In the second 
@@ -282,14 +297,15 @@ which controller should run this job on which slave machine, it then carries
 this assignment in its consensus request. Once a consensus on this job is 
 reached, each controller follows this assignment.
 
-Two figures: one is TRIPOD arch. The other is TRIPOD results from the workshop 
-paper. Figure~\ref{fig:scheduler-arch} and Figure~\ref{fig:scheduler-workflow} 
-and Figure~\ref{fig:scheduler-latency}.
+% Two figures: one is TRIPOD arch. The other is TRIPOD results from the workshop 
+% paper. Figure~\ref{fig:scheduler-arch} and Figure~\ref{fig:scheduler-workflow} 
+% and Figure~\ref{fig:scheduler-latency}.
 
 
-\para{Reliability v.s. resource consumption} The main goal of \xxx is to 
-provide high-availability to critical applications 
-running in clusters. On one hand, clusters are included more and more computing 
+\para{Availability v.s. resource consumption} In a conceptual level, \tripod 
+leverages R times of resources to make mission-critical applicaions 
+highly-avaialble. In practice, this rate is acceptable (SMR systems) TBD. On 
+one hand, clusters are included more and more computing 
 resources (\eg, machines), where failures of these resources and applications 
 are already commonplace~\cite{facebook:outage}. On the other hand, 
 high requirements on response times and availability become more and more 
