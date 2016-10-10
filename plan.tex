@@ -178,8 +178,7 @@ proposal plans to further study and improve its practicality in three aspects:
 (1) study its performance and potential bottlenecks on thousands of replicas, 
 and propose new solutions; (2) study its protocol robustness on failure 
 scenarios, including leader election and adding/removing replicas; and (3) 
-evaluate its generality on more diverse real-world applications (\eg, big-data 
-applications~\cite{spark:nsdi12}). 
+evaluate its generality on more latency-critical applications. 
 
 \vspace{-.15in}\subsection{Objective 2: Integrating \falcon with datacenter 
 schedulers}\label{sec:scheduler}\vspace{-.075in}
@@ -268,6 +267,23 @@ results unless the same mechanism is triggered.
 %  unless a tail-tolerance mechanism is triggered 
 % (\S\ref{sec:workflow})
 
+\begin{figure}[!htb]
+    \begin{minipage}{.49\textwidth}
+        \vspace{-.2in}
+        \includegraphics[width=0.34\textheight]{figures/scheduler_arch.ps}
+        \vspace{-.3in}
+        \caption{Fault-tolerant scheduler.}
+        \label{fig:scheduler-arch}
+    \end{minipage}
+    \begin{minipage}{0.51\textwidth}
+        \vspace{-.2in}
+        \includegraphics[width=0.34\textheight]{figures/scheduler_flow.ps}
+        \vspace{-.3in}
+        \caption{Workflow.}
+        \label{fig:scheduler-workflow}
+    \end{minipage}
+\end{figure}
+
 \vspace{-.15in}\subsubsection{Replication-aware resource allocation workflow}
 \label{sec:workflow}\vspace{-.075in}
 
@@ -302,55 +318,50 @@ reached, each controller follows this assignment.
 % and Figure~\ref{fig:scheduler-latency}.
 
 
-\para{Availability v.s. resource consumption} In a conceptual level, \tripod 
-leverages R times of resources to make mission-critical applicaions 
-highly-avaialble. In practice, this rate is acceptable (SMR systems) TBD. On 
-one hand, clusters are included more and more computing 
-resources (\eg, machines), where failures of these resources and applications 
-are already commonplace~\cite{facebook:outage}. On the other hand, 
-high requirements on response times and availability become more and more 
-important to critical applications.
+\para{Availability v.s. resource consumption.} \tripod is designed to make a
+mission-critical applicaion highly avaialble by leveraging \v{R} times of 
+resources than the application's native, unreplicated execution. We deemed this 
+extra resource consumption reasoanble for two reasons.
 
-For instance, Both NYSE and Nasdaq have experienced outage of their whole 
-site~\cite{nyse:halt} or specific IPO events~\cite{facebook:ipo:delay} due to 
-minor machine errors.  Even social-networking applications like Facebook has 
+First, a major trend is that an application runs on more and more 
+computers, thus minor computer failures tend to happen more likely. Such 
+failures may turn down the entire application and cause if the failure computer 
+runs a critical computation. For instance, Both NYSE and Nasdaq have experienced 
+outage of their whole site~\cite{nyse:halt} or specific IPO 
+events~\cite{facebook:ipo:delay} due to minor machine errors. 
+In addition, social-networking applications like Facebook has 
 strong fault-tolerance requirements, because minor machine failures have turned 
 down the whole Facebook site for several times in the last few 
-years~\cite{facebook:outage}, costing huge 
-money lost. 
+years~\cite{facebook:outage}, costing huge money lost. 
 
-Therefore, \tripod's design favors more on availability and performance 
-(low consensus latency). It's design tends to use \v{R} times of resources 
-compared to traditional applications. We argue that this extra resource 
-utilizations are acceptable for critical applications, because if they have 
-high 
-demand on availability and response times, they can often tolerate costs on 
-computing resources (\eg, trading and medical platforms).
+Second, it is already a common practice to replicate critical computations by 
+using \v{R} times of resources, and doing so can improve both availability and 
+performance. For instance, Scatter~\cite{scatter:sosp11} runs 8$\sim$12 
+replicas in a \paxos group to order client requests, and it lets replicas reply 
+requests in parallel. A bigger group size will improve Scatter throughput. 
+Moreover, several recent replication 
+systems~\cite{eve:osdi12,rex:eurosys14,crane:sosp15} 
+improve the availability of general server applications (\eg, 
+\mysql~\cite{mysql}) by replicating them.
 
-\begin{figure}[!htb]
-    \begin{minipage}{.49\textwidth}
-        \includegraphics[width=0.34\textheight]{figures/scheduler_arch.ps}
-        \vspace{0.1in}
-        \caption{Fault-tolerant scheduler.}
-        \label{fig:scheduler-arch}
-    \end{minipage}
-    \begin{minipage}{0.51\textwidth}
-        \includegraphics[width=0.34\textheight]{figures/scheduler_flow.ps}
-        \vspace{0.1in}
-        \caption{Workflow.}
-        \label{fig:scheduler-workflow}
-    \end{minipage}
-\end{figure}
+% Therefore, \tripod's design favors more on availability and performance 
+% (low consensus latency). It's design tends to use \v{R} times of resources 
+% compared to traditional applications. We argue that this extra resource 
+% utilizations are acceptable for critical applications, because if they have 
+% high 
+% demand on availability and response times, they can often tolerate costs on 
+% computing resources (\eg, trading and medical platforms).
 
-\para{Primilinary results.} change redis to memcached. used in financial 
-platform and social networking.
 
-To emulate a typical social-networking application, we ran this protocol with 
-\redis~\cite{redis}, a popular key-value store used by Twitter. Evaluation 
-showed that, compared to \redis's unreplicated execution, \xxx incurred merely 
-a \tputoverhead overhead in throughput and \latencyoverhead in response time. 
-This protocol was 40.1X faster than a \zookeeper-based
-SMR protocol~\cite{calvin:sigmod12} which runs on TCP/IP.
+
+\para{Primilinary results.} We built a preliminary \tripod propotype, 
+published in [APSys '16]. To evaluate a typical social-networking application, 
+we ran \tripod with \memcached~\cite{memcached}, a popular key-value store used 
+by Twitter and financial platforms~\cite{financial}. Compared to \memcached's 
+unreplicated execution, \tripod incurred merely a \tputoverhead overhead in 
+throughput and \latencyoverhead in response time.
+% This protocol was 40.1X faster than \zookeeper, a traditional replication
+% protocol~\cite{calvin:sigmod12} which runs on TCP/IP.
 
 % Disable the figure for now. Not much information.
 % \begin{figure}[!htb]
@@ -361,8 +372,14 @@ SMR protocol~\cite{calvin:sigmod12} which runs on TCP/IP.
 %         \label{fig:scheduler-latency}
 % \end{figure}
 
-\para{Open challenges.} New algorithm on scheduling and replication. Others? 
-Apply them to do tail tolerance.
+\para{Future work.} Our \tripod development will go along two directions. 
+First, currently our replication and resource allocation workflow is tied with 
+\mesos. We will study other popular schedulers and summarize their 
+resource allocation workflow patterns, and we will develop a general, 
+scheduler-agnostic workflow. Second, we will study new differential replication 
+schemes, so that we can flexibly assign different \v{R} values to different 
+compnents of an appilcation, getting both satisfiable availability and optimal 
+resource consumption.
 
 \vspace{-.15in}\subsection{Objective 3: Strenghening VM to improve application 
 availability}\label{sec:vm}\vspace{-.075in}
