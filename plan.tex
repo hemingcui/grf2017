@@ -386,12 +386,12 @@ availability}\label{sec:vm}\vspace{-.075in}
 
 Mainly introduce EC2, Openstak. VM only.
 
-Briefly introduce VM fault-tolerance techniques. Primary-backup. Remus. 
-Hypervisor replication (old paper). FaRM.
-
-Talk about migration. It is similar to primary-backup, but mainly for load 
-balance, not to overcome failures. Main approach is live migration that aims to 
-reduce application down time. VMotion.
+% Briefly introduce VM fault-tolerance techniques. Primary-backup. Remus. 
+% Hypervisor replication (old paper). FaRM.
+% 
+% Talk about migration. It is similar to primary-backup, but mainly for load 
+% balance, not to overcome failures. Main approach is live migration that aims to 
+% reduce application down time. VMotion.
 
 However, there is still substantial down time and resource consumption. E.g., 
 vMotion, for memory intensive applications, the down time can be up to 30 
@@ -403,8 +403,7 @@ When doing migration, both the local computer and the migration destination
 computer incur big resource consumption. This is contraditive to the motivation 
 of migration: reduing computer loads on the local computer.
 
-\vspace{-.15in}\subsubsection{Make applications running in VMs 
-highly-available} 
+\vspace{-.15in}\subsubsection{Forming an eco-system with VM and \falcon} 
 \label{sec:defense-arch}\vspace{-.075in}
 
 Describe the infrastructure. Take Ning's figure. Hypervisor. tap\_send().
