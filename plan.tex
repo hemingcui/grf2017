@@ -190,15 +190,15 @@ normal case, only one leading controller does the real work, and the others
 standby to cope with the leader's failure. Unfortnately, most applications 
 running by these schedulers have not been made highly-available (although minor 
 applications implement a replication 
-approach~\cite{mapreduce:osdi04,dolly:nsdi12}).
+approach~\cite{mapreduce,dolly:nsdi13}).
 
 A naive approach to achieve high application availability could be implementing 
 a \paxos within each application. However, this approach has two major issues. 
 First, \paxos is notoriously difficult to 
 understand~\cite{raft:usenix14,paxos:simple}, implement~\cite{paxos:practical, 
-paxos:live}, or test~\cite{modist:nsdi11,demeter:sosp11}, thus developing a 
+paxos:live}, or test~\cite{modist:nsdi09,demeter:sosp11}, thus developing a 
 \paxos protocol for each application is widely considered a 
-nightmare~\cite{modist:nsdi11,demeter:sosp11,paxos:live} for application 
+nightmare~\cite{modist:nsdi09,demeter:sosp11,paxos:live} for application 
 developers.
 
 The second issue is, the scheduler may defeat \paxos due to unawareness of the 
@@ -357,9 +357,9 @@ improve the availability of general server applications (\eg,
 \para{Primilinary results.} We built a preliminary \tripod propotype, 
 published in [APSys '16]. To evaluate a typical social-networking application, 
 we ran \tripod with \memcached~\cite{memcached}, a popular key-value store used 
-by Twitter and financial platforms~\cite{financial}. Compared to \memcached's 
-unreplicated execution, \tripod incurred merely a \tputoverhead overhead in 
-throughput and \latencyoverhead in response time.
+by Twitter and financial platforms~\cite{nosql:finance}. Compared to 
+\memcached's unreplicated execution, \tripod incurred merely a \tputoverhead 
+overhead in throughput and \latencyoverhead in response time.
 % This protocol was 40.1X faster than \zookeeper, a traditional replication
 % protocol~\cite{calvin:sigmod12} which runs on TCP/IP.
 
@@ -387,7 +387,7 @@ availability}\label{sec:vm}\vspace{-.075in}
 
 
 
-Virtual machines (VM) infrastructures (\eg, Amazon EC2~\cite{amazon:ec2} and 
+Virtual machines (VM) infrastructures (\eg, Amazon EC2~\cite{amazon:vpc} and 
 OpenStack~\cite{openstack}) are widely deployed in datacenters and clouds 
 because they can provide a virtualized abstraction of computing resources to 
 different applications and enforce strong utiilization isolation and security. 
@@ -396,10 +396,10 @@ As mentioned in related work (\S\ref{sec:others-work}), two approaches,
 primary-backup and live migration, exist for improving VM fault-tolerance, 
 resource utilization, and energy saving. Both these approaches face problems on 
 substantial application down time (\eg, 8 seconds in a live migration system 
-vMotion~\cite{vmotion}) and network bandwidth. The downtime hurts application 
-availability even if there is no replica failure. The bandwidth consumption 
-often aggravates resource burdens because these approaches are often invoked 
-when resources are tight.
+vMotion~\cite{vmotion:atc05}) and network bandwidth. The downtime hurts 
+application availability even if there is no replica failure. The bandwidth 
+consumption often aggravates resource burdens because these approaches are often 
+invoked when resources are tight.
 
 A main reason that causes these two problems is that these approaches have only 
 one actual execution of an application. Therefore, once execution states is 

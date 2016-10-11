@@ -158,7 +158,8 @@ primary VM and frequently propagate the changes to a backup VM on another
 computer. Live migration is invoked for both computer load balance and handling 
 failures, and it uses a similar hypervisor technique as primary-backup. Despite 
 much clever effort, both these two approaches consume substantial application 
-down time (\eg, 8 seconds in vMotion~\cite{vmotion}) and network bandwidth.
+down time (\eg, 8 seconds in vMotion~\cite{vmotion:atc05}) and network 
+bandwidth.
 
 % This approach consumes much network bandwidth and has weaker 
 % primary-consistency (\eg, if primary rejoins the network) than \paxos.
