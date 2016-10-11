@@ -68,13 +68,14 @@ application crashes or hardware errors occur, these schedulers have to
 reschedule applications, leading to substantial application unavailability.
 
 % 
-The second infrastruture type is VM~\cite{amazon:ec2, openstack, vmware, kvm, 
-xen:sosp01}. VM abstracts away the heterougous physical computing resources, 
-making computing resources easy to isolate, utilize, and balance loads (\eg, 
-via live migration~\cite{vmotion,xen:migration}). Although some application 
-fault-tolerance approaches such as primary-backup~\cite{remus:nsdi08}, these 
-approaches still often consume prohibitive resources (\eg, CPU and network 
-bandwith) and have weaker availability guarantee than \paxos.
+The second infrastruture type is VM~\cite{amazon:vpc, openstack, esx:osdi02, 
+kvm, xen:sosp}. VM abstracts away the heterougous physical computing 
+resources, making computing resources easy to isolate, utilize, and balance 
+loads (\eg, via live migration~\cite{vmotion:atc05,xen:migration:nsdi05}). 
+Although some application fault-tolerance approaches such as 
+primary-backup~\cite{remus:nsdi08}, these approaches still often consume 
+prohibitive resources (\eg, CPU and network bandwith) and have weaker 
+availability guarantee than \paxos.
 
 Schedulers and VMs are largely complementary infrastrutures depending on 
 application requirements such as performance and security. Many schedulers 
