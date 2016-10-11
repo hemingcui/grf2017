@@ -68,9 +68,9 @@ application crashes or hardware errors occur, these schedulers have to
 reschedule applications, leading to substantial application unavailability.
 
 % 
-The second infrastruture type is VM~\cite{amazon:ec2, openstack, vmware}. VM 
-abstracts away the heterougous physical computing resources, making 
-computing resources easy to isolate, utilize, and balance loads (\eg, 
+The second infrastruture type is VM~\cite{amazon:ec2, openstack, vmware, kvm, 
+xen:sosp01}. VM abstracts away the heterougous physical computing resources, 
+making computing resources easy to isolate, utilize, and balance loads (\eg, 
 via live migration~\cite{vmotion,xen:migration}). Although some application 
 fault-tolerance approaches such as primary-backup~\cite{remus:nsdi08}, these 
 approaches still often consume prohibitive resources (\eg, CPU and network 
