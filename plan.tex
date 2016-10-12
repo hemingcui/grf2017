@@ -1,7 +1,7 @@
 \vspace{-.15in}\section{Research Plan and Methodology}
 \label{sec:rep}\vspace{-.075in}
 
-\xxx strenghens the reliability of datacenter computing with a holistic 
+\xxx strengthens the reliability of datacenter computing with a holistic 
 methodology. This section first proposes \falcon (\S\ref{sec:protocol}), a fast 
 and scalable consensus protocol, it then leverages \falcon to build a scheduler 
 (\S\ref{sec:scheduler}) and a VM replication infrastructure (\S\ref{sec:vm}) to 
@@ -13,7 +13,7 @@ Finally, this section describes research plan (\S\ref{sec:plan}).
 RDMA}\label{sec:protocol}\vspace{-.075in}
 
 This section describes a performance problem (\S\ref{sec:latency-problem}) in 
-existing \paxos procotols and presents \falcon (\S\ref{sec:falcon}), a 
+existing \paxos protocols and presents \falcon (\S\ref{sec:falcon}), a 
 fast, scalable \paxos protocol by leveraging RDMA.
 
 \vspace{-.15in}
@@ -77,7 +77,7 @@ two-round, RDMA-based \paxos protocol in a sole-leader manner: leader does all
 RDMA workloads and backups do nothing. \dare was fast with 3$\sim$5 
 replicas. However, our study shows that, as replica group grows, \dare's 
 sole-leader and two-round protocol incurred scalability bottlenecks: the 
-consensus latency increased by \darescalability as the group growed by 35x (a 
+consensus latency increased by \darescalability as the group grew by 35x (a 
 linear increase, Figure~\ref{fig:scalability}).
 
 \vspace{-.15in}\subsubsection{Falcon: a fast, scalable RDMA-based \paxos 
@@ -102,7 +102,7 @@ We present \falcon,\footnote{We name our protocol after
 falcon, one of the fastest birds.} a new RDMA-based \paxos protocol and its
 runtime system. In \xxx, all replicas directly write to destination
 replicas' memory and poll messages from local memory to receive messages, and 
-our runtime system handles other technical challenges such as cheecking message 
+our runtime system handles other technical challenges such as checking message 
 delivery and recovering replica failures.
 
 To support general, unmodified applications, \falcon stems from our preliminary 
@@ -123,7 +123,7 @@ actual inputs (\textbf{L1}, not shown), it then invokes consensus across
 replicas. All solid arrows (\textbf{L3} and \textbf{B2}) are ultra-fast RDMA 
 direct writes to remote replicas' memory. All replicas poll from their own bare 
 memory to receive consensus messages. To handle replica failures, all replicas 
-persitently log inputs to local storage. For these writes, because the sending 
+persistently log inputs to local storage. For these writes, because the sending 
 replicas only need to copy the sent data to local RDMA network interface card 
 and then the writes finish on local site, \falcon is scalable when more backup 
 replicas are added.
@@ -148,7 +148,7 @@ replicas are added.
     \end{minipage}
 \end{figure}
 
-\para{Primilinary results.} Our preliminary results include two steps. First, 
+\para{Preliminary results.} Our preliminary results include two steps. First, 
 to justify whether such a general, socket-intercepting protocol can support 
 general applications, we have developed \crane~\cite{crane:sosp15}. \crane was 
 able to support five widely used server applications (\eg, \mysql) without 
@@ -187,7 +187,7 @@ Indeed, many existing schedulers have adopted \paxos to improve availability
 for themselves. Typically, they use \paxos to run multiple copies of their 
 controllers, which works on scheduling computation jobs with resources. In 
 normal case, only one leading controller does the real work, and the others 
-standby to cope with the leader's failure. Unfortnately, most applications 
+standby to cope with the leader's failure. Unfortunately, most applications 
 running by these schedulers have not been made highly-available (although minor 
 applications implement a replication 
 approach~\cite{mapreduce,dolly:nsdi13}).
@@ -319,9 +319,9 @@ reached, each controller follows this assignment.
 
 
 \para{Availability v.s. resource consumption.} \tripod is designed to make a
-mission-critical applicaion highly avaialble by leveraging \v{R} times of 
+mission-critical application highly available by leveraging \v{R} times of 
 resources than the application's native, unreplicated execution. We deemed this 
-extra resource consumption reasoanble for two reasons.
+extra resource consumption reasonable for two reasons.
 
 First, a major trend is that an application runs on more and more 
 computers, thus minor computer failures tend to happen more likely. Such 
@@ -354,7 +354,7 @@ improve the availability of general server applications (\eg,
 
 
 
-\para{Primilinary results.} We built a preliminary \tripod propotype, 
+\para{Preliminary results.} We built a preliminary \tripod prototype, 
 published in [APSys '16]. To evaluate a typical social-networking application, 
 we ran \tripod with \memcached~\cite{memcached}, a popular key-value store used 
 by Twitter and financial platforms~\cite{nosql:finance}. Compared to 
@@ -378,10 +378,10 @@ First, currently our replication and resource allocation workflow is tied with
 resource allocation workflow patterns, and we will develop a general, 
 scheduler-agnostic workflow. Second, we will study new differential replication 
 schemes, so that we can flexibly assign different \v{R} values to different 
-compnents of an appilcation, getting both satisfiable availability and optimal 
+components of an application, getting both satisfiable availability and optimal 
 resource consumption.
 
-\vspace{-.15in}\subsection{Objective 3: Strenghening VM to improve application 
+\vspace{-.15in}\subsection{Objective 3: Strengthening VM to improve application 
 availability}\label{sec:vm}\vspace{-.075in}
 
 
@@ -390,7 +390,7 @@ availability}\label{sec:vm}\vspace{-.075in}
 Virtual machines (VM) infrastructures (\eg, Amazon EC2~\cite{amazon:vpc} and 
 OpenStack~\cite{openstack}) are widely deployed in datacenters and clouds 
 because they can provide a virtualized abstraction of computing resources to 
-different applications and enforce strong utiilization isolation and security. 
+different applications and enforce strong utilization isolation and security. 
 
 As mentioned in related work (\S\ref{sec:others-work}), two approaches, 
 primary-backup and live migration, exist for improving VM fault-tolerance, 
@@ -442,14 +442,14 @@ shaded (and in blue color).}
 
 Fortunately, \paxos-based replication can construct multiple, equivalent 
 executions for the same application, thanking to its robustness and 
-consistency. To ensure high application avaialbility, we can just run \paxos to 
+consistency. To ensure high application availability, we can just run \paxos to 
 make replicas of VMs see the same sequence of inputs, and doing so is feasible 
 because many VM architectures have input interception layers by default.
 
 We make \falcon and VM form a mutual-beneficial eco-system. In this eco-system, 
 VM provides a hypervisor layer to automatically capture incoming inputs and 
 application execution state changes for \falcon, and \falcon benefits a VM by: 
-(1) improving avaialbility of applications running in this VM, and (2) greatly 
+(1) improving availability of applications running in this VM, and (2) greatly 
 improving application downtime and bandwidth consumption for the VM's live 
 migration.
 
@@ -463,8 +463,8 @@ API enables \falcon to coordinate inputs with RDMA, because currently RDMA only
 supports user space.
 
 A key benefit of such a \paxos-based VM replication over primary-backup is that 
-its leadership is strongly consistent (through a majority aggrement, which 
-primary-backup lacks), and it saves the bandwidth consumption for transfering 
+its leadership is strongly consistent (through a majority agreement, which 
+primary-backup lacks), and it saves the bandwidth consumption for transferring 
 application execution states in primary-backup.
 
 % Describe the infrastructure. Take Ning's figure. Hypervisor. tap\_send().
@@ -474,7 +474,7 @@ application execution states in primary-backup.
 
 Interestingly, this replication ability not only provides high 
 availability for fault-tolerance (suitable for the primary-backup scenario), 
-but can also greatly save resource consumption if fault-tolerence is not a 
+but can also greatly save resource consumption if fault-tolerance is not a 
 major concern (suitable for the live migration scenario). Consider the live 
 migration scenario, \paxos backups can only agree on inputs without actually 
 executing them, then the overall application execution consumes almost same 
@@ -487,8 +487,8 @@ this backup.
 % inputs, they can opt to execute requests or absorb periodic checkpoints.
 Leveraging this idea, we propose a fast, network bandwidth-friendly live 
 migration approach called ``\paxos-based live migration". A key benefit of this 
-approach is that, now migration does not require transfering all execution 
-states of application, but only tranferfing the \paxos leadership (almost as 
+approach is that, now migration does not require transferring all execution 
+states of application, but only transferring the \paxos leadership (almost as 
 fast as \paxos consensus latency) to a destination backup which has idle 
 resources. To increase the chance on finding a proper destination, we can 
 leverage \falcon's high availability to run many backups within a datacenter.
@@ -496,8 +496,8 @@ leverage \falcon's high availability to run many backups within a datacenter.
 % This approach is othorgnal to the VM replication. 
 This \paxos-based live migration approach contains four steps. First, in 
 normal case, the current computing instance (the leader) just agrees on 
-incoming inputs with backups using \falcon. A set of backups run on hightly 
-loaded computers and agree on inputs (also record the inputs persistantly). 
+incoming inputs with backups using \falcon. A set of backups run on highly 
+loaded computers and agree on inputs (also record the inputs persistently). 
 
 Second, the leader does a periodical checkpoint when it's idle (no incoming 
 requests), and sends the checkpoint to the backups. The backups only keeps 
@@ -505,7 +505,7 @@ the latest checkpoint and discards prior ones.
 
 Third, when the VM invokes a migration on the leader computer, it uses a 
 standard migration mechanism to determine which backup should be the migration 
-destination (the next leader). Then, the destination extracts the lastest
+destination (the next leader). Then, the destination extracts the latest
 checkpoint on local computer, restores the application state, and then catches 
 up with the leader with executing the recorded but not executed inputs.
 
