@@ -248,15 +248,15 @@ replication-aware scheduling for jobs  (\S\ref{sec:workflow}).
 Figure~\ref{fig:scheduler-arch} depicts \tripod's architecture, and its key 
 components are shaded (and in blue). To illustrate how \tripod works in an 
 application perspective, this figure shows two applications, Hadoop and MPI. 
-Each application has a \emph{replica strength} (\v{R}) to denote the level of 
+Each application has a \emph{replica strength} (\vv{R}) to denote the level of 
 fault-tolerance it demands. This value is either 1 or equals the number of 
 replicas of controllers in \tripod.
 
-By default, each application has \v{\v{R}=1}, which means that this application 
+By default, each application has \vv{R=1}, which means that this application 
 does not need replication. For such a default setting, \tripod runs the job as 
 is without replication, like a typical cluster management system (\eg, Mesos).
 
-In this figure, Hadoop's \v{R} is 3, which means that it wants to replicate 
+In this figure, Hadoop's \vv{R} is 3, which means that it wants to replicate 
 each of its job with three copies for high-availability. Suppose Hadoop 
 submits two jobs to the leader controller, each has different shapes (triangle 
 or hexagon). The leader controller then invokes a consensus on each job across 
@@ -297,9 +297,9 @@ handles all the replication logic.
 In the first step, slave machines periodically report their available computing 
 resources (\eg, CPU cores and memory) to the leader controller. In the second 
 step, instead of offering the available resources aggregated from slave 
-machines, \tripod divides the amount of resources by each application's \v{R} 
+machines, \tripod divides the amount of resources by each application's \vv{R} 
 value and then sends a resource offer to the application. The goal is to 
-reserve enough resources for \tripod to replicate a job with \v{R} copies.
+reserve enough resources for \tripod to replicate a job with \vv{R} copies.
 
 In the third step, an application scheduler submits jobs to the leader 
 controller. The leader controller then invokes a consensus on this job by 
@@ -319,7 +319,7 @@ reached, each controller follows this assignment.
 
 
 \para{Availability v.s. resource consumption.} \tripod is designed to make a
-mission-critical application highly available by leveraging \v{R} times of 
+mission-critical application highly available by leveraging \vv{R} times of 
 resources than the application's native, unreplicated execution. We deemed this 
 extra resource consumption reasonable for two reasons.
 
@@ -335,7 +335,7 @@ down the whole Facebook site for several times in the last few
 years~\cite{facebook:outage}, costing huge money lost. 
 
 Second, it is already a common practice to replicate critical computations by 
-using \v{R} times of resources, and doing so can improve both availability and 
+using \vv{R} times of resources, and doing so can improve both availability and 
 performance. For instance, Scatter~\cite{scatter:sosp11} runs 8$\sim$12 
 replicas in a \paxos group to order client requests, and it lets replicas reply 
 requests in parallel. A bigger group size will improve Scatter throughput. 
@@ -345,7 +345,7 @@ improve the availability of general server applications (\eg,
 \mysql~\cite{mysql}) by replicating them.
 
 % Therefore, \tripod's design favors more on availability and performance 
-% (low consensus latency). It's design tends to use \v{R} times of resources 
+% (low consensus latency). It's design tends to use \vv{R} times of resources 
 % compared to traditional applications. We argue that this extra resource 
 % utilizations are acceptable for critical applications, because if they have 
 % high 
@@ -377,7 +377,7 @@ First, currently our replication and resource allocation workflow is tied with
 \mesos. We will study other popular schedulers and summarize their 
 resource allocation workflow patterns, and we will develop a general, 
 scheduler-agnostic workflow. Second, we will study new differential replication 
-schemes, so that we can flexibly assign different \v{R} values to different 
+schemes, so that we can flexibly assign different \vv{R} values to different 
 components of an application, getting both satisfiable availability and optimal 
 resource consumption.
 
@@ -455,9 +455,9 @@ migration.
 
 Figure~\ref{fig:vm-arch} shows the architecture of the eco-system. To provide 
 the same fault-tolerance guarantee with primary-backup, a typical replication 
-factor of this eco-system is \v{R=3}. This eco-system chooses KVM~\cite{kvm} 
+factor of this eco-system is \vv{R=3}. This eco-system chooses KVM~\cite{kvm} 
 due to two main reasons. First, KVM is an open source hypervisor carried in 
-Linux. Second, it provides \v{tap\_send()}, an input capturing API at its QEMU 
+Linux. Second, it provides \vv{tap\_send()}, an input capturing API at its QEMU 
 component running at user space. Compared to other types of hypervisors, this 
 API enables \falcon to coordinate inputs with RDMA, because currently RDMA only 
 supports user space.
