@@ -90,42 +90,38 @@ destination replicas' memory, and let all replicas poll their local memory to
 receive messages.
 
 Although doing so will consume more CPU resources than a sole-leader 
-protocol~\cite{dare:hpdc15}, it has three major benefits. First, the leader 
-has less workloads. Second, both leader and backups participate in consensus, 
-which makes it possible to reach consensus with only one 
-round~\cite{paxos:practical}. Third, all replicas can just receive consensus 
-messages on their bare, local memory. An analogy is threads receiving other 
-threads' data via bare memory, a fast and scalable computation pattern.
+protocol~\cite{dare:hpdc15}, it has two major benefits. First, both leader and 
+backups participate in consensus, which makes it possible to reach consensus 
+with only one round~\cite{paxos:practical}. Second, all replicas can just 
+receive consensus messages on their bare, local memory. An analogy is threads 
+receiving other threads' data via bare memory, a fast and scalable computation 
+pattern.
 
-We present \falcon,\footnote{We name our protocol after
+We propose \falcon,\footnote{We name our protocol after
 falcon, one of the fastest birds.} a new RDMA-based \paxos protocol and its
 runtime system. In \xxx, all replicas directly write to destination
 replicas' memory and poll messages from local memory to receive messages, and 
 our runtime system handles other technical challenges such as checking message 
 delivery and recovering replica failures.
 
-To support general, unmodified applications, \falcon stems from our preliminary 
-general protocol, \crane~\cite{crane:sosp15}. Within \falcon, an application 
-runs as is. \falcon automatically deploys this program on replicas, intercepts 
-inputs from an application's inbound socket calls (\eg, \recv) with a Linux 
-technique called LD\_PRELOAD, and invokes its consensus protocol to enforce same 
-application inputs across replicas. Figure~\ref{fig:falcon-arch} shows 
-\falcon's architecture with four key components: our consensus protocol for 
-enforcing same inputs across replicas, an output checker for checking network 
-outputs across replicas with our same protocol, an in-memory consensus 
-log, and a guard process that handles checkpointing and recovering application 
-execute states.
+\falcon supports unmodified applications. \falcon automatically deploys the 
+same application on multiple replicas, intercepts the application's 
+network inputs from its inbound socket calls (\eg, \recv) with a Linux 
+technique called LD\_PRELOAD, and invokes its RDMA-based consensus protocol to 
+enforce same network inputs across replicas. Figure~\ref{fig:falcon-arch} 
+shows \falcon's architecture on the leader replica with three key components: 
+an input consensus coordinator, an in-memory consensus log, and a guard that 
+checkpoints and recovers application execution states.
 
 Figure~\ref{fig:falcon-protocol} shows \falcon's consensus protocol in normal 
-case. The leader first executes the actual inbound socket call to get the 
-actual inputs (\textbf{L1}, not shown), it then invokes consensus across 
-replicas. All solid arrows (\textbf{L3} and \textbf{B2}) are ultra-fast RDMA 
-direct writes to remote replicas' memory. All replicas poll from their own bare 
-memory to receive consensus messages. To handle replica failures, all replicas 
-persistently log inputs to local storage. For these writes, because the sending 
-replicas only need to copy the sent data to local RDMA network interface card 
-and then the writes finish on local site, \falcon is scalable when more backup 
-replicas are added.
+case. The leader first executes the actual inbound socket call to get and store 
+the actual inputs, it then invokes consensus across replicas. All 
+solid arrows (\textbf{L3} and \textbf{B2}) are direct RDMA writes to remote 
+replicas' memory. All replicas poll from their own bare memory to receive 
+consensus messages. To handle replica failures, all replicas persistently log 
+inputs to local SSD storage (\textbf{L2} and \textbf{B1}). For these writes, 
+the sending replicas only need to copy the data to local RDMA NIC and then the 
+writes finish, \falcon is scalable when more backup replicas are added.
 
 % Three figures. First, falcon arch. Second, consensus protocol. Third, falcon 
 % results compared to traditional ones and DARE.
@@ -147,6 +143,15 @@ replicas are added.
     \end{minipage}
 \end{figure}
 
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=0.34\textheight]{figures/traditional_paxos_latency.ps}
+        \vspace{-.2in}
+        \caption{Consensus latency of six \paxos protocols. \falcon is fastest 
+and scales the best.}
+        \label{fig:scalability}
+\end{figure}
+
 \para{Preliminary results.} Our preliminary results include two steps. First, 
 to justify whether such a general, socket-intercepting protocol can support 
 general applications, we have developed \crane~\cite{crane:sosp15}. \crane was 
@@ -156,21 +161,15 @@ version of \crane, by leveraging RDMA. Figure shoes \falcon performance with
 existing consensus protocols. \falcon was one order of magnitude faster latency 
 than the literature. \falcon's consensus latency outperforms 4 popular \paxos 
 protocols by \comptradlow to \comptradhigh on 3 to 9 replicas. \falcon is 
-faster than \dare by up to \fasterDARE. When changing the replica group size 
-from 3 to 105 (a 35x increase), \falcon's consensus latency increases merely 
-from \xxxlatencythree \us to \xxxlatencyonezerofive \us (a \xxxscalability, 
-sub-linear increase).
+faster than \dare by up to \fasterDARE.
+% When changing the replica group size 
+% from 3 to 105 (a 35x increase), \falcon's consensus latency increases merely 
+% from \xxxlatencythree \us to \xxxlatencyonezerofive \us (a \xxxscalability, 
+% sub-linear increase).
 % Crane. Falcon. Say Crane is first version. Falcon 
 % totally subsumes Crane. Falcon also has initial results.
 
-\begin{figure}[!htb]
-\centering
-\includegraphics[width=0.34\textheight]{figures/traditional_paxos_latency.ps}
-        \vspace{-.2in}
-        \caption{Consensus latency of six \paxos protocols. \falcon is fastest 
-and scales the best.}
-        \label{fig:scalability}
-\end{figure}
+
 
 \para{Future work.} Since \falcon is the keystone of our objectives, this 
 proposal plans to further study and improve its practicality in three aspects: 
