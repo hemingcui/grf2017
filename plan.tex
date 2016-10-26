@@ -145,7 +145,7 @@ writes finish, \falcon is scalable when more backup replicas are added.
 
 \begin{figure}[!htb]
 \centering
-\includegraphics[width=0.34\textheight]{figures/traditional_paxos_latency.ps}
+\includegraphics[width=0.25\textheight]{figures/traditional_paxos_latency.ps}
         \vspace{-.2in}
         \caption{Consensus latency of six \paxos protocols. \falcon is fastest 
 and scales the best.}
@@ -222,14 +222,14 @@ controller schedule jobs, \tripod runs replicas of the same job using replicas
 of controllers: after controllers agree on a new job with \falcon, \tripod lets 
 each controller independently schedule an copy of this job.
 
-Doing so has three benefits. First, \tripod's \paxos acts as a single, general 
-fault-tolerance service to applications. We can just leverage existing 
-verification tools~\cite{modist:nsdi09,demeter:sosp11} to make sure that our 
-\falcon protocol is robust and correct, and then we can benefit many 
-applications. Second, application developers can now just focus on their own 
-application logic, greatly saving development time and money. Third, now 
-\tripod's own scheduler can handle the replication logic and do careful, 
-replication-aware scheduling for jobs  (\S\ref{sec:workflow}). 
+% Doing so has three benefits. First, \tripod's \paxos acts as a single, general 
+% fault-tolerance service to applications. We can just leverage existing 
+% verification tools~\cite{modist:nsdi09,demeter:sosp11} to make sure that our 
+% \falcon protocol is robust and correct, and then we can benefit many 
+% applications. Second, application developers can now just focus on their own 
+% application logic, greatly saving development time and money. Third, now 
+% \tripod's own scheduler can handle the replication logic and do careful, 
+% replication-aware scheduling for jobs  (\S\ref{sec:workflow}). 
 
 
 % To 
@@ -265,17 +265,18 @@ results unless the same mechanism is triggered.
 %  unless a tail-tolerance mechanism is triggered 
 % (\S\ref{sec:workflow})
 
+% Hack: use eps to avoid the 1MB terrible ps size.
 \begin{figure}[!htb]
     \begin{minipage}{.49\textwidth}
         \vspace{-.2in}
-        \includegraphics[width=0.34\textheight]{figures/scheduler_arch.ps}
+        \includegraphics[width=0.34\textheight]{figures/scheduler_arch.eps}
         \vspace{-.3in}
         \caption{Fault-tolerant scheduler.}
         \label{fig:scheduler-arch}
     \end{minipage}
     \begin{minipage}{0.51\textwidth}
         \vspace{-.2in}
-        \includegraphics[width=0.34\textheight]{figures/scheduler_flow.ps}
+        \includegraphics[width=0.34\textheight]{figures/scheduler_flow.eps}
         \vspace{-.3in}
         \caption{Workflow.}
         \label{fig:scheduler-workflow}
@@ -319,28 +320,27 @@ reached, each controller follows this assignment.
 \para{Availability v.s. resource consumption.} \tripod is designed to make a
 mission-critical application highly available by leveraging \vv{R} times of 
 resources than the application's native, unreplicated execution. We deemed this 
-extra resource consumption reasonable for two reasons.
-
-First, a major trend is that an application runs on more and more 
-computers, thus minor computer failures tend to happen more likely. Such 
-failures may turn down the entire application and cause if the failure computer 
-runs a critical computation. For instance, Both NYSE and Nasdaq have experienced 
+extra resource consumption reasonable, because a major trend is that an 
+application runs on more and more computers, thus minor computer failures tend 
+to happen more likely. Such failures may turn down the entire application and 
+cause if the failure computer runs a critical computation. For instance, Both 
+NYSE and Nasdaq have experienced 
 outage of their whole site~\cite{nyse:halt} or specific IPO 
 events~\cite{facebook:ipo:delay} due to minor machine errors. 
 In addition, social-networking applications like Facebook has 
 strong fault-tolerance requirements, because minor machine failures have turned 
 down the whole Facebook site for several times in the last few 
 years~\cite{facebook:outage}, costing huge money lost. 
-
-Second, it is already a common practice to replicate critical computations by 
-using \vv{R} times of resources, and doing so can improve both availability and 
-performance. For instance, Scatter~\cite{scatter:sosp11} runs 8$\sim$12 
-replicas in a \paxos group to order client requests, and it lets replicas reply 
-requests in parallel. A bigger group size will improve Scatter throughput. 
-Moreover, several recent replication 
-systems~\cite{eve:osdi12,rex:eurosys14,crane:sosp15} 
-improve the availability of general server applications (\eg, 
-\mysql~\cite{mysql}) by replicating them.
+% for two reasons.
+% Second, it is already a common practice to replicate critical computations by 
+% using \vv{R} times of resources, and doing so can improve both availability and 
+% performance. For instance, Scatter~\cite{scatter:sosp11} runs 8$\sim$12 
+% replicas in a \paxos group to order client requests, and it lets replicas reply 
+% requests in parallel. A bigger group size will improve Scatter throughput. 
+% Moreover, several recent replication 
+% systems~\cite{eve:osdi12,rex:eurosys14,crane:sosp15} 
+% improve the availability of general server applications (\eg, 
+% \mysql~\cite{mysql}) by replicating them.
 
 % Therefore, \tripod's design favors more on availability and performance 
 % (low consensus latency). It's design tends to use \vv{R} times of resources 
@@ -431,11 +431,11 @@ disturbed.
 \begin{figure}[!htb]
 \centering
 \vspace{-.2in}
-\includegraphics[width=0.34\textheight]{figures/vm_arch.ps}
+\includegraphics[width=0.25\textheight]{figures/vm_arch.ps}
         \vspace{-.3in}
-        \caption{Performance overhead of scheduler. Our key components are 
-shaded (and in blue color).}
+        \caption{The \falcon and KVM eco-system.}
         \label{fig:vm-arch}
+        \vspace{-.2in}
 \end{figure}
 
 Fortunately, \paxos-based replication can construct multiple, equivalent 
@@ -492,27 +492,27 @@ resources. To increase the chance on finding a proper destination, we can
 leverage \falcon's high availability to run many backups within a datacenter.
 
 % This approach is othorgnal to the VM replication. 
-This \paxos-based live migration approach contains four steps. First, in 
-normal case, the current computing instance (the leader) just agrees on 
-incoming inputs with backups using \falcon. A set of backups run on highly 
-loaded computers and agree on inputs (also record the inputs persistently). 
-
-Second, the leader does a periodical checkpoint when it's idle (no incoming 
-requests), and sends the checkpoint to the backups. The backups only keeps 
-the latest checkpoint and discards prior ones.
-
-Third, when the VM invokes a migration on the leader computer, it uses a 
-standard migration mechanism to determine which backup should be the migration 
-destination (the next leader). Then, the destination extracts the latest
-checkpoint on local computer, restores the application state, and then catches 
-up with the leader with executing the recorded but not executed inputs.
-
-Fourth, we invoke a \falcon protocol level operation: migration the 
-leadership, which is similar to a traditional \paxos leader election 
-process~\cite{paxos:practical}, but we just explicitly decide the destination 
-computer as the new leader. \falcon's protocol handles various failure 
-scenarios (\eg, the destination computer crashes during the migration) as its 
-\paxos nature.
+% This \paxos-based live migration approach contains four steps. First, in 
+% normal case, the current computing instance (the leader) just agrees on 
+% incoming inputs with backups using \falcon. A set of backups run on highly 
+% loaded computers and agree on inputs (also record the inputs persistently). 
+% 
+% Second, the leader does a periodical checkpoint when it's idle (no incoming 
+% requests), and sends the checkpoint to the backups. The backups only keeps 
+% the latest checkpoint and discards prior ones.
+% 
+% Third, when the VM invokes a migration on the leader computer, it uses a 
+% standard migration mechanism to determine which backup should be the migration 
+% destination (the next leader). Then, the destination extracts the latest
+% checkpoint on local computer, restores the application state, and then catches 
+% up with the leader with executing the recorded but not executed inputs.
+% 
+% Fourth, we invoke a \falcon protocol level operation: migration the 
+% leadership, which is similar to a traditional \paxos leader election 
+% process~\cite{paxos:practical}, but we just explicitly decide the destination 
+% computer as the new leader. \falcon's protocol handles various failure 
+% scenarios (\eg, the destination computer crashes during the migration) as its 
+% \paxos nature.
 
 % TBD: mention the leader election latency in Objective 2.
 % Analysis: this approach incurs almost zero time and resource for a few reasons. 
