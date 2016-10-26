@@ -49,17 +49,16 @@ DPDK~\cite{dpdk} and Arrakis~\cite{arrakis:osdi14}).
 
 
 
-To deal with the rapidly increasing volume of data, more and more applications 
+To process the rapidly increasing volume of data, more and more applications 
 are deployed in a datacenter with two complementary types of infrastructures. 
 The first type is schedulers~\cite{borg:eurosys15,mesos:nsdi11,tupperware, 
 yarn:socc13, autopilot:sosp07,quincy:sosp09,apollo:osdi14,fuxi:vldb14}. Many 
-applications are mission critical and demand both high performance
-and availability, including financial trading, health care, social networks, 
-and military applications. For instance, a high-frequency trading platform 
-must be highly-available during operation hours, and adding merely hundreds of 
-\us to its latency means big money lost~\cite{nosql:finance}. Another 
-instance is social networks: minor computer errors in Facebook cluster led to 
-several outages in recent years~\cite{facebook:outage}.
+applications are mission-critical and demand both high performance
+and availability, including financial platforms, social networks, 
+and medical services. For instance, a trading platform must be highly available 
+during operation hours~\cite{nosql:finance}. Another instance is social 
+networks: minor computer failures in a Facebook datacenter led to several 
+outages in recent years~\cite{facebook:outage}.
 
 
 Although existing schedulers themselves have are made available with 
@@ -139,14 +138,13 @@ building block, these prior systems can scale even better.
 
 \para{Fault-tolerance in schedulers.} Datacenter
 schedulers~\cite{borg:eurosys15,mesos:nsdi11,tupperware,yarn:socc13,
-autopilot:sosp07,quincy:sosp09,apollo:osdi14,fuxi:vldb14} are widespread 
-because they can support diverse applications (\eg, 
-Hadoop~\cite{hadoop}, Dryad~\cite{dryad}, and key-value stores~\cite{redis}). 
-These existing systems mainly focus on high availability for themselves by 
-replicating their own important components, or focus on fault-recovery of 
-applications~\cite{fuxi:vldb14}. To the best of our knowledge, no existing 
-schedulers provide fast and general high-availability service to 
-applications.
+autopilot:sosp07,quincy:sosp09,apollo:osdi14,fuxi:vldb14} can support diverse 
+applications (\eg, Hadoop~\cite{hadoop}, Dryad~\cite{dryad}, and key-value 
+stores~\cite{redis}). Existing schedulers mainly focus on ensuring high 
+availability for themselves by replicating their own important components, or 
+focus on recovery instead of availability of applications~\cite{fuxi:vldb14}. 
+To the best of our knowledge, no existing schedulers provide a
+high availability support to general applications.
 % \xxx's consensus protocol design is general to application and 
 % schedulers so it can be integrated in other systems.
 
