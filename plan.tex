@@ -428,15 +428,37 @@ disturbed.
 \vspace{-.15in}\subsubsection{Forming an eco-system with VM and \falcon} 
 \label{sec:vm-arch}\vspace{-.075in}
 
+% \begin{figure}[!htb]
+% \centering
+% \vspace{-.2in}
+% \includegraphics[width=0.25\textheight]{figures/vm_arch.ps}
+%         \vspace{-.3in}
+%         \caption{The \falcon and KVM eco-system.}
+%         \label{fig:vm-arch}
+%         \vspace{-.2in}
+% \end{figure}
+
 \begin{figure}[!htb]
-\centering
-\vspace{-.2in}
-\includegraphics[width=0.25\textheight]{figures/vm_arch.ps}
-        \vspace{-.3in}
-        \caption{The \falcon and KVM eco-system.}
-        \label{fig:vm-arch}
+    \begin{minipage}{.49\textwidth}
         \vspace{-.2in}
+        \includegraphics[width=0.34\textheight]{figures/vm_arch.ps}
+        \vspace{-.3in}
+        \caption{A new fault-tolerant VM for improving application 
+availability.}
+        \label{fig:vm-arch}
+    \end{minipage}
+    \begin{minipage}{0.51\textwidth}
+        \vspace{-.2in}
+        \includegraphics[width=0.34\textheight]{figures/tree.ps}
+        \vspace{-.3in}
+        \caption{Tracking minor different memory across VM replications.}
+        \label{fig:vm-tree}
+    \end{minipage}
 \end{figure}
+
+\vspace{-.15in}\subsubsection{Replication-aware resource allocation workflow}
+\label{sec:workflow}\vspace{-.075in}
+
 
 Fortunately, \paxos-based replication can construct multiple, equivalent 
 executions for the same application, thanking to its robustness and 
