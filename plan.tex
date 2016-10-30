@@ -392,8 +392,8 @@ schemes, so that we can flexibly assign different \vv{R} values to different
 components of an application, getting both satisfiable availability and optimal 
 resource consumption.
 
-\vspace{-.15in}\subsection{Objective 3: Strengthening VM to improve application 
-availability}\label{sec:vm}\vspace{-.075in}
+\vspace{-.15in}\subsection{Objective 3: Building a fault-tolerant VM to improve 
+application availability}\label{sec:vm}\vspace{-.075in}
 
 
 
@@ -438,7 +438,7 @@ disturbed.
 % computer incur big resource consumption. This is contraditive to the motivation 
 % of migration: reduing computer loads on the local computer.
 
-\vspace{-.15in}\subsubsection{Forming an eco-system with VM and \falcon} 
+\vspace{-.15in}\subsubsection{Integragint \falcon with VM} 
 \label{sec:vm-arch}\vspace{-.075in}
 
 % \begin{figure}[!htb]
@@ -469,8 +469,7 @@ availability.}
     \end{minipage}
 \end{figure}
 
-\vspace{-.15in}\subsubsection{Replication-aware resource allocation workflow}
-\label{sec:workflow}\vspace{-.075in}
+
 
 
 Fortunately, \paxos-based replication can construct multiple, equivalent 
@@ -500,31 +499,64 @@ its leadership is strongly consistent (through a majority agreement, which
 primary-backup lacks), and it saves the bandwidth consumption for transferring 
 application execution states in primary-backup.
 
+\vspace{-.15in}\subsubsection{Tracking Minor Memory Difference Across VM 
+Replicas}
+\label{sec:workflow}\vspace{-.075in}
+
+To repair divergence efficiently, we propose a lightweight state synchronization 
+approach. It synchronizes state between replicas by transferring only pages 
+that are different. To do this, each replica maintains a Merkle tree kept 
+updating from the dirty pages. By "dirty", we mean the memory page has been 
+modified since last synchronization. One problem here is that each VM may have 
+dirtied different pages. This leads to different structures of Merkle trees and 
+they are not comparable. \xxx addresses this problem using a fast method as 
+follows:
+
+% \begin{small} \textit{(We use $A$ to denote the diverged replica; it will fetch 
+% state 
+% from replica $B$)} \end{small}
+\begin{enumerate}
+\item $A$ sends its dirty page bitmap $M_A$ to $B$.
+\item $B$ does a \textit{bitwise or} calculation \ $M_{union} = M_A | M_B $, 
+and sends $M_{union}$ back to $A$.
+\item $A$ and $B$ both update their own Merkle tree according to $M_{union}$. 
+$A$ sends its updated Merkle tree to $B$. 
+\item $B$ does a comparison on both Merkle tress to find the differences, as 
+illustrated in Figure~\ref{fig:tree}.
+\end{enumerate}
+
+Our method is efficient for two reasons. First, it only transfers the different 
+pages between replicas. Because we have made consensus on inputs and we can 
+turn off \textit{Address Space Layout Randomization} to trade for correctness, 
+the difference rate will be really small. Second, the use of Merkle tree 
+optimizes the time complexity of comparison between memory states to $O(\log 
+n)$.
+
 % Describe the infrastructure. Take Ning's figure. Hypervisor. tap\_send().
 
-\vspace{-.15in}\subsubsection{\paxos-based Live Migration} 
-\label{sec:vm-migration}\vspace{-.075in}
-
-Interestingly, this replication ability not only provides high 
-availability for fault-tolerance (suitable for the primary-backup scenario), 
-but can also greatly save resource consumption if fault-tolerance is not a 
-major concern (suitable for the live migration scenario). Consider the live 
-migration scenario, \paxos backups can only agree on inputs without actually 
-executing them, then the overall application execution consumes almost same 
-resources as the unreplicated one. A backup now can just absorb occasional, 
-periodical application checkpoints from the leader when the leader replica is 
-idle, and catches up with the leader when a migration destination is decided on 
-this backup.
-
-% We propose our own replication approach. The non-leader only agree on new 
-% inputs, they can opt to execute requests or absorb periodic checkpoints.
-Leveraging this idea, we propose a fast, network bandwidth-friendly live 
-migration approach called ``\paxos-based live migration". A key benefit of this 
-approach is that, now migration does not require transferring all execution 
-states of application, but only transferring the \paxos leadership (almost as 
-fast as \paxos consensus latency) to a destination backup which has idle 
-resources. To increase the chance on finding a proper destination, we can 
-leverage \falcon's high availability to run many backups within a datacenter.
+% \vspace{-.15in}\subsubsection{\paxos-based Live Migration} 
+% \label{sec:vm-migration}\vspace{-.075in}
+% 
+% Interestingly, this replication ability not only provides high 
+% availability for fault-tolerance (suitable for the primary-backup scenario), 
+% but can also greatly save resource consumption if fault-tolerance is not a 
+% major concern (suitable for the live migration scenario). Consider the live 
+% migration scenario, \paxos backups can only agree on inputs without actually 
+% executing them, then the overall application execution consumes almost same 
+% resources as the unreplicated one. A backup now can just absorb occasional, 
+% periodical application checkpoints from the leader when the leader replica is 
+% idle, and catches up with the leader when a migration destination is decided on 
+% this backup.
+% 
+% % We propose our own replication approach. The non-leader only agree on new 
+% % inputs, they can opt to execute requests or absorb periodic checkpoints.
+% Leveraging this idea, we propose a fast, network bandwidth-friendly live 
+% migration approach called ``\paxos-based live migration". A key benefit of this 
+% approach is that, now migration does not require transferring all execution 
+% states of application, but only transferring the \paxos leadership (almost as 
+% fast as \paxos consensus latency) to a destination backup which has idle 
+% resources. To increase the chance on finding a proper destination, we can 
+% leverage \falcon's high availability to run many backups within a datacenter.
 
 % This approach is othorgnal to the VM replication. 
 % This \paxos-based live migration approach contains four steps. First, in 
