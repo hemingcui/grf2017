@@ -143,21 +143,32 @@ writes finish, \falcon is scalable when more backup replicas are added.
     \end{minipage}
 \end{figure}
 
-\begin{figure}[!htb]
-\centering
-\includegraphics[width=0.25\textheight]{figures/traditional_paxos_latency.ps}
-        \vspace{-.2in}
-        \caption{Consensus latency of six \paxos protocols. \falcon is fastest 
-and scales the best.}
-        \label{fig:scalability}
-\end{figure}
+\begin{wrapfigure}{r}{7cm}
+  \vspace{-.1in}
+  \includegraphics[width=7cm]{figures/traditional_paxos_latency.ps}\\
+  \vspace{-.3in}
+  \caption{Consensus latency of six \paxos protocols. Both X and Y axes are 
+broken to fit in all these protocols. \falcon achieves the smallest consensus 
+latency.}
+  \label{fig:scalability}
+\end{wrapfigure}
+
+% \begin{figure}[!htb]
+% \centering
+% \includegraphics[width=0.25\textheight]{figures/traditional_paxos_latency.ps}
+%         \vspace{-.2in}
+%         \caption{Consensus latency of six \paxos protocols. \falcon is fastest 
+% and scales the best.}
+%         \label{fig:scalability}
+% \end{figure}
 
 \para{Preliminary results.} Our preliminary results include two steps. First, 
 to justify whether such a general, socket-intercepting protocol can support 
 general applications, we have developed \crane~\cite{crane:sosp15}. \crane was 
 able to support five widely used server applications (\eg, \mysql) without 
 modifying them. Second, we built \falcon, a much faster and more scalable 
-version of \crane, by leveraging RDMA. Figure shoes \falcon performance with 
+version of \crane, by leveraging RDMA. Figure~\ref{fig:scalability} shoes 
+\falcon performance with 
 existing consensus protocols. \falcon was one order of magnitude faster latency 
 than the literature. \falcon's consensus latency outperforms 4 popular \paxos 
 protocols by \comptradlow to \comptradhigh on 3 to 9 replicas. \falcon is 
