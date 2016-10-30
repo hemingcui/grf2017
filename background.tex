@@ -11,7 +11,7 @@ objectives (\S\ref{sec:motivation}), others' related work
 
 Consensus protocols (typically, 
 \paxos~\cite{paxos:practical,paxos,paxos:simple,paxos:complex}) play a 
-key role in datacenters, including ordering 
+core role in distributed systems, including ordering 
 services~\cite{ellis:thesis,manos:hotdep10,scatter:sosp11},
 leader election~\cite{zookeeper, chubby:osdi}, and
 fault-tolerance~\cite{eve:osdi12,rex:eurosys14,crane:sosp15}. A \paxos protocol
@@ -30,8 +30,8 @@ improve the availability of server applications (\eg, \mysql~\cite{mysql}).
 
 Unfortunately, the group size of existing \paxos protocols can hardly go up 
 to a dozen because their consensus messages go through OS kernels and software 
-TCP/IP layers (a round-trip takes about 200 \us), causing the consensus 
-latency to increase almost linearly to 
+TCP/IP layers (a \vv{ping} round-trip takes about 200 \us in a 10Gbps network), 
+causing the consensus latency to increase almost linearly to 
 group size~\cite{scatter:sosp11,zookeeper,crane:sosp15}.
 
 To address this \paxos performance problem, Remote Direct Memory Access (RDMA) 
@@ -47,40 +47,51 @@ DPDK~\cite{dpdk} and Arrakis~\cite{arrakis:osdi14}).
 \vspace{-.15in}\subsection{Datacenter Computing Infrastructures}
 \label{sec:datacenter}\vspace{-.075in}
 
+More and more applications are ran in a datacenter by two independent types of 
+infrastructures. The first type is 
+schedulers~\cite{borg:eurosys15,mesos:nsdi11,tupperware, yarn:socc13, 
+autopilot:sosp07,quincy:sosp09,apollo:osdi14,fuxi:vldb14}. Although existing 
+schedulers themselves have are made available with \paxos 
+(\eg,~\cite{mesos:nsdi11}), their applications are not. Therefore, if runtime 
+failures such as computer hardware errors occur, these schedulers have to 
+re-schedule applications, leading to substantial application unavailability.
 
-
-To process the rapidly increasing volume of data, more and more applications 
-are deployed in a datacenter with two complementary types of infrastructures. 
-The first type is schedulers~\cite{borg:eurosys15,mesos:nsdi11,tupperware, 
-yarn:socc13, autopilot:sosp07,quincy:sosp09,apollo:osdi14,fuxi:vldb14}. Many 
-applications are mission-critical and demand both high performance
-and availability, including financial platforms, social networks, 
-and medical services. For instance, a trading platform must be highly available 
-during operation hours~\cite{nosql:finance}. Another instance is social 
-networks: minor computer failures in a Facebook datacenter led to several 
-outages in recent years~\cite{facebook:outage}.
-
-
-Although existing schedulers themselves have are made available with 
-\paxos (\eg,~\cite{mesos:nsdi11}), their applications are not. Therefore, if an 
-application crashes or hardware errors occur, these schedulers have to 
-reschedule applications, leading to substantial application unavailability.
-
-% 
 The second infrastructure type is VM~\cite{amazon:vpc, openstack, esx:osdi02, 
 kvm, xen:sosp}. VM abstracts away the heterogeneous physical computing 
-resources, making computing resources easy to isolate, utilize, and balance 
-loads (\eg, via live migration~\cite{vmotion:atc05,xen:migration:nsdi05}). 
-Although some application fault-tolerance approaches such as 
-primary-backup~\cite{remus:nsdi08}, these approaches still often consume 
-prohibitive resources (\eg, CPU and network bandwidth) and have weaker 
-availability guarantee than \paxos.
+resources, making computing resources easy to utilize and balance loads (\eg, 
+via live migration~\cite{vmotion:atc05,xen:migration:nsdi05}). VM is also known 
+for its secure isolation on resources~\cite{xen:sosp,kvm,vmware:sugerman}. 
+Nowadays a computer is deploying more and more VMs due to its increasing CPU 
+cores, a computer hardware error can turn down all VMs and applications running 
+on them. Although some application fault-tolerance approaches such as 
+primary-backup~\cite{remus:nsdi08} exist, they often consume prohibitive 
+resources (\eg, network bandwidth).
 
-Schedulers and VMs are largely complementary infrastructures depending on 
-application requirements such as performance and security. Many schedulers 
-use lightweight containers~\cite{docker,lxc} for isolation, while many other 
-cloud deployments (\eg, Amazon EC2) simply use VMs without schedulers. 
-Therefore, this proposal strengthens the two infrastructures respectively.
+These two infrastructures are usually deployed independently, depending on 
+runtime trade-off such as performance or security isolation. Some applications 
+are ran solely by schedulers (e.g., Mesos~\cite{mesos:nsdi11} usually uses 
+lightweight Linux containers, not VMs), and some other applications are ran 
+solely by VMs (e.g., Amazon EC2). Therefore, this GAIA project strengthens the 
+two infrastructures respectively.
+
+Many applications are mission-critical (\eg, financial platforms, social 
+networks, and medical services,), so they naturally demand both high 
+performance and availability. For instance, a trading platform must be highly 
+available during operation hours~\cite{nosql:finance}. Another instance is 
+social networks: minor computer failures in a Facebook datacenter led to 
+several outages in recent years~\cite{facebook:outage}.
+
+
+
+
+% 
+
+
+% Schedulers and VMs are largely complementary infrastructures depending on 
+% application requirements such as performance and security. Many schedulers 
+% use lightweight containers~\cite{docker,lxc} for isolation, while many other 
+% cloud deployments (\eg, Amazon EC2) simply use VMs without schedulers. 
+% Therefore, this proposal strengthens the two infrastructures respectively.
 
 
 \vspace{-.15in}\subsection{Motivation of Objectives} 
