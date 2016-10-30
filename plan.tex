@@ -97,6 +97,23 @@ receive consensus messages on their bare, local memory. An analogy is threads
 receiving other threads' data via bare memory, a fast and scalable computation 
 pattern.
 
+\begin{figure}[h]
+    \begin{minipage}{.4\textwidth}
+        \vspace{-.2in}
+        \includegraphics[width=0.34\textheight]{figures/arch.ps}
+        \vspace{-.4in}         
+        \caption{The \falcon architecture.}
+        \label{fig:falcon-arch}
+    \end{minipage}
+    \begin{minipage}{0.4\textwidth}
+        \vspace{-.2in}
+        \includegraphics[width=0.34\textheight]{figures/consensus.ps}
+        \vspace{-.4in}
+        \caption{\falcon consensus protocol.}
+        \label{fig:falcon-protocol}
+    \end{minipage}
+\end{figure}
+
 We propose \falcon,\footnote{We name our protocol after
 falcon, one of the fastest birds.} a new RDMA-based \paxos protocol and its
 runtime system. In \xxx, all replicas directly write to destination
@@ -126,22 +143,7 @@ writes finish, \falcon is scalable when more backup replicas are added.
 % Three figures. First, falcon arch. Second, consensus protocol. Third, falcon 
 % results compared to traditional ones and DARE.
 
-\begin{figure}[!htb]
-    \begin{minipage}{.4\textwidth}
-        \vspace{-.2in}
-        \includegraphics[width=0.34\textheight]{figures/arch.ps}
-        \vspace{-.4in}         
-        \caption{The \falcon architecture.}
-        \label{fig:falcon-arch}
-    \end{minipage}
-    \begin{minipage}{0.4\textwidth}
-        \vspace{-.2in}
-        \includegraphics[width=0.34\textheight]{figures/consensus.ps}
-        \vspace{-.4in}
-        \caption{\falcon consensus protocol.}
-        \label{fig:falcon-protocol}
-    \end{minipage}
-\end{figure}
+
 
 \begin{wrapfigure}{r}{7cm}
   \vspace{-.1in}
