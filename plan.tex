@@ -3,22 +3,22 @@
 
 \xxx strengthens the reliability of datacenter computing with a holistic 
 methodology. This section first proposes \falcon (\S\ref{sec:protocol}), a fast 
-and scalable consensus protocol, it then leverages \falcon to build a scheduler 
+consensus protocol, it then leverages \falcon to build a scheduler 
 (\S\ref{sec:scheduler}) and a VM replication infrastructure (\S\ref{sec:vm}) to 
 improve the availability of applications ran by these infrastructures. 
 Finally, this section describes research plan (\S\ref{sec:plan}).
 % The first two objectives include preliminary results. 
 
-\vspace{-.15in}\subsection{Objective 1: Building Fast, Scalable Consensus via
+\vspace{-.15in}\subsection{Objective 1: Building Fast Distributed Consensus via
 RDMA}\label{sec:protocol}\vspace{-.075in}
 
 This section describes a performance problem (\S\ref{sec:latency-problem}) in 
 existing \paxos protocols and presents \falcon (\S\ref{sec:falcon}), a 
-fast, scalable \paxos protocol by leveraging RDMA.
+fast \paxos protocol by leveraging RDMA.
 
 \vspace{-.15in}
-\subsubsection{Problem: Consensus latency of existing \paxos 
-protocols scale poorly} 
+\subsubsection{Problem: consensus latency of existing \paxos 
+protocols are slow and unscalable} 
 \label{sec:latency-problem}\vspace{-.075in}
 
 % P1: as mentioned in background, a key reason is thread interleavings, 
@@ -53,7 +53,7 @@ goes through various software layers (\eg, OS kernels).
 % heavyweight transactions~\cite{crane:sosp15,eve:osdi12}, but undesirable for
 % key-value store applications~\cite{redis,memcached}.
 
-As replica group size increases, \paxos consensus latency often increases
+As replica group size increases, \paxos consensus latency scales poorly: it increases
 drastically~\cite{scatter:sosp11} due to the linearly increasing number of 
 consensus messages. One common approach to improve \paxos scalability is 
 leveraging parallel techniques such as multithreading~\cite{zookeeper, 
@@ -66,7 +66,11 @@ protocols~\cite{zookeeper, spaxos:srds12, crane:sosp15, libpaxos} on 40Gbps
 network with only one client sending consensus requests. When changing the 
 replica group size from 3 to 9, the consensus latency of three protocols 
 increased by \tradlatencyincreaselow to \tradlatencyincreasehigh, and 
-\systemcostlow to \systemcosthigh of this increase was in OS kernel.
+\systemcostlow to \systemcosthigh of this increase was in OS kernel. The only
+exception is S\-Paxos~\cite{spaxos:srds12} because it batches requests from backups
+and invokes consensus when the batch is full. More replicas causes shorter time
+to form a batch, but bacthing causes its consensus latency the highest with
+less replicas.
 
 % Second, briefly mention the problem in DARE. and its scalability bottleneck.
 RDMA appears a promising approach (\S\ref{sec:consensus}) to speed up \paxos. 
@@ -75,9 +79,8 @@ challenging by the community~\cite{pilaf:usenix14,herd:sigcomm14,
 farm:sosp15,dare:hpdc15}. For instance, \dare~\cite{dare:hpdc15} presents a
 two-round, RDMA-based \paxos protocol in a sole-leader manner: leader does all 
 RDMA workloads and backups do nothing. Although \dare was fast with 3$\sim$5 
-replicas, our study (Figure~\ref{fig:scalability}) shows that, as replica 
-group grows by 35x, \dare's sole-leader nature incurred a scalability 
-bottleneck: its consensus latency increased by \darescalability.
+replicas, our study (Figure~\ref{fig:scalability}) shows that \dare's sole-leader
+nature incurred a scalability bottleneck and thus a linearly increasing consensus latency.
 
 \vspace{-.15in}\subsubsection{Falcon: a fast, scalable RDMA-based \paxos 
 protocol} 
@@ -91,28 +94,11 @@ receive messages.
 
 Although doing so will consume more CPU resources than a sole-leader 
 protocol~\cite{dare:hpdc15}, it has two major benefits. First, both leader and 
-backups participate in consensus, which makes it possible to reach consensus 
+backups participate in consensus, making it possible to reach consensus 
 with only one round~\cite{paxos:practical}. Second, all replicas can just 
 receive consensus messages on their bare, local memory. An analogy is threads 
 receiving other threads' data via bare memory, a fast and scalable computation 
 pattern.
-
-\begin{figure}[h]
-    \begin{minipage}{.4\textwidth}
-        \vspace{-.2in}
-        \includegraphics[width=0.34\textheight]{figures/arch.ps}
-        \vspace{-.4in}         
-        \caption{The \falcon architecture.}
-        \label{fig:falcon-arch}
-    \end{minipage}
-    \begin{minipage}{0.4\textwidth}
-        \vspace{-.2in}
-        \includegraphics[width=0.34\textheight]{figures/consensus.ps}
-        \vspace{-.4in}
-        \caption{\falcon consensus protocol.}
-        \label{fig:falcon-protocol}
-    \end{minipage}
-\end{figure}
 
 We propose \falcon,\footnote{We name our protocol after
 falcon, one of the fastest birds.} a new RDMA-based \paxos protocol and its
@@ -120,6 +106,27 @@ runtime system. In \xxx, all replicas directly write to destination
 replicas' memory and poll messages from local memory to receive messages, and 
 our runtime system handles other technical challenges such as checking message 
 delivery and recovering replica failures.
+
+\begin{figure}[h]
+    \begin{minipage}{.4\textwidth}
+	\centering
+        \vspace{-.15in}
+        \includegraphics[width=0.33\textheight]{figures/arch.ps}
+        \vspace{-.45in}         
+        \caption{The \falcon architecture.}
+        \label{fig:falcon-arch}
+    \end{minipage}
+    \begin{minipage}{0.4\textwidth}
+        \vspace{-.15in}
+        \centering
+        \includegraphics[width=0.33\textheight]{figures/consensus.ps}
+        \vspace{-.45in}
+        \caption{\falcon consensus protocol.}
+        \label{fig:falcon-protocol}
+    \end{minipage}
+\end{figure}
+
+
 
 \falcon supports unmodified applications. \falcon automatically deploys the 
 same application on multiple replicas, intercepts the application's 
@@ -130,7 +137,7 @@ shows \falcon's architecture on the leader replica with three key components:
 an input consensus coordinator, an in-memory consensus log, and a guard that 
 checkpoints and recovers application execution states.
 
-Figure~\ref{fig:falcon-protocol} shows \falcon's consensus protocol in normal 
+Figure~\ref{fig:falcon-protocol} shows \falcon's consensus algorithm in normal 
 case. The leader first executes the actual inbound socket call to get and store 
 the actual inputs, it then invokes consensus across replicas. All 
 solid arrows (\textbf{L3} and \textbf{B2}) are direct RDMA writes to remote 
@@ -164,17 +171,15 @@ latency.}
 %         \label{fig:scalability}
 % \end{figure}
 
-\para{Preliminary results.} Our preliminary results include two steps. First, 
-to justify whether such a general, socket-intercepting protocol can support 
-general applications, we have developed \crane~\cite{crane:sosp15}. \crane was 
-able to support five widely used server applications (\eg, \mysql) without 
-modifying them. Second, we built \falcon, a much faster and more scalable 
-version of \crane, by leveraging RDMA. Figure~\ref{fig:scalability} shoes 
-\falcon performance with 
-existing consensus protocols. \falcon was one order of magnitude faster latency 
-than the literature. \falcon's consensus latency outperforms 4 popular \paxos 
-protocols by \comptradlow to \comptradhigh on 3 to 9 replicas. \falcon is 
-faster than \dare by up to \fasterDARE.
+\para{Preliminary results.} We implemented a \falcon prototype with two steps. First,
+to support unmodified applications, we implemented its socket-intercepting protocol,
+published in SOSP 2015~\cite{crane:sosp15}. \falcon was able to support five widely
+used server applications (\eg, \mysql) without modifying them. Second, we implemented its
+RDMA-powered consensus algorithm on a 40bps RDMA network. Figure~\ref{fig:scalability}
+shows \falcon performance with 5 existing consensus protocols. To analyze the scalability
+of our algorithm, we ran \falcon and \dare on up to 105 replicas. \falcon's consensus latency 
+outperforms 4 popular \paxos  protocols by \comptradlow to \comptradhigh on 3 to 9 replicas.
+\falcon is  faster than \dare by up to \fasterDARE.
 % When changing the replica group size 
 % from 3 to 105 (a 35x increase), \falcon's consensus latency increases merely 
 % from \xxxlatencythree \us to \xxxlatencyonezerofive \us (a \xxxscalability, 
@@ -185,11 +190,10 @@ faster than \dare by up to \fasterDARE.
 
 
 \para{Future work.} Since \falcon is the keystone of our objectives, this 
-proposal plans to further study and improve its practicality in three aspects: 
-(1) study its performance and potential bottlenecks on thousands of replicas, 
-and propose new solutions; (2) study its protocol robustness on failure 
-scenarios, including leader election and adding/removing replicas; and (3) 
-evaluate its generality on more latency-critical applications. 
+proposal plans to further improve its practicality in two directions: 
+(1) evaluate its performance and generality on more latency-critical applications, 
+and (2) study its protocol robustness on failure scenarios, including leader
+election and adding/removing replicas.
 
 \vspace{-.15in}\subsection{Objective 2: Integrating \falcon with datacenter 
 schedulers}\label{sec:scheduler}\vspace{-.075in}
