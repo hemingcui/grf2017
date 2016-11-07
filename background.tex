@@ -47,39 +47,45 @@ DPDK~\cite{dpdk} and Arrakis~\cite{arrakis:osdi14}).
 \vspace{-.15in}\subsection{Datacenter Computing Infrastructures}
 \label{sec:datacenter}\vspace{-.075in}
 
-More and more applications are ran in a datacenter by two independent types of 
-infrastructures. The first type is 
+More and more applications are ran in a datacenter by two 
+independent types of infrastructures. The first type is 
 schedulers~\cite{borg:eurosys15,mesos:nsdi11,tupperware, yarn:socc13, 
 autopilot:sosp07,quincy:sosp09,apollo:osdi14,fuxi:vldb14}. Although existing 
-schedulers themselves have are made available with \paxos 
-(\eg,~\cite{mesos:nsdi11}), their applications are not. Therefore, if runtime 
-failures such as computer hardware errors occur, these schedulers have to 
-re-schedule applications, leading to substantial application unavailability.
+schedulers themselves have been made available via \paxos 
+(\eg,~\cite{mesos:nsdi11}), their applications are not. Therefore, if failures 
+such as computer hardware errors occur, these schedulers have to re-launch 
+applications, leading to a substantial application downtime and thus a 
+huge lost for mission-critical applications (\eg, financial platforms and social 
+networks).
 
 The second infrastructure type is VM~\cite{amazon:vpc, openstack, esx:osdi02, 
 kvm, xen:sosp}. VM abstracts away the heterogeneous physical computing 
 resources, making computing resources easy to utilize and balance loads (\eg, 
 via live migration~\cite{vmotion:atc05,xen:migration:nsdi05}). VM is also known 
 for its secure isolation on resources~\cite{xen:sosp,kvm,vmware:sugerman}. 
-Nowadays a computer is deploying more and more VMs due to its increasing CPU 
-cores, a computer hardware error can turn down all VMs and applications running 
-on them. Although some application fault-tolerance approaches such as 
-primary-backup~\cite{remus:nsdi08} exist, they often consume prohibitive 
-resources (\eg, network bandwidth).
+Although some VM fault-tolerance approaches such 
+as primary-backup~\cite{remus:nsdi08} exist, they consume much 
+time and network bandwidth as they need to transfer all memory modified by 
+applications across VM replications.
+% Nowadays a computer is deploying more and more VMs due to its increasing CPU 
+% cores, a computer hardware error can turn down all VMs and applications running 
+% on them. 
 
-These two infrastructures are usually deployed independently, depending on 
+These two infrastructures usually work independently depending on 
 runtime trade-off such as performance or security isolation. Some applications 
 are ran solely by schedulers (e.g., Mesos~\cite{mesos:nsdi11} usually uses 
 lightweight Linux containers, not VMs), and some other applications are ran 
 solely by VMs (e.g., Amazon EC2). Therefore, this GAIA project strengthens the 
-two infrastructures respectively.
+two infrastructures respectively. If people need to run an application with 
+both infrastructures, they can choose either infrastructure developed from 
+GAIA and the other one from outside.
 
-Many applications are mission-critical (\eg, financial platforms, social 
-networks, and medical services,), so they naturally demand both high 
-performance and availability. For instance, a trading platform must be highly 
-available during operation hours~\cite{nosql:finance}. Another instance is 
-social networks: minor computer failures in a Facebook datacenter led to 
-several outages in recent years~\cite{facebook:outage}.
+% Many applications are mission-critical (\eg, financial platforms, social 
+% networks, and medical services,), so they naturally desire both high 
+% performance and availability. For instance, a trading platform must be highly 
+% available during operation hours~\cite{nosql:finance}. Another instance is 
+% social networks: minor computer failures in a Facebook datacenter led to 
+% several outages in recent years~\cite{facebook:outage}.
 
 
 
