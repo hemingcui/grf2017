@@ -303,11 +303,11 @@ results unless the same mechanism is triggered.
     \end{minipage}
 \end{figure}
 
-\vspace{-.15in}\subsubsection{Replication-aware resource allocation workflow}
+\vspace{-.15in}\subsubsection{Replication-aware resource allocation scheme}
 \label{sec:workflow}\vspace{-.075in}
 
-Figure~\ref{fig:scheduler-workflow} shows \tripod's workflow on scheduling jobs 
-with four steps. This workflow is similar to that in Mesos except the second 
+Figure~\ref{fig:scheduler-workflow} shows \tripod's scheme on scheduling jobs 
+with four steps. This scheme is similar to that in Mesos except the second 
 and fourth steps. These two steps \tripod abstract away the replication logic 
 in its resource offers and allocations from the application. An application runs 
 as if \xxx does not replicate any of its jobs, and \tripod transparently 
@@ -372,8 +372,8 @@ years~\cite{facebook:outage}, costing huge money lost.
 
 
 
-\para{Preliminary results.} We built a preliminary \tripod prototype, 
-published in [APSys '16]. To evaluate a typical social-networking application, 
+\para{Preliminary results.} We built and published a \tripod prototype 
+in~\cite{tripod:apsys16}. To evaluate a typical social-networking application, 
 we ran \tripod with \memcached~\cite{memcached}, a popular key-value store used 
 by Twitter and financial platforms~\cite{nosql:finance}. Compared to 
 \memcached's unreplicated execution, \tripod incurred merely a \tputoverhead 
@@ -391,10 +391,10 @@ overhead in throughput and \latencyoverhead in response time.
 % \end{figure}
 
 \para{Future work.} Our \tripod development will go along two directions. 
-First, currently our replication and resource allocation workflow is tied with 
+First, currently our replication and resource allocation scheme is tied with 
 \mesos. We will study other popular schedulers and summarize their 
-resource allocation workflow patterns, and we will develop a general, 
-scheduler-agnostic workflow. Second, we will study new differential replication 
+resource allocation scheme patterns, and we will develop a general, 
+scheduler-agnostic scheme. Second, we will study new differential replication 
 schemes, so that we can flexibly assign different \vv{R} values to different 
 components of an application, getting both satisfiable availability and optimal 
 resource consumption.
