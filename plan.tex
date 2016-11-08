@@ -1,12 +1,13 @@
 \vspace{-.15in}\section{Research Plan and Methodology}
 \label{sec:rep}\vspace{-.075in}
 
-\xxx strengthens the reliability of datacenter computing with a holistic 
-methodology. This section first proposes \falcon (\S\ref{sec:protocol}), a fast 
-consensus protocol, it then leverages \falcon to build a scheduler 
-(\S\ref{sec:scheduler}) and a VM replication infrastructure (\S\ref{sec:vm}) to 
-improve the availability of applications ran by these infrastructures. 
-Finally, this section describes research plan (\S\ref{sec:plan}).
+\xxx strengthens the reliability of datacenter 
+computing with a holistic methodology. This section first proposes \falcon 
+(\S\ref{sec:protocol}), a fast consensus protocol, it then leverages \falcon to 
+build a scheduler (\S\ref{sec:scheduler}) and a VM replication infrastructure 
+(\S\ref{sec:vm}) to improve the availability of applications ran by these 
+infrastructures. Finally, this section describes research plan 
+(\S\ref{sec:plan}).
 % The first two objectives include preliminary results. 
 
 \vspace{-.15in}\subsection{Objective 1: Building Fast Distributed Consensus via
@@ -119,9 +120,9 @@ shaded (and in blue color).}
     \end{minipage}
     \centering
     \begin{minipage}{0.48\textwidth}
-        \vspace{-.2in}
+        \vspace{-.25in}
         \includegraphics[width=0.34\textheight]{figures/consensus.ps}
-        \vspace{-.3in}
+        \vspace{-.32in}
         \caption{RDMA-powered consensus algorithm.}
         \label{fig:falcon-protocol}
     \end{minipage}
@@ -196,16 +197,17 @@ proposal plans to further improve its practicality in two directions:
 and (2) study its protocol robustness on failure scenarios, including leader
 election and adding/removing replicas.
 
-\vspace{-.15in}\subsection{Objective 2: Integrating \falcon with datacenter 
-schedulers}\label{sec:scheduler}\vspace{-.075in}
+\vspace{-.15in}\subsection{Objective 2: 
+building a fault-tolerant scheduler to improve 
+application availability}\label{sec:scheduler}\vspace{-.075in}
 
-Indeed, many existing schedulers have adopted \paxos to improve availability 
-for themselves. Typically, they use \paxos to run multiple copies of their 
-controllers, which works on scheduling computation jobs with resources. In 
-normal case, only one leading controller does the real work, and the others 
-standby to cope with the leader's failure. Unfortunately, most applications 
-running by these schedulers have not been made highly-available (although minor 
-applications implement a replication 
+Many existing schedulers have adopted \paxos to improve availability for 
+themselves. Typically, they use \paxos to replicate their essential components 
+such as a controller, which handles scheduling computation jobs to run on 
+resources. In normal case, only one leading controller does the real 
+work, and the others standby to cope with the leader's failure. Unfortunately, 
+most applications running by these schedulers have not been made 
+highly-available (although minor applications implement a replication 
 approach~\cite{mapreduce,dolly:nsdi13}).
 
 A naive approach to achieve high application availability could be implementing 
@@ -223,7 +225,7 @@ multiple copies of the same computation job to the scheduler, the scheduler may
 incorrectly schedule several copies on the same computer (it should schedule 
 each copy on different computers to achieve \paxos fault-tolerance).
 
-\vspace{-.15in}\subsubsection{\tripod: the fault-tolerant scheduler 
+\vspace{-.15in}\subsubsection{\tripod: a first fault-tolerant scheduler 
 architecture} 
 \label{sec:scheduler-arch}\vspace{-.075in}
 
@@ -288,15 +290,15 @@ results unless the same mechanism is triggered.
     \begin{minipage}{.49\textwidth}
         \vspace{-.2in}
         \includegraphics[width=0.34\textheight]{figures/scheduler_arch.eps}
-        \vspace{-.3in}
-        \caption{Fault-tolerant scheduler.}
+        \vspace{-.25in}
+        \caption{The \tripod fault-tolerant scheduler.}
         \label{fig:scheduler-arch}
     \end{minipage}
     \begin{minipage}{0.51\textwidth}
         \vspace{-.2in}
         \includegraphics[width=0.34\textheight]{figures/scheduler_flow.eps}
-        \vspace{-.3in}
-        \caption{Workflow.}
+        \vspace{-.05in}
+        \caption{The replication-aware resource allocation scheme.}
         \label{fig:scheduler-workflow}
     \end{minipage}
 \end{figure}
