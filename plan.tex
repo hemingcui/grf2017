@@ -108,20 +108,21 @@ our runtime system handles other technical challenges such as checking message
 delivery and recovering replica failures.
 
 \begin{figure}[h]
-    \begin{minipage}{.4\textwidth}
-	\centering
-        \vspace{-.15in}
-        \includegraphics[width=0.33\textheight]{figures/arch.ps}
-        \vspace{-.45in}         
-        \caption{The \falcon architecture.}
+    \centering
+    \begin{minipage}{.48\textwidth}    
+        \vspace{-.18in}
+        \includegraphics[width=0.32\textheight]{figures/arch.ps}
+        \vspace{-.35in}         
+        \caption{The \falcon protocol architecture. Protocol components are 
+shaded (and in blue).}
         \label{fig:falcon-arch}
     \end{minipage}
-    \begin{minipage}{0.4\textwidth}
-        \vspace{-.15in}
-        \centering
-        \includegraphics[width=0.33\textheight]{figures/consensus.ps}
-        \vspace{-.45in}
-        \caption{\falcon consensus protocol.}
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \vspace{-.2in}
+        \includegraphics[width=0.34\textheight]{figures/consensus.ps}
+        \vspace{-.3in}
+        \caption{RDMA-powered consensus algorithm.}
         \label{fig:falcon-protocol}
     \end{minipage}
 \end{figure}
