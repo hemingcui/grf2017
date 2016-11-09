@@ -445,7 +445,7 @@ disturbed.
 % computer incur big resource consumption. This is contraditive to the motivation 
 % of migration: reduing computer loads on the local computer.
 
-\vspace{-.15in}\subsubsection{Integragint \falcon with VM} 
+\vspace{-.15in}\subsubsection{Integraging \falcon with VM} 
 \label{sec:vm-arch}\vspace{-.075in}
 
 % \begin{figure}[!htb]
@@ -468,45 +468,44 @@ disturbed.
 %         \label{fig:vm-arch}
 %     \end{minipage}
     \begin{minipage}{0.47\textwidth}
-        \vspace{-.2in}
+        \vspace{-.15in}
         \includegraphics[width=0.34\textheight]{figures/tree.ps}
-        \vspace{-.3in}
-        \caption{Tracking different memory across VMs.}
+        \vspace{-.4in}
+        \caption{Data structures on tracking different memory pages 
+across VMs. Diverged pages and their parent nodes are marked red by 
+\textbf{Algorithm 1}.}
         \label{fig:vm-tree}
     \end{minipage}
-    \begin{minipage}{0.53\textwidth}
+    \begin{minipage}{0.52\textwidth}
       \vspace{-.1in}
       \centering
       \begin{algorithm}[H]
       \DontPrintSemicolon
       \scriptsize
       \SetCommentSty{textrm}
-      \SetKwInOut{Input}{Input}\SetKwInOut{Output}{Output}
-      \Input{execution trace $trace$, concurrency bug instructions $bug$}
-      \Output{branch statements relevant to concurrency attacks}
+      \SetKwInOut{Input}{Input}
+      \SetKwInOut{Output}{Output}
+      \Input{The root of merkle tree on leader, $root$}
+      \Output{Different memory pages between leader and replica, $pages$}
       
-      \SetKwBlock{Titlea}{Slicing($trace$)}{end}
+      \SetKwBlock{Titlea}{Track($bitmap$, $root$)}{end}
       \Titlea {
-        $slice$ $\leftarrow$ empty sequence \;
-        \For {{\rm $i$ $\in$ reverse($trace$)}} {
-          \If {{\rm $i$ $\in$ $bug$}} {
-            {\bf break} \;
+        $diverged$ $\leftarrow$ empty sequence \;
+        $pages$ $\leftarrow$ empty sequence \;
+        $diverged$ $\leftarrow$ \textbf{FALCON}(root, root.left(), 
+root.right()) \;
+        \For {{\rm $i$ $\leftarrow$ $diverged$.push\_front()}} {
+          \If {{\rm $i$ is\_leaf()}} {
+            $pages$.append($i$) \;
           }
-          \If {{\rm any $e \in slice$ transitively depends on $i$}} {
-            $slice$.push\_front($i$) \;
-          }
-          \ElseIf {{\rm $i$ is a branch instruction}} {
-            \For {{\rm $j$ $\in$ instructions $i$ reaches off $trace$}} {
-              \If {{\rm mayBeVulnerable($j$)}} {
-                $slice$.push\_front($i$) \;
-                {\bf break} \;
-              }
-            }
+          \Else {
+            $diverged$.append(\textbf{FALCON}($i$, $i$.left(), 
+$i$.right()) \;
           }
         }
-        \Return $slice$.branches() \;
+        \Return $pages$ \;
       }
-      \caption{Transfering Different Memory Pages}
+      \caption{Tracking different memory pages}
       \label{alg:slice}
       \end{algorithm}
     \vspace{-.1in}
