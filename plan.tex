@@ -459,21 +459,60 @@ disturbed.
 % \end{figure}
 
 \begin{figure}[!htb]
-    \begin{minipage}{.49\textwidth}
-        \vspace{-.2in}
-        \includegraphics[width=0.34\textheight]{figures/vm_arch.ps}
-        \vspace{-.3in}
-        \caption{A new fault-tolerant VM for improving application 
-availability.}
-        \label{fig:vm-arch}
-    \end{minipage}
-    \begin{minipage}{0.51\textwidth}
+%     \begin{minipage}{.49\textwidth}
+%         \vspace{-.2in}
+%         \includegraphics[width=0.34\textheight]{figures/vm_arch.ps}
+%         \vspace{-.3in}
+%         \caption{A new fault-tolerant VM for improving application 
+% availability.}
+%         \label{fig:vm-arch}
+%     \end{minipage}
+    \begin{minipage}{0.49\textwidth}
         \vspace{-.2in}
         \includegraphics[width=0.34\textheight]{figures/tree.ps}
         \vspace{-.3in}
-        \caption{Tracking minor different memory across VM replications.}
+        \caption{Tracking different memory across VMs.}
         \label{fig:vm-tree}
     \end{minipage}
+    \begin{minipage}{0.49\textwidth}
+      \vspace{-.1in}
+      \centering
+      \begin{algorithm}[H]
+      \DontPrintSemicolon
+      \scriptsize
+      \SetCommentSty{textrm}
+      \SetKwInOut{Input}{Input}\SetKwInOut{Output}{Output}
+      \Input{execution trace $trace$, concurrency bug instructions $bug$}
+      \Output{branch statements relevant to concurrency attacks}
+      
+      \SetKwBlock{Titlea}{Slicing($trace$)}{end}
+      \Titlea {
+        $slice$ $\leftarrow$ empty sequence \;
+        \For {{\rm $i$ $\in$ reverse($trace$)}} {
+          \If {{\rm $i$ $\in$ $bug$}} {
+            {\bf break} \;
+          }
+          \If {{\rm any $e \in slice$ transitively depends on $i$}} {
+            $slice$.push\_front($i$) \;
+          }
+          \ElseIf {{\rm $i$ is a branch instruction}} {
+            \For {{\rm $j$ $\in$ instructions $i$ reaches off $trace$}} {
+              \If {{\rm mayBeVulnerable($j$)}} {
+                $slice$.push\_front($i$) \;
+                {\bf break} \;
+              }
+            }
+          }
+        }
+        \Return $slice$.branches() \;
+      }
+      \caption{Transfering Different Memory}
+      \label{alg:slice}
+      \end{algorithm}
+    \vspace{-.1in}
+    %     \caption{Sketch of path slicing algorithm}
+%         \label{fig:algo}
+\end{minipage}
 \end{figure}
 
 
@@ -522,15 +561,15 @@ follows:
 % \begin{small} \textit{(We use $A$ to denote the diverged replica; it will fetch 
 % state 
 % from replica $B$)} \end{small}
-\begin{enumerate}
-\item $A$ sends its dirty page bitmap $M_A$ to $B$.
-\item $B$ does a \textit{bitwise or} calculation \ $M_{union} = M_A | M_B $, 
-and sends $M_{union}$ back to $A$.
-\item $A$ and $B$ both update their own Merkle tree according to $M_{union}$. 
-$A$ sends its updated Merkle tree to $B$. 
-\item $B$ does a comparison on both Merkle tress to find the differences, as 
-illustrated in Figure~\ref{fig:tree}.
-\end{enumerate}
+% \begin{enumerate}
+% \item $A$ sends its dirty page bitmap $M_A$ to $B$.
+% \item $B$ does a \textit{bitwise or} calculation \ $M_{union} = M_A | M_B $, 
+% and sends $M_{union}$ back to $A$.
+% \item $A$ and $B$ both update their own Merkle tree according to $M_{union}$. 
+% $A$ sends its updated Merkle tree to $B$. 
+% \item $B$ does a comparison on both Merkle tress to find the differences, as 
+% illustrated in Figure~\ref{fig:tree}.
+% \end{enumerate}
 
 Our method is efficient for two reasons. First, it only transfers the different 
 pages between replicas. Because we have made consensus on inputs and we can 
