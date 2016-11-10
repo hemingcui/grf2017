@@ -167,13 +167,13 @@ high availability support to general applications.
 %  Migration and primary-backup.
 \para{Fault-tolerance in VM.} Two approaches, primary-backup and live 
 migration, exist for improving application reliability in VM. Primary-backup 
-uses the hypervisor layer to record application execution state changes in a 
-primary VM and frequently propagate the changes to a backup VM on another 
-computer. Live migration is invoked for both computer load balance and handling 
-failures, and it uses a similar hypervisor technique as primary-backup. Despite 
-much clever effort, both these two approaches consume substantial application 
-down time (\eg, 8 seconds in vMotion~\cite{vmotion:atc05}) and network 
-bandwidth.
+uses the VM hypervisor to track memory pages modified during handling each 
+request on a primary VM and transfers these dirty pages to a backup VM. Live 
+migration is also invoked for improving computer load balance and consolidating 
+VMs on fewer computers to save energy. It uses a similar technique as 
+primary-backup. Despite much effort, both these two approaches consume 
+substantial application down time (\eg, 8 seconds in 
+vMotion~\cite{vmotion:atc05}) and network bandwidth during transfering memory.
 
 % This approach consumes much network bandwidth and has weaker 
 % primary-consistency (\eg, if primary rejoins the network) than \paxos.

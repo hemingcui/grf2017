@@ -412,17 +412,18 @@ because they can provide a virtualized abstraction of computing resources to
 different applications and enforce strong utilization isolation and security. 
 
 As mentioned in related work (\S\ref{sec:others-work}), primary-backup and live 
-migration are two common techniques for improving VM fault-tolerance and 
-resource utilization. They both are invoked frequently when serving requests or 
-the resources on local VM are tight. They both move all memory pages modified 
-by applications (\ie, dirty pages) from a local VM to a remote one, so they 
-both have the problems of significant application downtime (\eg, 8 seconds in a 
-live migration system vMotion~\cite{vmotion:atc05}) and network bandwidth.
+migration are two similar techniques for improving VM fault-tolerance. For 
+instance, after serving each request, the primary-backup technique transfers all 
+memory pages modified by applications (\ie, dirty pages) from the primary to 
+the backup to make them run in sync. Both primary-backup and migration 
+techniques have the problems of significant application downtime (\eg, 8 
+seconds in a live migration system vMotion~\cite{vmotion:atc05}) and network 
+bandwidth.
 
 A key reason that causes these problems is that these approaches have only one 
-actual application execution on one VM. Therefore, when dirty pages are 
-transfered to a remote computer, substantial time and network bandwidth are 
-consumed.
+actual application execution on one VM. Therefore, to transfer dirty pages to a 
+remote computer, substantial time and network bandwidth consumption are 
+unavoidable.
 
 
 
@@ -511,19 +512,21 @@ $i$.right()) \;
       \label{alg:slice}
       \end{algorithm}
     \vspace{-.1in}
-    %     \caption{Sketch of path slicing algorithm}
-%         \label{fig:algo}
+    %     \caption{Sketch of path slicing algorithm}
+
+%         \label{fig:algo}
+
 \end{minipage}
 \end{figure}
 
 
 
 
-Fortunately, \paxos-based replication can construct multiple equivalent 
-executions on multiple computers due to its reliability and consistency 
-guarantee. To ensure high application availability, we can just run \paxos 
-make VM replicas process same sequence of inputs, then most dirty memory 
-pages across replicas are the same and they need not be transfered.
+Fortunately, \paxos-based replication can construct multiple actual executions 
+on multiple computers due to its reliability and consistency guarantee. To 
+ensure high application availability, we can just run \paxos make VM replicas 
+process same sequence of inputs, then most dirty memory pages across replicas 
+are the same and they need not be transfered.
 
 We propose a new fault-tolerant VM by integrating \falcon into the hypervisor 
 layer of popular VMs. Specifically, we choose the popular KVM~\cite{kvm} for 
@@ -537,24 +540,23 @@ features run in userspace).
 %% Consume same resources as primary-backup.
 We carefully design our VM to achieve same level of resource consumption as 
 existing VM fault-tolerance techniques. An existing primary-backup technique 
-consumes $2\times\vv{R}$ resources compared to unreplicated executions as it 
+consumes 2*\vv{R} resources compared to unreplicated executions as it 
 maintains a primary execution and a backup execution. Although typical 
-\paxos-based replications consume $3\times\vv{R}$ resources, our VM design 
+\paxos-based replications consume 3*\vv{R} resources, our VM design 
 mitigates this consumption by assigning one backup as the \emph{major backup} 
 which agrees on and executes input requests, and the other backup the 
 \emph{standby backup} which only agrees on requests without executing them. The 
-major backup then periodically (one minute, by default) does checkpoints on 
-application states and propagate the checkpoints to the standby backup. Such a 
-checkpoint does not perturb the leader to process requests because the leader 
-and standby backup still form a majority and agree on requests rapidly. Once the 
-leader fails, \falcon gives the major backup a high priority to become the new 
-leader.
+major backup then periodically does checkpoints on application states and 
+propagate the checkpoints to the standby backup. A checkpoint does not 
+perturb the leader because the leader and the standby backup still form a 
+majority and agree on requests rapidly. If the leader fails, \falcon gives 
+the major backup a high priority to become the new leader.
 
 This design has three important benefits: (1) our new VM fault-tolerance 
-technique consumes roughly same $2\times\vv{R}$ computing resources as existing 
-techniques; (2) a \paxos majority group still holds; (3) this design is pratical 
-because even if the standby backup is elected as the new leader, it can extract 
-checkpoints and catch up with the old leader quickly.
+technique consumes roughly same 2*\vv{R} computing resources as existing 
+techniques; (2) a \paxos majority group still holds; (3) it is robust 
+because even if the standby backup is elected as a new leader, it can extract 
+checkpoints and use the aggreed inputs to catch up with the old leader quickly.
 
 % Figure~\ref{fig:vm-arch} shows the architecture of the eco-system. To provide 
 % the same fault-tolerance guarantee with primary-backup, a typical replication 
@@ -573,36 +575,40 @@ By enforcing same inputs across VM replicas, most dirty pages due to serving
 inputs are already made the same, but some minor pages may still diverge across 
 replicas (\eg, due to data races~\cite{lu:concurrency-bugs}). Our new VM 
 efficiently track and transfer diverged pages across VM replicas with two novel 
-parts: (1) proposing an efficient \vv{log(N)} algorithm to track diverged pages, 
+parts: (1) proposing an efficient algorithm to track diverged pages, 
 and (2) leveraging \falcon protocol to perform efficiently and reliably 
-transfer diverged pages across replicas. A common data structure to track dirty 
-pages is a Merkle tree~\cite{eve:osdi12} on each replica. As shown 
-in Figure~\ref{fig:vm-tree}, once a physical page is modified, our VM 
-hypervisor handler appends this page as a leaf to this Merkle () and recomputes 
-a hash based on the page content for its parents. Such a data tree is efficient 
-because if the root hashes of two trees are the same, then all dirty pages 
-(all leaves) are the same.
+transfer diverged pages across replicas.
+
+A naive approach is linearly scanning and comparing dirty pages between 
+replicas, which is as slow as traditional primary-backup techniques. Instead, 
+our algorithm uses a Merkle tree~\cite{eve:osdi12} to track dirty pages for 
+each replica. As shown in Figure~\ref{fig:vm-tree}, once a physical page is 
+modified, our VM hypervisor appends this page as a leaf to this Merkle 
+and recomputes a hash based on the page content for all its parents. This tree 
+is efficient because if the root hashes of two trees from two replicas are the 
+same, then all dirty pages (all leaves) are the same.
 
 % Three steps.
-Our new VM design poses a new interesting challenges to this Merkle tree. 
-Unlike previous works that three leaves are static~\cite{eve:osdi12} 
-(\ie, they statically treat global variables in application code as leaves), 
-the leaves in our trees are dynamic as they are dirty pages. As the dirty pages 
-across replicas can be different, the structures (\ie, the number of internal 
-nodes) of Merkle trees across replicas can be different and thus comparing roots 
-makes no sense.
+Our VM design poses a new interesting challenge: unlike previous works that 
+tree leaves are static (\eg, Eve~\cite{eve:osdi12} treats static global 
+variables in application code as leaves), the leaves in our trees are dynamic as 
+they are dirty pages. As the dirty pages across replicas can be different, the 
+structures (\ie, the number of internal nodes) of Merkle trees across replicas 
+can be different and hard to compare.
 
-Our new VM address this challenge by introducing a tree adjustment phase. Our 
-technique works with four steps. First, after serving a request, the leader 
-sends a dirty page bitmap provided by KVM to the standby backup. The backup 
-takes its own bitmap, does a union on the two bitmaps and sends back to leader. 
-Second, both leader and the standby backup do a tree adjustment with the union 
-bitmap (\eg, even if a page is not dirty on the leader, it is append to the 
-leader's tree), so that leader and the backup's trees have same structure. 
-Second, the leader invokes \textbf{Algorithm 1} to track the diverged pages 
-(leaves) across replicas and mark them red. Third, leader transfer the diverged 
-pages to the standby backup. Fourth, both leader and the standby mark all dirty 
-pages as clean and clear their threes.
+Our new VM address this challenge by introducing a \emph{tree adjustment} phase. 
+Our technique works with three steps. First, after serving each request, the 
+leader sends a dirty page bitmap provided by KVM to the standby backup. The 
+backup takes its own bitmap, does a union on the two bitmaps and sends back to 
+leader. Second, both leader and the standby backup do a tree adjustment with 
+the union bitmap (\eg, even if a page is not dirty, it is still appended to the 
+tree), so that leader and the backup's trees have same structure. Second, the 
+leader invokes \textbf{Algorithm 1} to do a \vv{log(N)} traversal on the 
+tree to identify the diverged pages across replicas. To compare internal nodes' 
+hashes or leaves across replicas, the algorithm invokes an augmented \falcon 
+protocol, which lets the backup return diverged ones. Third, leader transfers 
+the diverged pages to the standby backup, then they both mark all dirty pages 
+as clean and clear their threes.
 
 The efficacy of our algorithm depends on a key insight: the diverged dirty 
 pages between the leader and backups are rare. To verify this insight, we ran 
@@ -613,8 +619,8 @@ found that 2.4GB to 7.3GB memory pages were dirty after serving requests.
 Existing primary-backup or migration techniques need to transfer all dirty 
 pages from primary to backup. We also found that only 16.4MB to 107.8MB of 
 these dirty pages were different between two VMs. This preliminary study implies 
-that our proposed algorithm can save up to 99.8\% of transfered pages 
-compared to existing techniques, saving most time and network bandwidth.
+that our proposed algorithm can reduce up to 99.8\% of transfered pages 
+compared to the primary-backup technique.
 
 % To do this, each replica 
 % maintains a Merkle tree kept 
@@ -701,13 +707,13 @@ compared to existing techniques, saving most time and network bandwidth.
 % during the migration), thanking to \paxos.
 
 \para{Future work}. We plan to fully implement our new fault-tolerant VM, 
-including integrating \falcon with popular VMs and developing our novel 
-efficient memory tracking algorithm. We will compare the performance overhead 
-of our implementation with existing VM primary-backup techniques (\eg, 
-Remus~\cite{remus:nsdi08}) and quantify the saving on transfered pages. We will 
-also broadly apply our technique to build a fast, lightweight VM live migration 
-technique for improving resource utilization and saving datacenter 
-energy~\cite{vmotion:atc05}.
+including integrating \falcon into VM hypervisors and developing our novel 
+efficient memory tracking algorithm. We will compare the performance of our 
+implementation with existing VM primary-backup techniques 
+(\eg, Remus~\cite{remus:nsdi08}) and quantify our reduction on transfered 
+pages. Furthermore, we will broadly apply our algorithm to construct new 
+lightweight VM live migration techniques for improving resource utilization and 
+saving datacenter energy~\cite{vmotion:atc05}.
 
 
 % % TBD: need a new replication approach name.
