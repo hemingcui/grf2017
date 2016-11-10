@@ -624,10 +624,10 @@ appliations, MySQL~\cite{mysql}, MongoDB~\cite{mongodb}, and
 Memcached~\cite{memcached}, on two KVMs and ran same real-world 
 workloads~\cite{sysbench} on both VMs. We found that 6010 to 14295 application 
 memory pages were dirty. Existing primary-backup techniques need to transfer all 
-these dirty memory from primary to backup. We also found that only 471 to 1283 
+these dirty memory from primary to backup. We also found that only 471 to 983 
 of these dirty pages were divergent between two VMs. This preliminary study 
-implies that our algorithm can reduce up to 96.7\% of transfered pages compared 
-to the primary-backup technique.
+implies that our algorithm can reduce up to 96.7\% transfered pages compared 
+to existing primary-backup techniques.
 
 % To do this, each replica 
 % maintains a Merkle tree kept 
