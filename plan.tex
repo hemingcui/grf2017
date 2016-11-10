@@ -514,7 +514,7 @@ use the aggreed inputs to catch up with the old leader quickly.
 % application execution states in primary-backup.
 
 \vspace{-.15in}\subsubsection{A new synchronization technique to 
-track diverged pages across VM replicas}
+track divergent pages across VM replicas}
 \label{sec:tracking}\vspace{-.075in}
 
 
@@ -522,19 +522,19 @@ track diverged pages across VM replicas}
 Although our fault-tolerant VM has enforced same inputs across VM replicas, 
 minor memory pages may still diverge across replicas (\eg, due to 
 data races~\cite{lu:concurrency-bugs}). We propose a synchronization 
-technique to efficiently track and transfer diverged pages, including (1) 
-an efficient \vv{log(N)} algorithm to track diverged pages, and (2) 
+technique to efficiently track and transfer divergent pages, including (1) 
+an efficient \vv{log(N)} algorithm to track divergent pages, and (2) 
 leveraging \falcon's RDMA-powered protocol to efficiently and reliably compare 
-diverged pages.
+divergent pages.
 
-A naive way is linearly comparing all \vv{N} dirty pages between replicas, 
-which is as slow as traditional primary-backup techniques. Instead, our 
-algorithm uses a Merkle tree~\cite{eve:osdi12} to track dirty pages for each 
-replica. As shown in Figure~\ref{fig:vm-tree}, once a physical page is modified, 
-our VM hypervisor appends it as a leaf to a local Merkle and incrementally 
-recomputes a hash with the page content along all its parents. This tree 
-is efficient because if the roots of two (sub-)trees from two replicas have 
-same hash, all leaves are the same.
+A naive way is linearly comparing all \vv{N} dirty pages between replicas to 
+find divergent ones, but this is as slow as traditional primary-backup 
+techniques. Instead, our algorithm uses a Merkle tree~\cite{eve:osdi12} to track 
+dirty pages for each replica. As shown in Figure~\ref{fig:vm-tree}, once a 
+physical page is modified, our VM hypervisor appends it as a leaf to a local 
+Merkle and incrementally recomputes a hash with the page content along all its 
+parents. This tree is efficient because if the roots of two trees 
+have same hash, all leaves (pages) are the same.
 
 % Three steps.
 However, our VM design poses a new interesting challenge: unlike previous works 
@@ -553,9 +553,9 @@ a tree adjustment with the union bitmap (\eg, even if a page in the union is
 not dirty, it is still appended to the tree), then leader and the backup's 
 trees have same leaves and same structure. Third, leader invokes 
 \textbf{Algorithm 1} to do a \vv{log(N)} traversal from tree root to identify 
-diverged leaves across replicas. To compare internal nodes' hashes between 
+divergent leaves across replicas. To compare internal nodes' hashes between 
 leader and backup, the algorithm invokes an augmented \falcon protocol, which 
-lets the backup return diverged nodes. Fourth, leader transfers the diverged 
+lets the backup return divergent nodes. Fourth, leader transfers the divergent 
 pages to then major backup, then they both mark all dirty pages as clean and 
 clear their threes.
 
@@ -573,7 +573,7 @@ clear their threes.
         \includegraphics[width=0.34\textheight]{figures/tree.ps}
         \vspace{-.4in}
         \caption{Data structures on tracking different memory pages 
-across VMs. Diverged pages and their parent nodes are marked red by 
+across VMs. Divergent pages and their parent nodes are marked red by 
 \textbf{Algorithm 1}.}
         \label{fig:vm-tree}
     \end{minipage}
@@ -619,15 +619,15 @@ $i$.right()) \;
     \vspace{-.1in}
 \end{figure}
 
-To verify whether diverged pages are rare, we ran three real-world appliations, 
-MySQL~\cite{mysql}, MongoDB~\cite{mongodb}, and Memcached~\cite{memcached}, on 
-two KVMs and ran same real-world workloads~\cite{sysbench} on both VMs. 
-We found that 601 to 1429 application memory pages were dirty. Existing 
-primary-backup techniques need to transfer all these dirty memory from primary 
-to backup. We also found that only 47 to 128 of these dirty pages were 
-diverged between two VMs. This preliminary study implies that our algorithm can 
-reduce up to 96.8\% of transfered pages compared to the primary-backup 
-technique.
+To verify whether divergent dirty pages are rare, we ran three real-world 
+appliations, MySQL~\cite{mysql}, MongoDB~\cite{mongodb}, and 
+Memcached~\cite{memcached}, on two KVMs and ran same real-world 
+workloads~\cite{sysbench} on both VMs. We found that 6010 to 14295 application 
+memory pages were dirty. Existing primary-backup techniques need to transfer all 
+these dirty memory from primary to backup. We also found that only 471 to 1283 
+of these dirty pages were divergent between two VMs. This preliminary study 
+implies that our algorithm can reduce up to 96.7\% of transfered pages compared 
+to the primary-backup technique.
 
 % To do this, each replica 
 % maintains a Merkle tree kept 
