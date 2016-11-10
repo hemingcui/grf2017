@@ -406,23 +406,24 @@ application availability}\label{sec:vm}\vspace{-.075in}
 % % pages after the transfer, otherwise the tree will become bigger and bigger 
 % and we have not optimization.
 
-Virtual machines (VM) infrastructures (\eg, Amazon EC2~\cite{amazon:vpc} and 
-OpenStack~\cite{openstack}) are widely deployed in datacenters and clouds 
-because they can provide a virtualized abstraction of computing resources to 
-different applications and enforce strong utilization isolation and security. 
+% Virtual machines (VM) infrastructures (\eg, Amazon EC2~\cite{amazon:vpc} and 
+% OpenStack~\cite{openstack}) are widely deployed in datacenters and clouds 
+% because they can provide a virtualized abstraction of computing resources to 
+% different applications and enforce strong utilization isolation and security. 
 
 As mentioned in related work (\S\ref{sec:others-work}), primary-backup and live 
-migration are two similar techniques for improving VM fault-tolerance. For 
+migration are two similar techniques on improving VM fault-tolerance. For 
 instance, after serving each request, the primary-backup technique transfers all 
-memory pages modified by applications (\ie, dirty pages) from the primary to 
-the backup to make them run in sync. Both primary-backup and migration 
-techniques have the problems of significant application downtime (\eg, 8 
-seconds in a live migration system vMotion~\cite{vmotion:atc05}) and network 
-bandwidth.
+memory pages modified by applications (\ie, dirty pages of 4KB) from the 
+primary to the backup. This technique consumes 2*\vv{R} resources (\vv{R} is 
+the amount of resources consumed by unreplicated execution). Because there can 
+be GBs of dirty bytes (\S\ref{sec:tracking}), these two existing techniques 
+face the problems of significant application downtime (\eg, 8 seconds in 
+vMotion~\cite{vmotion:atc05}) and network bandwidth consumption.
 
-A key reason that causes these problems is that these approaches have only one 
-actual application execution on one VM. Therefore, to transfer dirty pages to a 
-remote computer, substantial time and network bandwidth consumption are 
+A key reason that causes these problems is that existing techniques have only 
+one actual application execution. Therefore, to transfer dirty pages to a 
+remote computer, substantial downtime and network bandwidth consumption are 
 unavoidable.
 
 
@@ -448,7 +449,7 @@ unavoidable.
 % computer incur big resource consumption. This is contraditive to the motivation 
 % of migration: reduing computer loads on the local computer.
 
-\vspace{-.15in}\subsubsection{Integraging \falcon with VM} 
+\vspace{-.15in}\subsubsection{Integraging \falcon with KVM} 
 \label{sec:vm-arch}\vspace{-.075in}
 
 % \begin{figure}[!htb]
@@ -460,6 +461,59 @@ unavoidable.
 %         \label{fig:vm-arch}
 %         \vspace{-.2in}
 % \end{figure}
+
+
+
+
+
+
+Fortunately, \paxos replication can construct multiple actual executions 
+on multiple computers due to its reliability and consistency guarantee. To 
+ensure high application availability, we can just run \paxos make VM replicas 
+process same sequence of inputs, then most dirty memory pages across replicas 
+are the same and they need not be transfered.
+
+We propose a new fault-tolerant VM by integrating \falcon into the hypervisor 
+layer of popular VMs. Specifically, we choose the popular KVM~\cite{kvm} for 
+three main reasons. First, KVM is an open source hypervisor in Linux. 
+Second, it provides \vv{tap\_send()}, an input capturing API in its hypervisor. 
+This API allows \falcon to intercept network inputs on the leader VM and 
+transparently replicates them on backup VMs. Third, this KVM API runs in 
+userspace, which allows RDMA to work (RDMA runs in userspace).
+
+%% Consume same resources as primary-backup.
+We practively design our VM to achieve same 2*\vv{R} resource consumption as 
+existing VM fault-tolerance techniques. Although \paxos replication 
+normally consume 3*\vv{R} resources, our VM design reduces this consumption 
+by letting one backup act as the \emph{major backup} with a high priority to 
+become a new leader if current leader fails. The major backup agrees on and 
+executes input requests, while the other backup acts as the \emph{standby 
+backup} which only agrees on requests without executing them. The major backup 
+periodically checkpoints application states and send them to the 
+standby backup. Checkpoints do not affect performance because the leader and 
+the standby backup still form a majority and agree on requests rapidly.
+
+% If the leader 
+% fails, \falcon gives the major backup a high priority to become the new leader.
+
+This design has three important benefits: (1) our new VM fault-tolerance 
+technique consumes roughly same 2*\vv{R} computing resources as existing 
+techniques; (2) a \paxos majority group still holds; (3) it is robust 
+because even if the standby backup is elected as a new leader, it can extract 
+checkpoints and use the aggreed inputs to catch up with the old leader quickly.
+
+% Figure~\ref{fig:vm-arch} shows the architecture of the eco-system. To provide 
+% the same fault-tolerance guarantee with primary-backup, a typical replication 
+% factor of this eco-system is \vv{R=3}. 
+
+% A key benefit of such a \paxos-based VM replication over primary-backup is that 
+% its leadership is strongly consistent (through a majority agreement, which 
+% primary-backup lacks), and it saves the bandwidth consumption for transferring 
+% application execution states in primary-backup.
+
+\vspace{-.15in}\subsubsection{Tracking minor diverged dirty pages across VM 
+replicas}
+\label{sec:tracking}\vspace{-.075in}
 
 \begin{figure}[!htb]
 %     \begin{minipage}{.49\textwidth}
@@ -518,58 +572,6 @@ $i$.right()) \;
 
 \end{minipage}
 \end{figure}
-
-
-
-
-Fortunately, \paxos-based replication can construct multiple actual executions 
-on multiple computers due to its reliability and consistency guarantee. To 
-ensure high application availability, we can just run \paxos make VM replicas 
-process same sequence of inputs, then most dirty memory pages across replicas 
-are the same and they need not be transfered.
-
-We propose a new fault-tolerant VM by integrating \falcon into the hypervisor 
-layer of popular VMs. Specifically, we choose the popular KVM~\cite{kvm} for 
-three main reasons. First, KVM is an open source hypervisor carried in Linux. 
-Second, it provides \vv{tap\_send()}, an input capturing API at its hypervisor 
-layer. This API allows \falcon to intercept network inputs of the leader VM and 
-transparently replicates same inputs on backup VMs. Third, this KVM API runs in 
-userspace, which allows \falcon's RDMA to work (all current commodity RDMA 
-features run in userspace).
-
-%% Consume same resources as primary-backup.
-We carefully design our VM to achieve same level of resource consumption as 
-existing VM fault-tolerance techniques. An existing primary-backup technique 
-consumes 2*\vv{R} resources compared to unreplicated executions as it 
-maintains a primary execution and a backup execution. Although typical 
-\paxos-based replications consume 3*\vv{R} resources, our VM design 
-mitigates this consumption by assigning one backup as the \emph{major backup} 
-which agrees on and executes input requests, and the other backup the 
-\emph{standby backup} which only agrees on requests without executing them. The 
-major backup then periodically does checkpoints on application states and 
-propagate the checkpoints to the standby backup. A checkpoint does not 
-perturb the leader because the leader and the standby backup still form a 
-majority and agree on requests rapidly. If the leader fails, \falcon gives 
-the major backup a high priority to become the new leader.
-
-This design has three important benefits: (1) our new VM fault-tolerance 
-technique consumes roughly same 2*\vv{R} computing resources as existing 
-techniques; (2) a \paxos majority group still holds; (3) it is robust 
-because even if the standby backup is elected as a new leader, it can extract 
-checkpoints and use the aggreed inputs to catch up with the old leader quickly.
-
-% Figure~\ref{fig:vm-arch} shows the architecture of the eco-system. To provide 
-% the same fault-tolerance guarantee with primary-backup, a typical replication 
-% factor of this eco-system is \vv{R=3}. 
-
-% A key benefit of such a \paxos-based VM replication over primary-backup is that 
-% its leadership is strongly consistent (through a majority agreement, which 
-% primary-backup lacks), and it saves the bandwidth consumption for transferring 
-% application execution states in primary-backup.
-
-\vspace{-.15in}\subsubsection{Tracking minor diverged dirty pages across VM 
-replicas}
-\label{sec:tracking}\vspace{-.075in}
 
 By enforcing same inputs across VM replicas, most dirty pages due to serving 
 inputs are already made the same, but some minor pages may still diverge across 
