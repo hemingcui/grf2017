@@ -711,12 +711,10 @@ technique.
 % leader's idle time. Third, robust to various scenarios (\eg, destination fails 
 % during the migration), thanking to \paxos.
 
-\para{Future work}. We plan to fully implement our new fault-tolerant VM, 
-including integrating \falcon into VM hypervisors and developing our novel 
-efficient memory tracking algorithm. We will compare the performance of our 
-implementation with existing VM primary-backup techniques 
-(\eg, Remus~\cite{remus:nsdi08}) and quantify our reduction on transfered 
-pages. Furthermore, we will broadly apply our algorithm to construct new 
+\para{Future work}. We will fully implement this new fault-tolerant VM, 
+compare its performance with existing VM primary-backup techniques (\eg, 
+Remus~\cite{remus:nsdi08}), and quantify our reduction on transfered pages. 
+Moreover, we will broadly apply our tracking algorithm to construct new 
 lightweight VM live migration techniques for improving resource utilization and 
 saving datacenter energy~\cite{vmotion:atc05}.
 
