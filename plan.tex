@@ -549,14 +549,15 @@ Our synchronization technique tackles this challenge by introducing a
 serving each request, leader sends a dirty page bitmap provided by KVM to 
 the major backup. Major backup does a union on this bitmap and its own one 
 and sends back to leader. Second, both leader and the major backup do 
-a tree adjustment with the union bitmap (\eg, even if a page is not dirty, it is 
-still appended to the tree), then leader and the backup's trees have same 
-structure. Third, leader invokes \textbf{Algorithm 1} to do a \vv{log(N)} 
-traversal from tree root to identify diverged leaves across replicas. To 
-compare internal nodes' hashes between leader and backup, the algorithm invokes 
-an augmented \falcon protocol, which lets the backup return diverged nodes. 
-Fourth, leader transfers the diverged pages to then major backup, then they 
-both mark all dirty pages as clean and clear their threes.
+a tree adjustment with the union bitmap (\eg, even if a page in the union is 
+not dirty, it is still appended to the tree), then leader and the backup's 
+trees have same leaves and same structure. Third, leader invokes 
+\textbf{Algorithm 1} to do a \vv{log(N)} traversal from tree root to identify 
+diverged leaves across replicas. To compare internal nodes' hashes between 
+leader and backup, the algorithm invokes an augmented \falcon protocol, which 
+lets the backup return diverged nodes. Fourth, leader transfers the diverged 
+pages to then major backup, then they both mark all dirty pages as clean and 
+clear their threes.
 
 \begin{figure}[!htb]
 %     \begin{minipage}{.49\textwidth}
@@ -590,17 +591,18 @@ across VMs. Diverged pages and their parent nodes are marked red by
       
       \SetKwBlock{Titlea}{Track($root$)}{end}
       \Titlea {
-        $diverged$ $\leftarrow$ empty sequence \;
+%         $diverged$ $\leftarrow$ empty sequence \;
         $pages$ $\leftarrow$ empty sequence \;
-        $diverged$ $\leftarrow$ \textbf{FALCON}(root, root.left(), 
-root.right()) \;
+        $diverged$ $\leftarrow$ \textbf{FALCON}($root$, $root$.left(), 
+$root$.right()) \;
         \For {{\rm $i$ $\leftarrow$ $diverged$.push\_front()}} {
           \If {{\rm $i$ is\_leaf()}} {
             $pages$.append($i$) \;
           }
           \Else {
-            $diverged$.append(\textbf{FALCON}($i$, $i$.left(), 
+            $diff$ $\leftarrow$ \textbf{FALCON}($i$, $i$.left(), 
 $i$.right()) \;
+            $diverged$.append($diff$) \;
           }
         }
         \Return $pages$ \;
