@@ -202,28 +202,29 @@ building a fault-tolerant scheduler to improve
 application availability}\label{sec:scheduler}\vspace{-.075in}
 
 Many existing schedulers have adopted \paxos to improve availability for 
-themselves. Typically, they use \paxos to replicate their essential components 
-such as a controller, which handles scheduling computation jobs to run on 
-resources. In normal case, only one leading controller does the real 
-work, and the others standby to cope with the leader's failure. Unfortunately, 
-most applications running by these schedulers have not been made 
-highly-available (although minor applications implement a replication 
+themselves. Typically, a scheduler use \paxos to replicate its essential 
+components such as a controller, which handles scheduling computation jobs 
+to run on resources. In normal case, only one leading controller does the real 
+work, and the other controllers act as backup to handle the leader's failure. 
+Unfortunately, most applications running by schedulers have not been made 
+highly-available (although individual applications carry a replication 
 approach~\cite{mapreduce,dolly:nsdi13}).
 
 A naive approach to achieve high application availability could be implementing 
-a \paxos within each application. However, this approach has two major issues. 
-First, \paxos is notoriously difficult to 
+a \paxos protocol for every application. However, this will cause two major 
+issues. First, \paxos is notoriously difficult to 
 understand~\cite{raft:usenix14,paxos:simple}, implement~\cite{paxos:practical, 
-paxos:live}, or test~\cite{modist:nsdi09,demeter:sosp11}, thus developing a 
-\paxos protocol for each application is widely considered a 
+paxos:live}, or test~\cite{modist:nsdi09,demeter:sosp11}. Developing a 
+\paxos protocol for every application is widely considered a 
 nightmare~\cite{modist:nsdi09,demeter:sosp11,paxos:live} for application 
 developers.
 
-The second issue is, the scheduler may defeat \paxos due to unawareness of the 
-application's \paxos replication logic. For instance, if an application submits 
-multiple copies of the same computation job to the scheduler, the scheduler may 
-incorrectly schedule several copies on the same computer (it should schedule 
-each copy on different computers to achieve \paxos fault-tolerance).
+The second issue is, the scheduler can be conflicting with \paxos due to 
+unawareness of the application's \paxos replication logic. For instance, if an 
+application submits multiple replications of the same computation job to the 
+scheduler, the scheduler may incorrectly schedule several replications on the 
+same computer (it should schedule each copy on different computers to achieve 
+\paxos fault-tolerance).
 
 \vspace{-.15in}\subsubsection{\tripod: a first fault-tolerant scheduler 
 architecture} 
@@ -232,15 +233,17 @@ architecture}
 % ,\footnote{We name our system after 
 % the ancient Chinese three-legged tripod, a reliable, multi-purpose container.}
 This section proposes the design of \tripod, a scheduler infrastructure that 
-automatically provides high-availability to general applications. \tripod 
-is integrated with a widely used scheduler \mesos~\cite{mesos:nsdi11} and 
+can replicate all or essential computations of a general application. 
+\tripod is formed by a widely used scheduler \mesos~\cite{mesos:nsdi11} and 
 \falcon (\textbf{Objective 1}). To avoid the two aforementioned issues 
-(\S\ref{sec:scheduler}), \tripod chooses 
-to integrate \paxos in a scheduler, not in applications. To achieve high
-application availability, unlike existing schedulers which let only one 
-controller schedule jobs, \tripod runs replicas of the same job using replicas 
-of controllers: after controllers agree on a new job with \falcon, \tripod lets 
-each controller independently schedule an copy of this job.
+(\S\ref{sec:scheduler}), \tripod's design integrates \paxos in a scheduler, 
+not in applications. To achieve high application availability, unlike existing 
+schedulers which let only one controller schedule jobs, \tripod runs replicas 
+of the same job using replicas of controllers: after controllers agree on a new 
+job with \falcon, \tripod lets each controller independently schedule a 
+replication of this job. To seamlessly resolve conflicts between the resource 
+allocation scheme and repliation scheme, \tripod introduces a replication-aware 
+resource allocation scheme (\S\ref{sec:workflow}).
 
 % Doing so has three benefits. First, \tripod's \paxos acts as a single, general 
 % fault-tolerance service to applications. We can just leverage existing 
@@ -266,22 +269,30 @@ each controller independently schedule an copy of this job.
 Figure~\ref{fig:scheduler-arch} depicts \tripod's architecture, and its key 
 components are shaded (and in blue). To illustrate how \tripod works in an 
 application perspective, this figure shows two applications, Hadoop and MPI. 
-Each application has a \emph{replica strength} (\vv{R}) to denote the level of 
-fault-tolerance it demands. This value is either 1 or equals the number of 
-replicas of controllers in \tripod.
+Each job has a \emph{replica strength} (\vv{R}) to denote the level of 
+fault-tolerance it demands. This \vv{R} value is either 1 (default, no 
+replication) or no more than the number of controllers in \tripod. An 
+application can assign other \vv{R} numbers to a job when it submits this job to 
+\tripod.
 
-By default, each application has \vv{R=1}, which means that this application 
-does not need replication. For such a default setting, \tripod runs the job as 
-is without replication, like a typical cluster management system (\eg, Mesos).
+It is often easy for an application to identify which computation jobs require 
+high availability and thus a bigger \vv{R} value. For instance, 
+Alluxio~\cite{alluxio}, a distributed storage application ran in \mesos, has 
+an essential manager component to manage storages across computers. When 
+running in our \tripod scheduler, Alluxio can just assign \vv{R=3} to the 
+launching job of this manager.
 
-In this figure, Hadoop's \vv{R} is 3, which means that it wants to replicate 
-each of its job with three copies for high-availability. Suppose Hadoop 
-submits two jobs to the leader controller, each has different shapes (triangle 
-or hexagon). The leader controller then invokes a consensus on each job across 
-controllers. Once a consensus is reached, each controller assigns the same job 
-on different slave machines. The leader controller directly returns its 
-computation result to the Hadoop scheduler. Standby controllers ignore the 
-results unless the same mechanism is triggered.
+% By default, each application has \vv{R=1}, which means that this application 
+% does not need replication. For such a default setting, \tripod runs the job as 
+% is without replication, like a typical cluster management system (\eg, Mesos).
+
+Figure~\ref{fig:scheduler-arch} shows an example of replicating all Hadoop jobs 
+with \vv{R=3}. Suppose Hadoop submits two jobs to \tripod's leader controller, 
+each has different shapes (triangle or hexagon). The leader controller then 
+invokes a consensus on each job across controllers. Once a consensus is reached, 
+each controller assigns the same job on different slave machines. The leader 
+controller directly returns its computation result to the Hadoop scheduler. 
+A standby controller ignores computation results unless it becomes a new leader.
 %  unless a tail-tolerance mechanism is triggered 
 % (\S\ref{sec:workflow})
 
@@ -307,7 +318,7 @@ results unless the same mechanism is triggered.
 \label{sec:workflow}\vspace{-.075in}
 
 Figure~\ref{fig:scheduler-workflow} shows \tripod's scheme on scheduling jobs 
-with four steps. This scheme is similar to that in Mesos except the second 
+with four steps. This scheme is similar to that in \mesos except the second 
 and fourth steps. These two steps \tripod abstract away the replication logic 
 in its resource offers and allocations from the application. An application runs 
 as if \xxx does not replicate any of its jobs, and \tripod transparently 
@@ -316,15 +327,19 @@ handles all the replication logic.
 In the first step, slave machines periodically report their available computing 
 resources (\eg, CPU cores and memory) to the leader controller. In the second 
 step, instead of offering the available resources aggregated from slave 
-machines, \tripod divides the amount of resources by each application's \vv{R} 
-value and then sends a resource offer to the application. The goal is to 
-reserve enough resources for \tripod to replicate a job with \vv{R} copies.
+machines, \tripod conservatively divides the amount of resources by each 
+application's \vv{R} value and then sends a resource offer to the application. 
+The goal is to reserve enough resources for \tripod to replicate a job with 
+\vv{R} copies, although some jobs have only \vv{R=1}.
 
 In the third step, an application scheduler submits jobs to the leader 
-controller. The leader controller then invokes a consensus on this job by 
-carrying the resource offer made to the application.
+controller. If \vv{R} is 1, the leader schedules the job without consensus and 
+revokes \vv{R-1} resources specified in this job from the application. By doing 
+so, the conservatively reserved resources are given back to \tripod. If vv{R} 
+is larger than 1, The leader controller then invokes a consensus on this job 
+across controllers.
 
-Once a majority of controllers agrees on executing this job, each controller 
+Once a majority of controllers agrees on executing a job, each controller 
 does the fourth step. It schedules this job on an available slave machine 
 according to the resource offer. To prevent controllers putting the same job on 
 the same slave machine, the leader controller first makes an assignment on 
@@ -338,19 +353,25 @@ reached, each controller follows this assignment.
 
 
 \para{Availability v.s. resource consumption.} \tripod is designed to make a
-mission-critical application highly available by leveraging \vv{R} times of 
-resources than the application's native, unreplicated execution. We deemed this 
+mission-critical application highly available by using \vv{R-1} more 
+resources for the application's essential computations. Non-essential 
+computations use same resources as those in \mesos. We deemed this 
 extra resource consumption reasonable, because a major trend is that an 
 application runs on more and more computers, thus minor computer failures tend 
 to happen more likely. Such failures may turn down the entire application and 
-cause if the failure computer runs a critical computation. For instance, Both 
-NYSE and Nasdaq have experienced 
-outage of their whole site~\cite{nyse:halt} or specific IPO 
-events~\cite{facebook:ipo:delay} due to minor machine errors. 
-In addition, social-networking applications like Facebook has 
-strong fault-tolerance requirements, because minor machine failures have turned 
-down the whole Facebook site for several times in the last few 
-years~\cite{facebook:outage}, costing huge money lost. 
+cause if the failure computer runs an essential computation. Given that minor 
+computer failures have caused severe outgage disasters  (\eg, 2015 NYSE trading 
+halts~\cite{nyse:halt} and several Facebook outage events in recent 
+years~\cite{facebook:outage}), we consider these extra resource consumptions 
+necessary on improving applicaiton availability.
+
+% For instance, Both 
+% NYSE and Nasdaq have experienced outage of their whole site~\cite{nyse:halt} or 
+% specific IPO events~\cite{facebook:ipo:delay} due to minor machine errors. 
+% In addition, social-networking applications like Facebook has 
+% strong fault-tolerance requirements, because minor machine failures have turned 
+% down the whole Facebook site for several times in the last few 
+% years~\cite{facebook:outage}, costing huge money lost. 
 % for two reasons.
 % Second, it is already a common practice to replicate critical computations by 
 % using \vv{R} times of resources, and doing so can improve both availability and 
@@ -392,12 +413,12 @@ overhead in throughput and \latencyoverhead in response time.
 
 \para{Future work.} Our \tripod development will go along two directions. 
 First, currently our replication and resource allocation scheme is tied with 
-\mesos. We will study other popular schedulers and summarize their 
+\mesos. We will study other popular schedulers and summarize general 
 resource allocation scheme patterns, and we will develop a general, 
-scheduler-agnostic scheme. Second, we will study new differential replication 
-schemes, so that we can flexibly assign different \vv{R} values to different 
-components of an application, getting both satisfiable availability and optimal 
-resource consumption.
+scheduler-agnostic scheme for other popular schedulers. Second, we will study 
+new differential replication schemes, so that we can automatically assign 
+different \vv{R} values to different components of an application, obtaining 
+both satisfiable availability and optimal resource consumption.
 
 \vspace{-.15in}\subsection{Objective 3: building a fault-tolerant VM to improve 
 application availability}\label{sec:vm}\vspace{-.075in}
