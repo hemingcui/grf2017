@@ -101,7 +101,7 @@ receive consensus messages on their bare, local memory. An analogy is threads
 receiving other threads' data via bare memory, a fast and scalable computation 
 pattern.
 
-We propose \falcon,\footnote{We name our protocol after
+We propose the design of \falcon,\footnote{We name our protocol after
 apus, one of the fastest birds.} a new RDMA-based \paxos protocol and its
 runtime system. In \xxx, all replicas directly write to destination
 replicas' memory and poll messages from local memory to receive messages, and 
@@ -130,18 +130,19 @@ shaded (and in blue color).}
 
 
 
-\falcon supports unmodified applications. \falcon automatically deploys the 
-same application on multiple replicas, intercepts the application's 
-network inputs from its inbound socket calls (\eg, \recv) with a Linux 
-technique called LD\_PRELOAD, and invokes its RDMA-based consensus protocol to 
-enforce same network inputs across replicas. Figure~\ref{fig:falcon-arch} 
-shows \falcon's architecture on the leader replica with three key components: 
-an input consensus coordinator, an in-memory consensus log, and a guard that 
-checkpoints and recovers application execution states.
+We plan to make \falcon support unmodified applications. \falcon's runtime 
+system will automatically deploy the same application on multiple replicas, 
+intercept the application's network inputs from its inbound socket calls (\eg, 
+\recv) with a Linux technique called LD\_PRELOAD, and invoke its RDMA-based 
+consensus protocol to enforce same network inputs across replicas. 
+Figure~\ref{fig:falcon-arch} shows \falcon's architecture on the leader replica 
+with three key components: an input consensus coordinator, an in-memory 
+consensus log, and a guard that checkpoints and recovers application execution 
+states.
 
-Figure~\ref{fig:falcon-protocol} shows \falcon's consensus algorithm in normal 
-case. The leader first executes the actual inbound socket call to get and store 
-the actual inputs, it then invokes consensus across replicas. All 
+Figure~\ref{fig:falcon-protocol} depicts \falcon's consensus algorithm in 
+normal case. The leader first executes the actual inbound socket call to get 
+and store the actual inputs, it then invokes consensus across replicas. All 
 solid arrows (\textbf{L3} and \textbf{B2}) are direct RDMA writes to remote 
 replicas' memory. All replicas poll from their own bare memory to receive 
 consensus messages. To handle replica failures, all replicas persistently log 
@@ -173,15 +174,17 @@ latency.}
 %         \label{fig:scalability}
 % \end{figure}
 
-\para{Preliminary results.} We implemented a \falcon prototype with two steps. First,
-to support unmodified applications, we implemented its socket-intercepting protocol,
-published in SOSP 2015~\cite{crane:sosp15}. \falcon was able to support five widely
-used server applications (\eg, \mysql) without modifying them. Second, we implemented its
-RDMA-powered consensus algorithm on a 40bps RDMA network. Figure~\ref{fig:scalability}
-shows \falcon performance with 5 existing consensus protocols. To analyze the scalability
-of our algorithm, we ran \falcon and \dare on up to 105 replicas. \falcon's consensus latency 
-outperforms 4 popular \paxos  protocols by \comptradlow to \comptradhigh on 3 to 9 replicas.
-\falcon is  faster than \dare by up to \fasterDARE.
+\para{Preliminary results.} We developed a \falcon initial prototype with two 
+steps. First, to support unmodified applications, we implemented its 
+socket-intercepting runtime system, presented in SOSP 2015~\cite{crane:sosp15}. 
+\falcon was able to support five widely used server applications (\eg, \mysql) 
+without modifying them. Second, we implemented its RDMA-powered consensus 
+algorithm on a 40bps RDMA network. Figure~\ref{fig:scalability} shows \falcon 
+performance with 5 existing consensus protocols. To analyze the scalability
+of our algorithm, we ran \falcon and \dare on up to 105 replicas. \falcon's 
+consensus latency outperforms 4 popular \paxos  protocols by \comptradlow to 
+\comptradhigh on 3 to 9 replicas. \falcon is  faster than \dare by up to 
+\fasterDARE.
 % When changing the replica group size 
 % from 3 to 105 (a 35x increase), \falcon's consensus latency increases merely 
 % from \xxxlatencythree \us to \xxxlatencyonezerofive \us (a \xxxscalability, 
@@ -191,11 +194,10 @@ outperforms 4 popular \paxos  protocols by \comptradlow to \comptradhigh on 3 to
 
 
 
-\para{Future work.} Since \falcon is the keystone of our objectives, this 
-proposal plans to further improve its practicality in two directions: 
-(1) evaluate its performance and generality on more latency-critical applications, 
-and (2) study its protocol robustness on failure scenarios, including leader
-election and adding/removing replicas.
+\para{Future work.} We will fully implement \falcon and intensively study its 
+practicality in two directions: (1) evaluate its performance and generality on 
+broad latency-critical applications, and (2) analyze its protocol robustness on 
+failure scenarios, including leader election and adding/removing replicas.
 
 \vspace{-.15in}\subsection{Objective 2: 
 building a fault-tolerant scheduler to improve 
@@ -275,7 +277,7 @@ replication) or no more than the number of controllers in \tripod. An
 application can assign other \vv{R} numbers to a job when it submits this job to 
 \tripod.
 
-It is often easy for an application to identify which computation jobs require 
+It is often easy for an application to determine which computation jobs require 
 high availability and thus a bigger \vv{R} value. For instance, 
 Alluxio~\cite{alluxio}, a distributed storage application ran in \mesos, has 
 an essential manager component to manage storages across computers. When 
@@ -317,12 +319,12 @@ A standby controller ignores computation results unless it becomes a new leader.
 \vspace{-.15in}\subsubsection{Replication-aware resource allocation scheme}
 \label{sec:workflow}\vspace{-.075in}
 
-Figure~\ref{fig:scheduler-workflow} shows \tripod's scheme on scheduling jobs 
-with four steps. This scheme is similar to that in \mesos except the second 
-and fourth steps. These two steps \tripod abstract away the replication logic 
-in its resource offers and allocations from the application. An application runs 
-as if \xxx does not replicate any of its jobs, and \tripod transparently 
-handles all the replication logic.
+Figure~\ref{fig:scheduler-workflow} shows the design of \tripod's scheme on 
+scheduling jobs with four steps. This scheme is similar to that in \mesos 
+except the second and fourth steps. These two steps \tripod abstract away the 
+replication logic in its resource offers and allocations from the application. 
+An application runs as if \xxx does not replicate any of its jobs, and \tripod 
+transparently handles all the replication logic.
 
 In the first step, slave machines periodically report their available computing 
 resources (\eg, CPU cores and memory) to the leader controller. In the second 
@@ -639,15 +641,15 @@ $i$.right()) \;
     \vspace{-.1in}
 \end{figure}
 
-To verify whether divergent dirty pages are rare, we ran three real-world 
+To estimate whether divergent pages are rare, we manually ran three real-world 
 appliations, MySQL~\cite{mysql}, MongoDB~\cite{mongodb}, and 
 Memcached~\cite{memcached}, on two KVMs and ran same real-world 
-workloads~\cite{sysbench} on both VMs. We found that 6,010 to 14,295 
-application memory pages were dirty. Existing primary-backup techniques need to 
-transfer all these dirty memory from primary to backup. We also found that only 
-471 to 983 of these dirty pages were divergent between two VMs. This preliminary 
-study implies that our algorithm can reduce up to 96.7\% transfered pages 
-compared to existing primary-backup techniques.
+workloads~\cite{sysbench} on both VMs. We found that 6,010 to 14,295 application 
+memory pages were dirty. Existing primary-backup techniques need to transfer all 
+these dirty memory from primary to backup. We also found that only 471 to 983 of 
+these dirty pages were divergent between two VMs. This preliminary study implies 
+that our algorithm may reduce up to 96.7\% transfered pages compared to 
+existing primary-backup techniques.
 
 % To do this, each replica 
 % maintains a Merkle tree kept 
@@ -733,8 +735,8 @@ compared to existing primary-backup techniques.
 % leader's idle time. Third, robust to various scenarios (\eg, destination fails 
 % during the migration), thanking to \paxos.
 
-\para{Future work.} We will fully implement this new fault-tolerant VM, 
-compare its performance with existing VM primary-backup techniques (\eg, 
+\para{Future work.} We will implement this new fault-tolerant VM, compare its 
+performance with existing VM primary-backup techniques (\eg, 
 Remus~\cite{remus:nsdi08}), and quantify our reduction on transfered pages. 
 Moreover, we will broadly apply our tracking algorithm to construct new 
 lightweight VM live migration techniques for improving resource utilization and 

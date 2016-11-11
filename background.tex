@@ -20,7 +20,7 @@ and enforces the same order of inputs for this application, as long as
 a majority of replicas are still alive. Therefore, \paxos tolerates 
 various faults, including minor replica failures and packet losses.
 
-\paxos is widely served in many systems. For instance, 
+\paxos is widely used in many systems. For instance, 
 Scatter~\cite{scatter:sosp11} runs 8$\sim$12 replicas in a
 \paxos group to order client requests, and it lets replicas reply requests
 in parallel. A bigger group size will improve Scatter throughput. 
@@ -78,7 +78,8 @@ lightweight Linux containers, not VMs), and some other applications are ran
 solely by VMs (e.g., Amazon EC2). Therefore, this GAIA project strengthens the 
 two infrastructures respectively. If people need to run an application with 
 both infrastructures, they can choose either infrastructure developed from 
-GAIA and the other one from outside.
+GAIA and the other one from outside. For instance, people can choose our 
+\tripod scheduler (\S\ref{sec:scheduler-arch}) and VMWare.
 
 % Many applications are mission-critical (\eg, financial platforms, social 
 % networks, and medical services,), so they naturally desire both high 
