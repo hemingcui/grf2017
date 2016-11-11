@@ -83,7 +83,7 @@ RDMA workloads and backups do nothing. Although \dare was fast with 3$\sim$5
 replicas, our study (Figure~\ref{fig:scalability}) shows that \dare's sole-leader
 nature incurred a scalability bottleneck and thus a linearly increasing consensus latency.
 
-\vspace{-.15in}\subsubsection{Falcon: a fast, scalable RDMA-based \paxos 
+\vspace{-.15in}\subsubsection{\falcon: a fast, scalable RDMA-based \paxos 
 protocol} 
 \label{sec:falcon}\vspace{-.075in}
 
@@ -102,7 +102,7 @@ receiving other threads' data via bare memory, a fast and scalable computation
 pattern.
 
 We propose \falcon,\footnote{We name our protocol after
-falcon, one of the fastest birds.} a new RDMA-based \paxos protocol and its
+apus, one of the fastest birds.} a new RDMA-based \paxos protocol and its
 runtime system. In \xxx, all replicas directly write to destination
 replicas' memory and poll messages from local memory to receive messages, and 
 our runtime system handles other technical challenges such as checking message 
@@ -191,7 +191,7 @@ outperforms 4 popular \paxos  protocols by \comptradlow to \comptradhigh on 3 to
 
 
 
-\para{Research plan.} Since \falcon is the keystone of our objectives, this 
+\para{Future work.} Since \falcon is the keystone of our objectives, this 
 proposal plans to further improve its practicality in two directions: 
 (1) evaluate its performance and generality on more latency-critical applications, 
 and (2) study its protocol robustness on failure scenarios, including leader
@@ -411,7 +411,7 @@ overhead in throughput and \latencyoverhead in response time.
 %         \label{fig:scheduler-latency}
 % \end{figure}
 
-\para{Research plan.} Our \tripod development will go along two directions. 
+\para{Future work.} Our \tripod development will go along two directions. 
 First, currently our replication and resource allocation scheme is tied with 
 \mesos. We will study other popular schedulers and summarize general 
 resource allocation scheme patterns, and we will develop a general, 
@@ -575,7 +575,7 @@ still appended to the tree), then leader and the backup's trees have same leaves
 and same structure. Third, leader invokes \textbf{Algorithm 1} to do a 
 \vv{log(N)} traversal from tree root to find divergent leaves. To compare 
 internal node hashes between leader and backup, the algorithm invokes an 
-augmented \falcon protocol as \textbf{FALCON()}, which returns divergent nodes 
+augmented \falcon protocol as \textbf{APUS()}, which returns divergent nodes 
 carried in the backup's consensus reply. Fourth, leader transfers divergent 
 pages to the major backup, then they both clear trees and dirty page flags.
 
@@ -613,14 +613,14 @@ color.}
       \Titlea {
 %         $diverged$ $\leftarrow$ empty sequence \;
         $pages$ $\leftarrow$ empty sequence \;
-        $diverged$ $\leftarrow$ \textbf{FALCON}($root$, $root$.left(), 
+        $diverged$ $\leftarrow$ \textbf{APUS}($root$, $root$.left(), 
 $root$.right()) \;
         \For {{\rm $i$ $\leftarrow$ $diverged$.push\_front()}} {
           \If {{\rm $i$ is\_leaf()}} {
             $pages$.append($i$) \;
           }
           \Else {
-            $diff$ $\leftarrow$ \textbf{FALCON}($i$, $i$.left(), 
+            $diff$ $\leftarrow$ \textbf{APUS}($i$, $i$.left(), 
 $i$.right()) \;
             $diverged$.append($diff$) \;
           }
@@ -733,7 +733,7 @@ compared to existing primary-backup techniques.
 % leader's idle time. Third, robust to various scenarios (\eg, destination fails 
 % during the migration), thanking to \paxos.
 
-\para{Research plan}. We will fully implement this new fault-tolerant VM, 
+\para{Future work.} We will fully implement this new fault-tolerant VM, 
 compare its performance with existing VM primary-backup techniques (\eg, 
 Remus~\cite{remus:nsdi08}), and quantify our reduction on transfered pages. 
 Moreover, we will broadly apply our tracking algorithm to construct new 
