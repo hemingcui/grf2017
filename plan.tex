@@ -191,7 +191,7 @@ outperforms 4 popular \paxos  protocols by \comptradlow to \comptradhigh on 3 to
 
 
 
-\para{Future work.} Since \falcon is the keystone of our objectives, this 
+\para{Research plan.} Since \falcon is the keystone of our objectives, this 
 proposal plans to further improve its practicality in two directions: 
 (1) evaluate its performance and generality on more latency-critical applications, 
 and (2) study its protocol robustness on failure scenarios, including leader
@@ -393,7 +393,7 @@ necessary on improving applicaiton availability.
 
 
 
-\para{Preliminary results.} We presented a \tripod early prototype 
+\para{Preliminary results.} We presented an early prototype of \tripod
 in~\cite{tripod:apsys16}. To evaluate a typical social-networking application, 
 we ran \tripod with \memcached~\cite{memcached}, a popular key-value store used 
 by Twitter and financial platforms~\cite{nosql:finance}. Compared to 
@@ -411,7 +411,7 @@ overhead in throughput and \latencyoverhead in response time.
 %         \label{fig:scheduler-latency}
 % \end{figure}
 
-\para{Future work.} Our \tripod development will go along two directions. 
+\para{Research plan.} Our \tripod development will go along two directions. 
 First, currently our replication and resource allocation scheme is tied with 
 \mesos. We will study other popular schedulers and summarize general 
 resource allocation scheme patterns, and we will develop a general, 
@@ -733,7 +733,7 @@ compared to existing primary-backup techniques.
 % leader's idle time. Third, robust to various scenarios (\eg, destination fails 
 % during the migration), thanking to \paxos.
 
-\para{Future work}. We will fully implement this new fault-tolerant VM, 
+\para{Research plan}. We will fully implement this new fault-tolerant VM, 
 compare its performance with existing VM primary-backup techniques (\eg, 
 Remus~\cite{remus:nsdi08}), and quantify our reduction on transfered pages. 
 Moreover, we will broadly apply our tracking algorithm to construct new 
