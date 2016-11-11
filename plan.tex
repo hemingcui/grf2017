@@ -197,7 +197,7 @@ consensus latency outperforms 4 popular \paxos  protocols by \comptradlow to
 \para{Future work.} We will fully implement \falcon and intensively study its 
 practicality in two directions: (1) evaluate its performance and generality on 
 broad latency-critical applications, and (2) analyze its protocol robustness on 
-failure scenarios, including leader election and adding/removing replicas.
+various abnormal scenarios, including leader election and adding/removing replicas.
 
 \vspace{-.15in}\subsection{Objective 2: 
 building a fault-tolerant scheduler to improve 
@@ -413,14 +413,17 @@ overhead in throughput and \latencyoverhead in response time.
 %         \label{fig:scheduler-latency}
 % \end{figure}
 
-\para{Future work.} Our \tripod development will go along two directions. 
-First, currently our replication and resource allocation scheme is tied with 
-\mesos. We will study other popular schedulers and summarize general 
-resource allocation scheme patterns, and we will develop a general, 
-scheduler-agnostic scheme for other popular schedulers. Second, we will study 
-new differential replication schemes, so that we can automatically assign 
-different \vv{R} values to different components of an application, obtaining 
-both satisfiable availability and optimal resource consumption.
+\para{Future directions.} We forsee two directions for \tripod's 
+future evolvement. First, currently our replication and resource allocation 
+scheme is tied to \mesos. We will study other popular schedulers and summarize 
+general resource allocation scheme patterns, and we will develop a general, 
+scheduler-agnostic scheme for diverse datacenter schedulers. Second, currently  
+our scheme requires application developers to manually assign \vv{R} values to 
+application components. We will leverage our expertise on precise program 
+analysis~\cite{peregrine:sosp11,woodpecker:asplos13} to develop new schemes 
+that can automatically analyze an application and assign precise \vv{R} values 
+to different components. We believe that both these directions will lead to 
+novel works.
 
 \vspace{-.15in}\subsection{Objective 3: building a fault-tolerant VM to improve 
 application availability}\label{sec:vm}\vspace{-.075in}
@@ -735,12 +738,15 @@ existing primary-backup techniques.
 % leader's idle time. Third, robust to various scenarios (\eg, destination fails 
 % during the migration), thanking to \paxos.
 
-\para{Future work.} We will implement this new fault-tolerant VM, compare its 
-performance with existing VM primary-backup techniques (\eg, 
+\para{Future directions.} We anticipate broad outcomes from this objective by 
+going along two directions. First, we will implement our fault-tolerant VM, 
+compare its performance with prior VM primary-backup techniques (\eg, 
 Remus~\cite{remus:nsdi08}), and quantify our reduction on transfered pages. 
-Moreover, we will broadly apply our tracking algorithm to construct new 
-lightweight VM live migration techniques for improving resource utilization and 
-saving datacenter energy~\cite{vmotion:atc05}.
+Second, we will apply our tracking algorithm to construct new lightweight VM 
+live migration techniques~\cite{vmotion:atc05}. Because VM primary-backup and 
+migration techniques have been used in broad areas (\eg, improving resource 
+utilization, balancing computer loads, and saving datacenter energy), we plan 
+to apply our techniques in these areas, too.
 
 
 % % TBD: need a new replication approach name.
