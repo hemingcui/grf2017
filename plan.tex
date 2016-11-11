@@ -210,9 +210,9 @@ Unfortunately, most applications running by schedulers have not been made
 highly-available (although individual applications carry a replication 
 approach~\cite{mapreduce,dolly:nsdi13}).
 
-A naive approach to achieve high application availability could be implementing 
-a \paxos protocol for every application. However, this will cause two major 
-issues. First, \paxos is notoriously difficult to 
+A strawman approach to achieve high application availability could be 
+implementing a \paxos protocol for every application. However, this will cause 
+two major issues. First, \paxos is notoriously difficult to 
 understand~\cite{raft:usenix14,paxos:simple}, implement~\cite{paxos:practical, 
 paxos:live}, or test~\cite{modist:nsdi09,demeter:sosp11}. Developing a 
 \paxos protocol for every application is widely considered a 
@@ -393,7 +393,7 @@ necessary on improving applicaiton availability.
 
 
 
-\para{Preliminary results.} We built and published a \tripod prototype 
+\para{Preliminary results.} We presented a \tripod early prototype 
 in~\cite{tripod:apsys16}. To evaluate a typical social-networking application, 
 we ran \tripod with \memcached~\cite{memcached}, a popular key-value store used 
 by Twitter and financial platforms~\cite{nosql:finance}. Compared to 
