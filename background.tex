@@ -17,8 +17,9 @@ leader election~\cite{zookeeper, chubby:osdi}, and
 fault-tolerance~\cite{eve:osdi12,rex:eurosys14,crane:sosp15}. A \paxos protocol
 replicates the same application on a group of computers (or \emph{replicas}) 
 and enforces the same order of inputs for this application, as long as 
-a majority of replicas are still alive. Therefore, \paxos tolerates 
-various faults, including minor replica failures and packet losses.
+a majority of replicas are still alive. If leader fails, it elects a new 
+leader~\cite{paxos:practical}. Therefore, \paxos tolerates 
+various faults, including minor replica failures and packet losses. 
 
 % \paxos is widely used in many systems. For instance, 
 % Scatter~\cite{scatter:sosp11} runs 8$\sim$12 replicas in a

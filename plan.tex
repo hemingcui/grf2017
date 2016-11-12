@@ -144,14 +144,15 @@ an in-memory consensus log, and a guard that handles application checkpoints
 and recovery.
 
 Figure~\ref{fig:falcon-protocol} depicts \falcon's consensus algorithm in 
-normal case. The leader first executes the actual inbound socket call to get 
-and store the actual inputs, it then invokes consensus across replicas. All 
-solid arrows (\textbf{L3} and \textbf{B2}) are direct RDMA writes to remote 
-replicas' memory. All replicas poll from their own bare memory to receive 
-consensus messages. To handle replica failures, all replicas persistently log 
-inputs to local SSD storage (\textbf{L2} and \textbf{B1}). For these writes, 
-the sending replicas only need to copy the data to local RDMA NIC and then the 
-writes finish, \falcon is scalable when more backup replicas are added.
+normal case. The leader first executes the actual inbound socket call 
+(\textbf{L1}, now shown) to get actual inputs, it then invokes consensus across 
+replicas. All solid arrows (\textbf{L3}, \textbf{B2}) are direct RDMA writes 
+to remote replicas' memory. All replicas poll from their own bare memory to 
+receive consensus messages. To handle replica failures, all replicas store 
+inputs to local SSD (\textbf{L2}, \textbf{B1}). For these WRITEs, sending 
+replicas need only copy data to local RDMA NIC and the WRITEs finish, 
+\falcon is scalable to consensus group size. In abnormal (rare) case, \falcon 
+uses an existing algorithm~\cite{paxos:practical}.
 
 % Three figures. First, falcon arch. Second, consensus protocol. Third, falcon 
 % results compared to traditional ones and DARE.
@@ -197,11 +198,11 @@ consensus latency outperforms 4 popular \paxos  protocols by \comptradlow to
 
 
 
-\para{Future work.} We will proactively improve \falcon's practicality in two 
-parts. First, we will evaluate its performance on broad latency-critical 
-applications and refine the normal case algorithm. Second, we will analyze 
-its robustness on various abnormal scenarios, including leader election and 
-adding/removing replicas.
+\para{Future work.} We will further improve \falcon's practicality in two 
+dimensions. First, we will evaluate its performance on broad latency-critical 
+applications using diverse input workloads. Second, we will further torture its 
+scalability on at least 10X more replicas, identify its scalability 
+bottleneck, and refine our algorithm. 
 
 \vspace{-.15in}\subsection{Objective 2: 
 building a fault-tolerant scheduler to improve 
