@@ -303,7 +303,7 @@ A standby controller ignores computation results unless it becomes a new leader.
 % (\S\ref{sec:workflow})
 
 % Hack: use eps to avoid the 1MB terrible ps size.
-\vspace{-.15in}
+\vspace{.1in}
 \begin{figure}[!htb]
     \begin{minipage}{.49\textwidth}
         \vspace{-.15in}
@@ -322,6 +322,7 @@ A standby controller ignores computation results unless it becomes a new leader.
 \end{figure}
 
 % \vspace{-.15in}
+\vspace{-.3in}
 \subsubsection{Replication-aware resource allocation scheme}
 \label{sec:workflow}\vspace{-.075in}
 
@@ -360,18 +361,18 @@ reached, each controller follows this assignment.
 % and Figure~\ref{fig:scheduler-latency}.
 
 
-\para{Availability v.s. resource consumption.} \tripod is designed to make a
+\para{Availability versus resource consumption.} \tripod is designed to make a
 mission-critical application highly available by using \vv{R-1} more 
-resources for the application's essential computations. Non-essential 
-computations use same resources as those in \mesos. We deemed this 
-extra resource consumption reasonable, because a major trend is that an 
-application runs on more and more computers, thus minor computer failures tend 
-to happen more likely. Such failures may turn down the entire application and 
-cause if the failure computer runs an essential computation. Given that minor 
-computer failures have caused severe outgage disasters  (\eg, 2015 NYSE trading 
-halts~\cite{nyse:halt} and several Facebook outage events in recent 
+resources than that consumed by the application's essential computations. 
+Non-essential computations use same resources as those in \mesos. Given that 
+minor computer failures have caused severe outgage disasters  (\eg, 2015 NYSE 
+trading halts~\cite{nyse:halt} and several Facebook outage events in recent 
 years~\cite{facebook:outage}), we consider these extra resource consumptions 
-necessary on improving applicaiton availability.
+worthwhile on improving applicaiton availability.
+
+% We deemed 
+% this extra resource consumption reasonable, because even minor computer 
+% failures can turn down an entire application. 
 
 % For instance, Both 
 % NYSE and Nasdaq have experienced outage of their whole site~\cite{nyse:halt} or 
