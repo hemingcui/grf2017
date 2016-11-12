@@ -361,12 +361,13 @@ reached, each controller follows this assignment.
 % and Figure~\ref{fig:scheduler-latency}.
 
 
-\para{Availability versus resource consumption.} \tripod is designed to make a
-mission-critical application highly available by using \vv{R-1} more 
-resources than that consumed by the application's essential computations. 
-Non-essential computations use same resources as those in \mesos. Given that 
-minor computer failures have caused severe outgage disasters  (\eg, 2015 NYSE 
-trading halts~\cite{nyse:halt} and several Facebook outage events in recent 
+% \para{Availability versus resource consumption.} 
+\tripod is designed to make a mission-critical application highly available by 
+using \vv{R-1} more resources than that consumed by the application's essential 
+computations. Non-essential computations use same resources as those in \mesos. 
+Given that minor computer failures have caused severe outgage disasters  (\eg, 
+2015 NYSE trading halts~\cite{nyse:halt} and several Facebook outage events in 
+recent 
 years~\cite{facebook:outage}), we consider these extra resource consumptions 
 worthwhile on improving applicaiton availability.
 
@@ -448,17 +449,21 @@ application availability}\label{sec:vm}\vspace{-.075in}
 As mentioned in related work (\S\ref{sec:others-work}), primary-backup and live 
 migration are two similar techniques on improving VM fault-tolerance. For 
 instance, after serving each request, the primary-backup technique transfers all 
-memory pages modified by applications (\ie, dirty pages of 4KB) from the 
+memory pages modified by applications (\ie, dirty pages) from the 
 primary to the backup. This technique consumes 2*\vv{R} resources (\vv{R} is 
-the amount of resources consumed by unreplicated execution). Because there can 
-be GBs of dirty bytes (\S\ref{sec:tracking}), these two existing techniques 
-face the problems of significant application downtime (\eg, 8 seconds in 
-vMotion~\cite{vmotion:atc05}) and network bandwidth consumption.
+the amount of resources consumed by unreplicated execution). There can 
+be GBs of dirty bytes to be transfered (\S\ref{sec:tracking}), causing 
+substantial time and network bandwidth consumption. A key reason for 
+this problem is that existing techniques have only one actual application 
+execution.
+% , these two 
+% existing techniques 
+% face the problems of significant application downtime (\eg, 8 seconds in 
+% vMotion~\cite{vmotion:atc05}) and network bandwidth consumption.
 
-A key reason that causes these problems is that existing techniques have only 
-one actual application execution. Therefore, to transfer dirty pages to a 
-remote computer, substantial downtime and network bandwidth consumption are 
-unavoidable.
+%  Therefore, to transfer dirty pages to a 
+% remote computer, substantial downtime and network bandwidth consumption are 
+% unavoidable.
 
 
 
