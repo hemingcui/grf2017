@@ -69,19 +69,19 @@ replica group size from 3 to 9, the consensus latency of three protocols
 increased by \tradlatencyincreaselow to \tradlatencyincreasehigh, and 
 \systemcostlow to \systemcosthigh of this increase was in OS kernel. The only
 exception is S\-Paxos~\cite{spaxos:srds12} because it batches requests from backups
-and invokes consensus when the batch is full. More replicas causes shorter time
-to form a batch, but bacthing causes its consensus latency the highest with
-less replicas.
+and starts consensus when the batch is full. Mmore replicas causes shorter time
+to form a batch, but batching aggravates latency.
 
 % Second, briefly mention the problem in DARE. and its scalability bottleneck.
-RDMA appears a promising approach (\S\ref{sec:consensus}) to speed up \paxos. 
+RDMA appears a promising solution (\S\ref{sec:consensus}) to speed up \paxos. 
 However, fully exploiting RDMA speed in software systems is widely considered 
 challenging by the community~\cite{pilaf:usenix14,herd:sigcomm14,
 farm:sosp15,dare:hpdc15}. For instance, \dare~\cite{dare:hpdc15} presents a
 two-round, RDMA-based \paxos protocol in a sole-leader manner: leader does all 
-RDMA workloads and backups do nothing. Although \dare was fast with 3$\sim$5 
+RDMA workloads and backups do nothing. Although \dare is fast with 3$\sim$5 
 replicas, our study (Figure~\ref{fig:scalability}) shows that \dare's sole-leader
-nature incurred a scalability bottleneck and thus a linearly increasing consensus latency.
+nature incurred a scalability bottleneck and thus a linearly increasing 
+latency.
 
 \vspace{-.15in}\subsubsection{\falcon: a fast, scalable RDMA-based \paxos 
 protocol} 
