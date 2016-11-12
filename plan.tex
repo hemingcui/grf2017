@@ -456,6 +456,11 @@ be GBs of dirty bytes to be transfered (\S\ref{sec:tracking}), causing
 substantial time and network bandwidth consumption. A key reason for 
 this problem is that existing techniques have only one actual application 
 execution.
+
+We will use \falcon to tackle this problem as it maintains multiple actual 
+executions. By using \falcon to enforce same inputs across VM replicas, most 
+dirty pages across replicas are the same and need no transfer.
+
 % , these two 
 % existing techniques 
 % face the problems of significant application downtime (\eg, 8 seconds in 
@@ -506,11 +511,7 @@ execution.
 
 
 
-Fortunately, \paxos replication can construct multiple actual executions 
-on multiple computers due to its reliability and consistency guarantee. To 
-ensure high application availability, we can just run \paxos make VM replicas 
-process same sequence of inputs, then most dirty memory pages across replicas 
-are the same and they need not be transfered.
+
 
 We propose a new fault-tolerant VM by integrating \falcon into the hypervisor 
 layer of popular VMs. Specifically, we choose the popular KVM~\cite{kvm} for 
