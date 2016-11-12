@@ -135,61 +135,65 @@ There are a rich set of \paxos
 algorithms~\cite{paxos:practical,paxos,paxos:simple,paxos:complex,
 epaxos:sosp13} 
 and implementations~\cite{paxos:live,paxos:practical,chubby:osdi,crane:sosp15}. 
-\paxos is notoriously difficult to be fast and 
-scalable~\cite{ellis:thesis,manos:hotdep10,scatter:sosp11}. Since consensus 
-protocols play a core role in datacenters~\cite{matei:hotcloud11, mesos:nsdi11, 
+Since consensus protocols play a core role in 
+datacenters~\cite{matei:hotcloud11, mesos:nsdi11, 
 datacenter:os} and worldwide 
 distributed systems~\cite{spanner:osdi12,mencius:osdi08}, various works 
 have been conducted to improve specific aspects of consensus protocols, 
 including commutativity~\cite{epaxos:sosp13}, 
 understandability~\cite{raft:usenix14,paxos}, and verifiable 
-rules~\cite{modist:nsdi09,demeter:sosp11}.
+rules~\cite{modist:nsdi09,demeter:sosp11}. \paxos is notoriously difficult to be 
+fast and scalable to a large consensus 
+group~\cite{ellis:thesis,manos:hotdep10,scatter:sosp11}. 
 
 To make \paxos's throughput scalable (\ie, more replicas, higher throughput), 
 various systems leverage \paxos as a core building block to develop advanced 
 replication approaches, including partitioning program 
 states~\cite{scatter:sosp11,ssmr:dsn14}, splitting consensus 
 leadership~\cite{mencius:osdi08,spaxos:srds12}, and hierarchical 
-replication~\cite{manos:hotdep10,scatter:sosp11}. Theses approaches have shown 
-to largely improve throughput. However, the core of these systems, 
+replication~\cite{manos:hotdep10,scatter:sosp11}. Theses approaches have 
+improved throughput. However, the core of these systems, 
 \paxos, still faces an unscalable consensus 
-latency~\cite{ellis:thesis,scatter:sosp11,manos:hotdep10}. By using \xxx as a 
-building block, these prior systems can scale even better.
+latency~\cite{ellis:thesis,scatter:sosp11,manos:hotdep10}. By realizing 
+\textbf{Objective 1} (\S\ref{sec:protocol}), these systems can scale even 
+better.
 
 \para{Fault-tolerance in schedulers.} Datacenter
 schedulers~\cite{borg:eurosys15,mesos:nsdi11,tupperware,yarn:socc13,
-autopilot:sosp07,quincy:sosp09,apollo:osdi14,fuxi:vldb14} can support diverse 
+autopilot:sosp07,quincy:sosp09,apollo:osdi14,fuxi:vldb14} support diverse 
 applications (\eg, Hadoop~\cite{hadoop}, Dryad~\cite{dryad}, and key-value 
-stores~\cite{redis}). Existing schedulers mainly focus on ensuring high 
-availability for themselves by replicating their own important components, or 
-focus on recovery instead of availability of applications~\cite{fuxi:vldb14}. 
+stores~\cite{redis}). Existing schedulers mainly focus on obtaining high 
+availability for themselves by replicating their own essential components, or 
+focus on application recovery~\cite{fuxi:vldb14} instead of availability. 
 To the best of our knowledge, no existing schedulers provide a
-high availability support to general applications.
+high availability support to general applications. \textbf{Objective 2} 
+(\S\ref{sec:scheduler}) aims to provide this support.
 % \xxx's consensus protocol design is general to application and 
 % schedulers so it can be integrated in other systems.
 
 %  Migration and primary-backup.
 \para{Fault-tolerance in VM.} Two approaches, primary-backup and live 
 migration, exist for improving application reliability in VM. Primary-backup 
-uses the VM hypervisor to track memory pages modified during handling each 
-request on a primary VM and transfers these dirty pages to a backup VM. Live 
-migration is also invoked for improving computer load balance and consolidating 
-many VMs on fewer computers to save datacenter energy. It uses a similar 
-technique as primary-backup. Despite much effort, both these two approaches 
-consume substantial application down time (\eg, 8 seconds in 
-vMotion~\cite{vmotion:atc05}) and network bandwidth during transfering memory.
+uses the hypervisor on a primary VM to track memory pages modified during 
+handling each request, and then transfers these pages to a backup VM. Live 
+migration uses a similar hypervisor technique as primary-backup, and it is 
+also used to improve computer load balance and consolidating many VMs on fewer 
+computers to save datacenter energy. A common problem in these two approaches 
+is that they incur substantial application downtime (\eg, 8 seconds 
+in vMotion~\cite{vmotion:atc05}) and network bandwidth during transfering 
+memory. \textbf{Objective 3} (\S\ref{sec:vm}) aims to address this problem.
 
 % This approach consumes much network bandwidth and has weaker 
 % primary-consistency (\eg, if primary rejoins the network) than \paxos.
 
-\para{RDMA techniques.} RDMA has been realized in various types of datacenter 
-networks, including Infiniband~\cite{infiniband}, RoCE~\cite{roce}, and 
-iWRAP~\cite{iwrap}. RDMA has been leveraged in many software systems to improve 
-different performance aspects, including high performance 
-computing~\cite{openmpi}, key-value 
+\para{RDMA techniques.} Recently RDMA is deployed in various types of 
+datacenter networks, including Infiniband~\cite{infiniband} and 
+RoCE~\cite{roce}. RDMA has been leveraged in many 
+software systems to improve different performance aspects, including high 
+performance computing~\cite{openmpi}, key-value 
 stores~\cite{pilaf:usenix14,herd:sigcomm14,farm:nsdi14,memcached:rdma}, 
-transactional processing systems~\cite{drtm:sosp15,farm:sosp15}, and file 
-systems~\cite{gibson:nfs}. These systems are complementary to \xxx.
+distributed transactions~\cite{drtm:sosp15,farm:sosp15}, and file 
+systems~\cite{gibson:nfs}. These systems are complementary to \xxx objectives.
 
 \vspace{-.15in}\subsection{Related Work by the PI} 
 \label{sec:my-work}\vspace{-.075in}
