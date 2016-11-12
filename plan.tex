@@ -532,8 +532,8 @@ backup} which only agrees on requests without executing them. The major backup
 periodically checkpoints application states and send them to the 
 standby backup. Checkpoints do not affect performance because the leader and 
 the standby backup still form a majority and agree on requests rapidly. Even if 
-the standby backup is elected as a new leader, it can extract checkpoints and 
-use the aggreed inputs to catch up with the old leader quickly.
+the standby backup is elected as a new leader, it extracts checkpoints and 
+uses the aggreed inputs to catch up with old leader quickly.
 
 % If the leader 
 % fails, \falcon gives the major backup a high priority to become the new leader.
