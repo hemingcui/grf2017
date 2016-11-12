@@ -101,17 +101,17 @@ receive consensus messages on their bare, local memory. An analogy is threads
 receiving other threads' data via bare memory, a fast and scalable computation 
 pattern.
 
-We propose the design of \falcon,\footnote{We name our protocol after
-apus, one of the fastest birds.} a new RDMA-based \paxos protocol and its
-runtime system. In \xxx, all replicas directly write to destination
-replicas' memory and poll messages from local memory to receive messages, and 
-our runtime system handles other technical challenges such as checking message 
-delivery and recovering replica failures.
+
+
+% In \xxx, all replicas directly write to destination
+% replicas' memory and poll messages from local memory to receive messages, and 
+% our runtime system handles other technical challenges such as checking message 
+% delivery and recovering replica failures.
 
 \begin{figure}[h]
     \centering
     \begin{minipage}{.48\textwidth}    
-        \vspace{-.18in}
+        \vspace{-.15in}
         \includegraphics[width=0.31\textheight]{figures/arch.ps}
         \vspace{-.35in}         
         \caption{The \falcon protocol architecture. Protocol components are 
@@ -120,7 +120,7 @@ shaded (and in blue color).}
     \end{minipage}
     \centering
     \begin{minipage}{0.48\textwidth}
-        \vspace{-.25in}
+        \vspace{-.2in}
         \includegraphics[width=0.34\textheight]{figures/consensus.ps}
         \vspace{-.32in}
         \caption{RDMA-powered consensus algorithm.}
@@ -130,15 +130,18 @@ shaded (and in blue color).}
 
 
 
-We plan to make \falcon support unmodified applications. \falcon's runtime 
+With this observation, we propose the design of \falcon,\footnote{We name our 
+protocol after apus, one of the fastest birds.} a new RDMA-based \paxos 
+protocol and its runtime system. Figure~\ref{fig:falcon-arch} shows \falcon's 
+architecture. It is designed to support unmodified applications. Its runtime 
 system will automatically deploy the same application on multiple replicas, 
 intercept the application's network inputs from its inbound socket calls (\eg, 
-\recv) with a Linux technique called LD\_PRELOAD, and invoke its RDMA-based 
-consensus protocol to enforce same network inputs across replicas. 
-Figure~\ref{fig:falcon-arch} shows \falcon's architecture on the leader replica 
-with three key components: an input consensus coordinator, an in-memory 
-consensus log, and a guard that checkpoints and recovers application execution 
-states.
+\recv) with a Linux technique called LD\_PRELOAD, and invoke a RDMA-powered 
+algorithm (Figure~\ref{fig:falcon-protocol}) to enforce same network inputs 
+across replicas. \falcon architecture has four key components: an input 
+consensus coordinator and an output checker (both are built on the algorithm), 
+an in-memory consensus log, and a guard that handles application checkpoints 
+and recovery.
 
 Figure~\ref{fig:falcon-protocol} depicts \falcon's consensus algorithm in 
 normal case. The leader first executes the actual inbound socket call to get 
