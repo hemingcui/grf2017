@@ -194,10 +194,11 @@ consensus latency outperforms 4 popular \paxos  protocols by \comptradlow to
 
 
 
-\para{Future work.} We will fully implement \falcon and intensively study its 
-practicality in two directions: (1) evaluate its performance and generality on 
-broad latency-critical applications, and (2) analyze its protocol robustness on 
-various abnormal scenarios, including leader election and adding/removing replicas.
+\para{Future work.} We will proactively improve \falcon's practicality in two 
+parts. First, we will evaluate its performance on broad latency-critical 
+applications and refine the normal case algorithm. Second, we will analyze 
+its robustness on various abnormal scenarios, including leader election and 
+adding/removing replicas.
 
 \vspace{-.15in}\subsection{Objective 2: 
 building a fault-tolerant scheduler to improve 
@@ -413,17 +414,18 @@ overhead in throughput and \latencyoverhead in response time.
 %         \label{fig:scheduler-latency}
 % \end{figure}
 
-\para{Future directions.} We forsee two directions for \tripod's 
-future evolvement. First, currently our replication and resource allocation 
-scheme is tied to \mesos. We will study other popular schedulers and summarize 
-general resource allocation scheme patterns, and we will develop a general, 
-scheduler-agnostic scheme for diverse datacenter schedulers. Second, currently  
-our scheme requires application developers to manually assign \vv{R} values to 
-application components. We will leverage our expertise on precise program 
-analysis~\cite{peregrine:sosp11,woodpecker:asplos13} to develop new schemes 
-that can automatically analyze an application and assign precise \vv{R} values 
-to different components. We believe that both these directions will lead to 
-novel works.
+\para{Future directions.} We forsee three directions for \tripod's further 
+development. First, we will fully implement it and conduct an extensive study 
+on diverse applications. Second, currently our replication and resource 
+allocation scheme is tied to \mesos. We will study other popular schedulers, 
+summarize general resource allocation scheme patterns, then we will develop a 
+general, scheduler-agnostic scheme for diverse datacenter schedulers. Third, 
+currently our scheme requires application developers to manually assign \vv{R} 
+values to application components. We will leverage our expertise on precise 
+program analysis~\cite{peregrine:sosp11,woodpecker:asplos13} to create new 
+schemes that can automatically analyze an application and assign precise \vv{R} 
+values to different components. We believe that all the three directions will 
+lead to innovative work.
 
 \vspace{-.15in}\subsection{Objective 3: building a fault-tolerant VM to improve 
 application availability}\label{sec:vm}\vspace{-.075in}
@@ -743,10 +745,10 @@ going along two directions. First, we will implement our fault-tolerant VM,
 compare its performance with prior VM primary-backup techniques (\eg, 
 Remus~\cite{remus:nsdi08}), and quantify our reduction on transfered pages. 
 Second, we will apply our tracking algorithm to develop new lightweight VM 
-live migration techniques~\cite{vmotion:atc05}. Because VM primary-backup and 
-migration techniques have been used in broad areas (\eg, improving resource 
-utilization, balancing computer loads, and saving datacenter energy), we plan 
-to apply our techniques in these areas, too.
+live migration techniques (\S\ref{sec:others-work}). Because VM primary-backup 
+and migration techniques have been used in broad areas (\eg, improving resource 
+utilization, balancing computer loads, and saving datacenter energy), our 
+techniques can be applied in these areas, too.
 
 
 % % TBD: need a new replication approach name.
