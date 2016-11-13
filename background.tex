@@ -68,7 +68,7 @@ resources, making computing resources easy to utilize and balance loads (\eg,
 via live migration~\cite{vmotion:atc05,xen:migration:nsdi05}). VM is also known 
 for its secure isolation on resources~\cite{xen:sosp,kvm,vmware:sugerman}. 
 Although some VM fault-tolerance approaches such 
-as primary-backup~\cite{remus:nsdi08} exist, they consume much 
+as primary-backup~\cite{remus:nsdi08,ftvm} exist, they consume much 
 time and network bandwidth as they need to transfer all memory modified by 
 applications across VM replications.
 % Nowadays a computer is deploying more and more VMs due to its increasing CPU 
@@ -173,16 +173,18 @@ high availability support to general applications. \textbf{Objective 2}
 % schedulers so it can be integrated in other systems.
 
 %  Migration and primary-backup.
-\para{Fault-tolerance in VM.} Two approaches, primary-backup and live 
-migration, exist for improving application reliability in VM. Primary-backup 
+\para{Fault-tolerance in VM.} Two approaches, 
+primary-backup~\cite{remus:nsdi08,ftvm} and live 
+migration~\cite{vmotion:atc05,xen:migration:nsdi05}, exist for improving 
+application reliability in VM. Primary-backup 
 uses the hypervisor on a primary VM to track memory pages modified during 
 handling each request, and then transfers these pages to a backup VM. Live 
-migration uses a similar hypervisor technique as primary-backup, and it is 
+migration uses a similar technique as primary-backup, and it is 
 also used to improve computer load balance and consolidating many VMs on fewer 
 computers to save datacenter energy. A common problem in these two approaches 
 is that they incur substantial application downtime (\eg, 8 seconds 
-in vMotion~\cite{vmotion:atc05}) and network bandwidth during transfering 
-memory. \textbf{Objective 3} (\S\ref{sec:vm}) aims to address this problem.
+in vMotion~\cite{vmotion:atc05}) and network bandwidth during memory transfer. 
+\textbf{Objective 3} (\S\ref{sec:vm}) aims to address this problem.
 
 % This approach consumes much network bandwidth and has weaker 
 % primary-consistency (\eg, if primary rejoins the network) than \paxos.

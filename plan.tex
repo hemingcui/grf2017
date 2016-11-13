@@ -753,15 +753,16 @@ two VMs. These initial results imply that \textbf{Algorithm 1} can reduce up to
 % leader's idle time. Third, robust to various scenarios (\eg, destination fails 
 % during the migration), thanking to \paxos.
 
-\para{Future directions.} We anticipate broad outcomes from this objective by 
-going along two directions. First, we will implement our fault-tolerant VM, 
-compare its performance with prior VM primary-backup techniques (\eg, 
-Remus~\cite{remus:nsdi08}), and quantify our reduction on transfered pages. 
-Second, we will apply our tracking algorithm to develop new lightweight VM 
-live migration techniques (\S\ref{sec:others-work}). Because VM primary-backup 
-and migration techniques have been used in broad areas (\eg, improving resource 
-utilization, balancing computer loads, and saving datacenter energy), our 
-techniques can be applied in these areas, too.
+\para{Future directions.} We anticipate broad research outcomes in two 
+directions. First, we will implement our algorithm and quantify its performance 
+improvement compared to prior VM primary-backup 
+techqniues (\eg, vSphere~\cite{ftvm}). Second, we will apply the 
+algorithm to develop new lightweight VM live migration techniques 
+(\S\ref{sec:others-work}). Because VM primary-backup and migration techniques 
+are applied to address broad challenges (\eg, improving resource utilization, 
+balancing computer loads, and saving datacenter energy), applications of our 
+techniques on these challenges will nurture new research questions and 
+solutions.
 
 
 % % TBD: need a new replication approach name.
