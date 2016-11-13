@@ -422,18 +422,19 @@ overhead in throughput and \latencyoverhead in response time.
 %         \label{fig:scheduler-latency}
 % \end{figure}
 
-\para{Future directions.} We forsee three directions for \tripod's further 
-development. First, we will fully implement it and conduct an extensive study 
-on diverse applications. Second, currently our replication and resource 
-allocation scheme is tied to \mesos. We will study other popular schedulers, 
-summarize general resource allocation scheme patterns, then we will develop a 
-general, scheduler-agnostic scheme for diverse datacenter schedulers. Third, 
-currently our scheme requires application developers to manually assign \vv{R} 
-values to application components. We will leverage our expertise on precise 
+\para{Future directions.} We forsee three directions for \tripod's future 
+evolvement. First, we will further improve the performance of its 
+replication-aware resource allocation scheme through an extensive study on 
+diverse applications. Second, currently this scheme is tied to \mesos. We will 
+study other popular schedulers, summarize general resource allocation scheme 
+patterns, then we will develop a scheduler-agnostic scheme for general 
+datacenter schedulers. Third, currently this scheme requires application 
+developers to manually assign \vv{R} values to application components. We will 
+leverage our expertise on precise 
 program analysis~\cite{peregrine:sosp11,woodpecker:asplos13} to create new 
 schemes that can automatically analyze an application and assign precise \vv{R} 
-values to different components. We believe that all the three directions will 
-lead to innovative work.
+values to different components. We believe that all these directions will 
+generate new conceptual methods.
 
 \vspace{-.15in}\subsection{Objective 3: building a fault-tolerant VM to improve 
 application availability}\label{sec:vm}\vspace{-.075in}
