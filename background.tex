@@ -79,11 +79,11 @@ These two infrastructures usually work independently depending on
 runtime trade-off such as performance or security isolation. Some applications 
 are ran solely by schedulers (e.g., Mesos~\cite{mesos:nsdi11} usually uses 
 lightweight Linux containers, not VMs), and some other applications are ran 
-solely by VMs (e.g., Amazon EC2). Therefore, this GAIA project strengthens the 
+solely by VMs (e.g., Amazon EC2). Therefore, this proposal strengthens the 
 two infrastructures respectively. If people need to run an application with 
 both infrastructures, they can choose either infrastructure developed from 
-GAIA and the other one from outside. For instance, people can choose our 
-\tripod scheduler (\S\ref{sec:scheduler-arch}) and VMWare.
+this proposal and the other one from outside. For instance, people can choose 
+our \tripod scheduler (\S\ref{sec:scheduler-arch}) and VMWare.
 
 % Many applications are mission-critical (\eg, financial platforms, social 
 % networks, and medical services,), so they naturally desire both high 
@@ -117,9 +117,10 @@ GAIA and the other one from outside. For instance, people can choose our
 % integrate this protocol with two major infrastrutures (Objective 2 and 3). This 
 % novel integratation provides a clean high-availability support for general  
 % applications.
-GAIA objectives stem from two research problems in datacenter 
-computing. First, despite the core role and wide deployments of \paxos, it 
-suffers from high consensus latency. Therefore, 
+The objectives of GAIA\footnote{Gaia is an ancient Greek goddess who takes good 
+care of everything on earth, including software applications.} stem from two 
+research problems in datacenter computing. First, despite the core role and 
+wide deployments of \paxos, it suffers from high consensus latency. Therefore, 
 \textbf{Objective 1} addresses this problem by leveraging RDMA to create a 
 fast consensus algorithm and implementation protocol. Second, although many 
 mission-critical applications demand stringent availability, existing 
@@ -128,7 +129,8 @@ infrastructures lack such support. To benefit these applications,
 with two major infrastructures, potentially benefiting almost all applications.
 
 
-\vspace{-.15in}\subsection{Related Work by Others} 
+% \vspace{-.15in} hack, for the gaia footnote.
+\subsection{Related Work by Others} 
 \label{sec:others-work}\vspace{-.075in}
 
 \para{Various Consensus Protocols.}  
