@@ -129,7 +129,7 @@ infrastructures lack such support. To benefit these applications,
 with two major infrastructures, potentially benefiting almost all applications.
 
 
-% \vspace{-.15in} hack, for the gaia footnote.
+% \vspace{-.15in}% hack, for the gaia footnote.
 \subsection{Related Work by Others} 
 \label{sec:others-work}\vspace{-.075in}
 
@@ -175,15 +175,15 @@ high availability support to general applications. \textbf{Objective 2}
 % schedulers so it can be integrated in other systems.
 
 %  Migration and primary-backup.
-\para{Fault-tolerance in VM.} Two approaches, 
-primary-backup~\cite{remus:nsdi08,ftvm} and live 
+\para{Fault-tolerance in VM.} Two 
+techniques, primary-backup~\cite{remus:nsdi08,ftvm} and live 
 migration~\cite{vmotion:atc05,xen:migration:nsdi05}, exist for improving 
 application reliability in VM. Primary-backup 
 uses the hypervisor on a primary VM to track memory pages modified during 
 handling each request, and then transfers these pages to a backup VM. Live 
-migration uses a similar technique as primary-backup, and it is 
-also used to improve computer load balance and consolidating many VMs on fewer 
-computers to save datacenter energy. A common problem in these two approaches 
+migration uses a similar technique as primary-backup. Both techniques are
+used to improve computer load balance and consolidating many VMs on fewer 
+computers to save datacenter energy. A common problem in the two techniques 
 is that they incur substantial application downtime (\eg, 8 seconds 
 in vMotion~\cite{vmotion:atc05}) and network bandwidth during memory transfer. 
 \textbf{Objective 3} (\S\ref{sec:vm}) aims to address this problem.
@@ -200,23 +200,27 @@ stores~\cite{pilaf:usenix14,herd:sigcomm14,farm:nsdi14,memcached:rdma},
 distributed transactions~\cite{drtm:sosp15,farm:sosp15}, and file 
 systems~\cite{gibson:nfs}. These systems are complementary to \xxx objectives.
 
-\vspace{-.15in}\subsection{Related Work by the PI} 
+\vspace{-.15in}\subsection{Related Work by the PI and co-I} 
 \label{sec:my-work}\vspace{-.075in}
 % 
 % First emphasis debugging experience on concurrency. Program analysis.
 % Then mention security exploits found in Woodpecker.
 % Then mention runtime systems.
 
-The PI is an expert on improving the reliability of both datacenter software 
-systems~\cite{crane:sosp15, tripod:apsys16} and multithreading runtime 
-systems~\cite{smt:cacm, cui:tern:osdi10, peregrine:sosp11, parrot:sosp13}. The 
-PI's works are published in premier conferences on systems software (OSDI 2010, 
-SOSP 2011, SOSP 2013, and SOSP 2015) and programming languages (PLDI 2012 and 
-ASPLOS 2013). As preliminary results for this \xxx proposal, the PI has 
+The PI is an expert on reliable multithreading~\cite{smt:cacm, 
+cui:tern:osdi10, peregrine:sosp11, parrot:sosp13} and
+distributed systems~\cite{crane:sosp15, 
+tripod:apsys16}. The 
+PI's works are published in premier conferences on systems (OSDI '10, 
+SOSP '11, SOSP '13, and SOSP '15) and programming languages (PLDI '12 and 
+ASPLOS '13). As preliminary results for this \xxx proposal, the PI has 
 developed a fast consensus protocol~\cite{crane:sosp15} (part of 
 \textbf{Objective 1}) and a fault-tolerant datacenter 
-scheduler~\cite{tripod:apsys16} (part of \textbf{Objective 2}).
-
-
+scheduler~\cite{tripod:apsys16} (part of \textbf{Objective 2}). The co-I is an 
+expert on high-performance 
+computing~\cite{powerrock,hwang,jessica,cheung,khokhar}, fault-tolerance~\cite{ 
+sheng,shengdi1}, and VMs~\cite{rhymes,shengdi,jessica2}. The 
+co-I's works are published in top systems conferences (Cluster '02, SC '13, 
+and ICPADS '14) and journals (JPDC '00, TPDS '13, IEEE Tran. Computers '14).
 
 

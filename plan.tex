@@ -13,9 +13,8 @@ research plan (\S\ref{sec:plan}).
 \vspace{-.15in}\subsection{Objective 1: Building Fast Distributed Consensus via
 RDMA}\label{sec:protocol}\vspace{-.075in}
 
-This section describes a performance problem (\S\ref{sec:latency-problem}) in 
-existing \paxos protocols and presents \falcon (\S\ref{sec:falcon}), a 
-fast \paxos protocol by leveraging RDMA.
+This section presents \paxos performance problem (\S\ref{sec:latency-problem}) 
+and a fast, RDMA-powered protocol (\S\ref{sec:falcon}).
 
 \vspace{-.15in}
 \subsubsection{Problem: consensus latency of existing \paxos 
@@ -41,13 +40,13 @@ protocols are slow and unscalable}
 % improve the availability of
 % general server programs.
 
-Despite the wide deployments of \paxos (\S\ref{sec:consensus}), its high 
-consensus latency makes many software applications suffer. For efficiency, 
-\paxos typically assigns one replica as the leader to propose consensus 
-requests, and the other replicas as backups to agree on requests. To 
-agree on an input, at least one message round-trip is required between the 
-leader and a backup. A round-trip causes big latency (hundreds of \us) as it 
-goes through various software layers (\eg, OS kernels).
+% Despite the wide deployments of \paxos (\S\ref{sec:consensus}), its high 
+% consensus latency makes many software applications suffer. 
+For efficiency, \paxos (\S\ref{sec:consensus}) typically assigns one replica as 
+the leader to propose consensus requests, and the other replicas as backups to 
+agree on requests. To agree on an input, at least one message round-trip is 
+required between the leader and a backup. A round-trip causes big latency 
+(hundreds of \us) as it goes through various software layers (\eg, OS kernels).
 
 % This 
 % latency may be acceptable for leader election~\cite{chubby:osdi,zookeeper} or 
