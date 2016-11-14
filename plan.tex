@@ -68,7 +68,7 @@ replica group size from 3 to 9, the consensus latency of three protocols
 increased by \tradlatencyincreaselow to \tradlatencyincreasehigh, and 
 \systemcostlow to \systemcosthigh of this increase was in OS kernel. The only
 exception is S\-Paxos~\cite{spaxos:srds12} because it batches requests from backups
-and starts consensus when the batch is full. Mmore replicas causes shorter time
+and starts consensus when the batch is full. More replicas causes shorter time
 to form a batch, but batching aggravates latency.
 
 % Second, briefly mention the problem in DARE. and its scalability bottleneck.
@@ -182,7 +182,7 @@ phases. First, to support unmodified applications, we implemented its
 socket-intercepting runtime system, presented in SOSP 2015~\cite{crane:sosp15}. 
 \falcon was able to support five widely used server applications (\eg, \mysql) 
 without modifying them. Second, we implemented its RDMA-powered consensus 
-algorithm on a 40bps RDMA network. Figure~\ref{fig:scalability} shows \falcon 
+algorithm on a 40Gbps RDMA network. Figure~\ref{fig:scalability} shows \falcon 
 performance with 5 existing consensus protocols. To analyze the scalability
 of our algorithm, we ran \falcon and \dare on up to 105 replicas. \falcon's 
 consensus latency outperforms 4 popular \paxos  protocols by \comptradlow to 
@@ -216,7 +216,7 @@ Unfortunately, most applications running by schedulers have not been made
 highly-available (although individual applications carry a replication 
 approach~\cite{mapreduce,dolly:nsdi13}).
 
-A strawman approach to achieve high application availability could be 
+A straw-man approach to achieve high application availability could be 
 implementing a \paxos protocol for every application. However, this will cause 
 two major issues. First, \paxos is notoriously difficult to 
 understand~\cite{raft:usenix14,paxos:simple}, implement~\cite{paxos:practical, 
@@ -248,7 +248,8 @@ schedulers which let only one controller schedule jobs, \tripod runs replicas
 of the same job using replicas of controllers: after controllers agree on a new 
 job with \falcon, \tripod lets each controller independently schedule a 
 replication of this job. To seamlessly resolve conflicts between the resource 
-allocation scheme and repliation scheme, \tripod introduces a replication-aware 
+allocation scheme and replication scheme, \tripod introduces a 
+replication-aware 
 resource allocation scheme (\S\ref{sec:workflow}).
 
 % Doing so has three benefits. First, \tripod's \paxos acts as a single, general 
@@ -344,7 +345,7 @@ The goal is to reserve enough resources for \tripod to replicate a job with
 In the third step, an application scheduler submits jobs to the leader 
 controller. If \vv{R} is 1, the leader schedules the job without consensus and 
 revokes \vv{R-1} resources specified in this job from the application. By doing 
-so, the conservatively reserved resources are given back to \tripod. If vv{R} 
+so, the conservatively reserved resources are given back to \tripod. If \vv{R} 
 is larger than 1, The leader controller then invokes a consensus on this job 
 across controllers.
 
@@ -365,11 +366,11 @@ reached, each controller follows this assignment.
 \tripod is designed to make a mission-critical application highly available by 
 using \vv{R-1} more resources than that consumed by the application's essential 
 computations. Non-essential computations use same resources as those in \mesos. 
-Given that minor computer failures have caused severe outgage disasters  (\eg, 
+Given that minor computer failures have caused severe outage disasters  (\eg, 
 2015 NYSE trading halts~\cite{nyse:halt} and several Facebook outage events in 
 recent 
 years~\cite{facebook:outage}), we consider these extra resource consumptions 
-worthwhile on improving applicaiton availability.
+worthwhile on improving application availability.
 
 % We deemed 
 % this extra resource consumption reasonable, because even minor computer 
@@ -421,8 +422,8 @@ overhead in throughput and \latencyoverhead in response time.
 %         \label{fig:scheduler-latency}
 % \end{figure}
 
-\para{Future directions.} We forsee three directions for \tripod's future 
-evolvement. First, we will further improve the performance of its 
+\para{Future directions.} We foresee three directions for \tripod's future 
+development. First, we will further improve the performance of its 
 replication-aware resource allocation scheme through an extensive study on 
 diverse applications. Second, currently this scheme is tied to \mesos. We will 
 study other popular schedulers, summarize general resource allocation scheme 
@@ -453,7 +454,7 @@ instance, after serving every request, the primary-backup technique transfers
 all memory pages modified by applications (\ie, dirty pages in 4KB) from the 
 primary to backup. This technique consumes 2*\vv{R} resources (\vv{R} denotes 
 the amount of resources consumed by unreplicated execution). The transfered 
-dirby bytes can be up to 1.7GB (\S\ref{sec:tracking}), causing a substantial  
+dirty bytes can be up to 1.7GB (\S\ref{sec:tracking}), causing a substantial  
 delay and network bandwidth consumption for every request.
 
 A key reason for this problem is that existing techniques have only one actual 
@@ -494,7 +495,7 @@ transfer.
 % computer incur big resource consumption. This is contraditive to the motivation 
 % of migration: reduing computer loads on the local computer.
 
-\vspace{-.15in}\subsubsection{Integraging \falcon with KVM} 
+\vspace{-.15in}\subsubsection{Integrating \falcon with KVM} 
 \label{sec:vm-arch}\vspace{-.075in}
 
 % \begin{figure}[!htb]
@@ -520,10 +521,10 @@ three main reasons. First, KVM is an open source hypervisor in Linux.
 Second, it provides \vv{tap\_send()}, an input capturing API in its hypervisor. 
 This API allows \falcon to intercept network inputs on the leader VM and 
 transparently replicates them on backup VMs. Third, this KVM API runs in 
-userspace, which allows RDMA to work (RDMA runs in userspace).
+user-space, which allows RDMA to work (RDMA runs in user-space).
 
 %% Consume same resources as primary-backup.
-We practively design our VM to achieve same 2*\vv{R} resource consumption as 
+We proactively design our VM to achieve same 2*\vv{R} resource consumption as 
 existing VM fault-tolerance techniques. Although \paxos 
 normally consumes 3*\vv{R} resources, our VM design reduces this consumption 
 by letting one backup act as the \emph{major backup} with a high priority to 
@@ -534,7 +535,7 @@ periodically checkpoints application states and send them to the
 standby backup. Checkpoints do not affect performance because the leader and 
 the standby backup still form a majority and agree on requests rapidly. Even if 
 the standby backup is elected a new leader, it extracts checkpoints and 
-uses the aggreed inputs to catch up with old leader quickly.
+uses the agreed inputs to catch up with old leader quickly.
 
 % If the leader 
 % fails, \falcon gives the major backup a high priority to become the new leader.
@@ -626,7 +627,7 @@ color.}
       \SetCommentSty{textrm}
       \SetKwInOut{Input}{Input}
       \SetKwInOut{Output}{Output}
-      \Input{The root of merkle tree on leader, $root$}
+      \Input{The root of Merkle tree on leader, $root$}
       \Output{Different memory pages between leader and replica, $pages$}
       
       \SetKwBlock{Titlea}{Track($root$)}{end}
@@ -659,7 +660,7 @@ $i$.right()) \;
     \vspace{-.1in}
 \end{figure}
 
-To check whether divergent pages are rare, we ran three appliations, 
+To check whether divergent pages are rare, we ran three applications, 
 MongoDB~\cite{mongodb}, Redis~\cite{redis}, and Memcached~\cite{memcached}, on 
 two KVMs with same real-world workloads~\cite{ycsb}. We 
 found 261.1K$\sim$429K dirty pages (\ie, up to 1.7GB). Primary-backup 
@@ -755,7 +756,7 @@ transfered pages compared to primary-backup techniques.
 \para{Future directions.} We anticipate broad research outcomes in two 
 directions. First, we will implement our algorithm and quantify its performance 
 improvement compared to existing VM primary-backup 
-techqniues (\eg, vSphere~\cite{ftvm}). Second, we will apply the 
+techniques (\eg, vSphere~\cite{ftvm}). Second, we will apply the 
 algorithm to develop new lightweight VM live migration techniques 
 (\S\ref{sec:others-work}). Because VM primary-backup and migration techniques 
 are applied to address broad challenges (\eg, improving resource utilization, 
