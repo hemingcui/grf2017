@@ -447,20 +447,20 @@ application availability}\label{sec:vm}\vspace{-.075in}
 % because they can provide a virtualized abstraction of computing resources to 
 % different applications and enforce strong utilization isolation and security. 
 
-As mentioned in related work (\S\ref{sec:others-work}), primary-backup and live 
-migration are two similar techniques on improving VM fault-tolerance. For 
-instance, after serving each request, the primary-backup technique transfers all 
-memory pages modified by applications (\ie, dirty pages) from the 
-primary to the backup. This technique consumes 2*\vv{R} resources (\vv{R} is 
-the amount of resources consumed by unreplicated execution). There can 
-be GBs of dirty bytes to be transfered (\S\ref{sec:tracking}), causing 
-substantial time and network bandwidth consumption. A key reason for 
-this problem is that existing techniques have only one actual application 
-execution.
+Primary-backup and live migration are two similar 
+techniques (\S\ref{sec:others-work}) for improving VM fault-tolerance. For 
+instance, after serving every request, the primary-backup technique transfers 
+all memory pages modified by applications (\ie, dirty pages in 4KB) from the 
+primary to backup. This technique consumes 2*\vv{R} resources (\vv{R} denotes 
+the amount of resources consumed by unreplicated execution). The transfered 
+dirby bytes can be up to 1.7GB (\S\ref{sec:tracking}), causing a substantial  
+delay and network bandwidth consumption for every request.
 
-We will use \falcon to tackle this problem as it maintains multiple actual 
-executions. By using \falcon to enforce same inputs across VM replicas, most 
-dirty pages across replicas are the same and needn't transfer.
+A key reason for this problem is that existing techniques have only one actual 
+application execution. We will use \falcon to tackle this problem as it 
+maintains multiple actual executions. By using \falcon to enforce same inputs 
+across VM replicas, most dirty pages across replicas are the same and needn't 
+transfer.
 
 % , these two 
 % existing techniques 
@@ -662,11 +662,11 @@ $i$.right()) \;
 To check whether divergent pages are rare, we ran three appliations, 
 MongoDB~\cite{mongodb}, Redis~\cite{redis}, and Memcached~\cite{memcached}, on 
 two KVMs with same real-world workloads~\cite{ycsb}. We 
-found 6,010$\sim$14,295 application pages dirty. Primary-backup 
-techniques have to transfer all dirty pages from primary to backup. We 
-also found that only 471$\sim$983 of these dirty pages diverged between 
-two VMs. These initial results imply that \textbf{Algorithm 1} can reduce up to 
-96.7\% transfered pages compared to prior primary-backup techniques.
+found 261.1K$\sim$429K dirty pages (\ie, up to 1.7GB). Primary-backup 
+techniques have to transfer all dirty pages from primary to backup. We also 
+found that only 14.2$\sim$29.3K of these dirty pages diverged between two VMs. 
+These initial results imply that \textbf{Algorithm 1} can reduce up to 96.7\% 
+transfered pages compared to primary-backup techniques.
 
 % To do this, each replica 
 % maintains a Merkle tree kept 
@@ -754,13 +754,14 @@ two VMs. These initial results imply that \textbf{Algorithm 1} can reduce up to
 
 \para{Future directions.} We anticipate broad research outcomes in two 
 directions. First, we will implement our algorithm and quantify its performance 
-improvement compared to prior VM primary-backup 
+improvement compared to existing VM primary-backup 
 techqniues (\eg, vSphere~\cite{ftvm}). Second, we will apply the 
 algorithm to develop new lightweight VM live migration techniques 
 (\S\ref{sec:others-work}). Because VM primary-backup and migration techniques 
 are applied to address broad challenges (\eg, improving resource utilization, 
 balancing computer loads, and saving datacenter energy), applications of our 
-techniques on these challenges will cultivate broad research opportunities.
+techniques on these challenges will cultivate even broader innovative 
+techniques.
 
 
 % % TBD: need a new replication approach name.
