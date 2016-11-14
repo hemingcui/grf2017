@@ -178,15 +178,15 @@ high availability support to general applications. \textbf{Objective 2}
 \para{Fault-tolerance in VM.} Two 
 techniques, primary-backup~\cite{remus:nsdi08,ftvm} and live 
 migration~\cite{vmotion:atc05,xen:migration:nsdi05}, exist for improving 
-application reliability in VM. Primary-backup 
-uses the hypervisor on a primary VM to track memory pages modified during 
-handling each request, and then transfers these pages to a backup VM. Live 
-migration uses a similar technique as primary-backup. Both techniques are
-used to improve computer load balance and consolidating many VMs on fewer 
-computers to save datacenter energy. A common problem in the two techniques 
-is that they incur substantial application downtime (\eg, 8 seconds 
-in vMotion~\cite{vmotion:atc05}) and network bandwidth during memory transfer. 
-\textbf{Objective 3} (\S\ref{sec:vm}) aims to address this problem.
+application reliability in VM. Primary-backup (\eg, vSphere~\cite{ftvm})
+uses the hypervisor on a primary VM to track memory pages modified by 
+applications, it then transfers these pages to a backup VM. Live migration 
+uses a similar technique as primary-backup. Both techniques are used to improve 
+computer load balance and consolidating many VMs on fewer computers to save 
+datacenter energy. A common problem in the two techniques is that they incur 
+substantial application downtime (\eg, 8 seconds in 
+vMotion~\cite{vmotion:atc05}) and network bandwidth during the memory transfer. 
+\textbf{Objective 3} (\S\ref{sec:vm}) will greatly mitigate this problem.
 
 % This approach consumes much network bandwidth and has weaker 
 % primary-consistency (\eg, if primary rejoins the network) than \paxos.
