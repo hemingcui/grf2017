@@ -339,28 +339,29 @@ replication logic in its resource offers and allocations from the application.
 An application runs as if \xxx does not replicate any of its tasks, and \tripod 
 transparently handles all the replication logic.
 
-In the first step, slave machines periodically report their available computing 
-resources (\eg, CPU cores and memory) to the leader controller. In the second 
-step, instead of offering the available resources aggregated from slave 
-machines, \tripod conservatively divides the amount of resources by each 
-application's \vv{R} value and then sends a resource offer to the application. 
-The goal is to reserve enough resources for \tripod to replicate a task with 
-\vv{R} copies, although some tasks have only \vv{R=1}.
+In the first step (\textbf{S1}), slave machines periodically report their 
+available computing resources (\eg, CPU cores and memory) to the leader 
+controller. In the second step (\textbf{S2}), instead of offering the available 
+resources aggregated from slave machines, \tripod conservatively divides the 
+amount of resources by each application's \vv{R} value and then sends a 
+resource offer to the application. The goal is to reserve enough resources for 
+\tripod to replicate a task with \vv{R} copies, although some tasks have only 
+\vv{R=1}.
 
-In the third step, an application scheduler submits tasks to the leader 
-controller. If \vv{R} is 1, the leader schedules the task without consensus and 
-revokes \vv{R-1} resources specified in this task from the application. By 
-doing so, the conservatively reserved resources are given back to \tripod. If 
-\vv{R} is larger than 1, The leader controller then invokes a consensus on this 
-task across controllers.
+In the third step (\textbf{S3}), an application scheduler submits tasks to the 
+leader controller. If \vv{R} is 1, the leader schedules the task without 
+consensus and revokes \vv{R-1} resources specified in this task from the 
+application. By doing so, the conservatively reserved resources are given back 
+to \tripod. If \vv{R} is larger than 1, The leader controller then invokes a 
+consensus on this task across controllers.
 
 Once a majority of controllers agrees on executing a task, each controller 
-does the fourth step. It schedules this task on an available slave machine 
-according to the resource offer. To prevent controllers putting the same task 
-on the same slave machine, the leader controller first makes an assignment on 
-which controller should run this task on which slave machine, it then carries 
-this assignment in its consensus request. Once a consensus on this task is 
-reached, each controller follows this assignment.
+does the fourth step  (\textbf{S4}). It schedules this task on an available 
+slave machine according to the resource offer. To prevent controllers putting 
+the same task on the same slave machine, the leader controller first makes an 
+assignment on which controller should run this task on which slave machine, it 
+then carries this assignment in its consensus request. Once a consensus on this 
+task is reached, each controller follows this assignment.
 
 % Two figures: one is TRIPOD arch. The other is TRIPOD results from the workshop 
 % paper. Figure~\ref{fig:scheduler-arch} and Figure~\ref{fig:scheduler-workflow} 
