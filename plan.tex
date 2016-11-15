@@ -209,7 +209,7 @@ application availability}\label{sec:scheduler}\vspace{-.075in}
 
 Many existing schedulers have adopted \paxos to improve availability for 
 themselves. Typically, a scheduler use \paxos to replicate its essential 
-components such as a controller, which handles scheduling computation jobs 
+components such as a controller, which handles scheduling computation tasks 
 to run on resources. In normal case, only one leading controller does the real 
 work, and the other controllers act as backup to handle the leader's failure. 
 Unfortunately, most applications running by schedulers have not been made 
@@ -227,7 +227,7 @@ developers.
 
 The second issue is, the scheduler can be conflicting with \paxos due to 
 unawareness of the application's \paxos replication logic. For instance, if an 
-application submits multiple replications of the same computation job to the 
+application submits multiple replications of the same computation task to the 
 scheduler, the scheduler may incorrectly schedule several replications on the 
 same computer (it should schedule each copy on different computers to achieve 
 \paxos fault-tolerance).
@@ -244,10 +244,10 @@ can replicate all or essential computations of a general application.
 \falcon (\textbf{Objective 1}). To avoid the two aforementioned issues 
 (\S\ref{sec:scheduler}), \tripod's design integrates \paxos in a scheduler, 
 not in applications. To achieve high application availability, unlike existing 
-schedulers which let only one controller schedule jobs, \tripod runs replicas 
-of the same job using replicas of controllers: after controllers agree on a new 
-job with \falcon, \tripod lets each controller independently schedule a 
-replication of this job. To seamlessly resolve conflicts between the resource 
+schedulers which let only one controller schedule tasks, \tripod runs replicas 
+of the same task using replicas of controllers: after controllers agree on a 
+new task with \falcon, \tripod lets each controller independently schedule a 
+replication of this task. To seamlessly resolve conflicts between the resource 
 allocation scheme and replication scheme, \tripod introduces a 
 replication-aware 
 resource allocation scheme (\S\ref{sec:workflow}).
@@ -276,48 +276,53 @@ resource allocation scheme (\S\ref{sec:workflow}).
 Figure~\ref{fig:scheduler-arch} depicts \tripod's architecture, and its key 
 components are shaded (and in blue). To illustrate how \tripod works in an 
 application perspective, this figure shows two applications, Hadoop and MPI. 
-Each job has a \emph{replica strength} (\vv{R}) to denote the level of 
+Each task has a \emph{replica strength} (\vv{R}) to denote the level of 
 fault-tolerance it demands. This \vv{R} value is either 1 (default, no 
 replication) or no more than the number of controllers in \tripod. An 
-application can assign other \vv{R} numbers to a job when it submits this job to 
-\tripod.
+application can assign other \vv{R} numbers to a task when it submits this task 
+to \tripod.
 
-It is often easy for an application to determine which computation jobs require 
-high availability and thus a bigger \vv{R} value. For instance, 
+It is often easy for an application to determine which computation tasks 
+require high availability and thus a bigger \vv{R} value. For instance, 
 Alluxio~\cite{alluxio}, a distributed storage application ran in \mesos, has 
 an essential manager component to manage storages across computers. When 
 running in our \tripod scheduler, Alluxio can just assign \vv{R=3} to the 
-launching job of this manager.
+launching task of this manager.
 
 % By default, each application has \vv{R=1}, which means that this application 
 % does not need replication. For such a default setting, \tripod runs the job as 
 % is without replication, like a typical cluster management system (\eg, Mesos).
 
-Figure~\ref{fig:scheduler-arch} shows an example of replicating all Hadoop jobs 
-with \vv{R=3}. Suppose Hadoop submits two jobs to \tripod's leader controller, 
-each has different shapes (triangle or hexagon). The leader controller then 
-invokes a consensus on each job across controllers. Once a consensus is reached, 
-each controller assigns the same job on different slave machines. The leader 
-controller directly returns its computation result to the Hadoop scheduler. 
-A standby controller ignores computation results unless it becomes a new leader.
+Figure~\ref{fig:scheduler-arch} shows an example of replicating all Hadoop 
+tasks with \vv{R=3}. Suppose Hadoop submits two tasks to \tripod's leader 
+controller, each has different shapes (triangle or hexagon). The leader 
+controller then invokes a consensus on each task across controllers. Once a 
+consensus is reached, each controller assigns the same task on different slave 
+machines. The leader directly returns its computation result to the 
+Hadoop scheduler. A standby controller ignores computation results unless it 
+becomes a new leader.
 %  unless a tail-tolerance mechanism is triggered 
 % (\S\ref{sec:workflow})
 
 % Hack: use eps to avoid the 1MB terrible ps size.
 \vspace{.1in}
 \begin{figure}[!htb]
-    \begin{minipage}{.49\textwidth}
-        \vspace{-.15in}
+%     \centering
+    \begin{minipage}{.48\textwidth}
+        \vspace{-.1in}
         \includegraphics[width=0.34\textheight]{figures/scheduler_arch.eps}
-        \vspace{-.25in}
-        \caption{The \tripod fault-tolerant scheduler.}
+         \vspace{-.05in}
+        \caption{The \tripod scheduler architecture. It replicates all Hadoop 
+tasks (\vv{R=3}) for fault-tolerance and runs all MPI tasks as is (\vv{R=1}).}
         \label{fig:scheduler-arch}
     \end{minipage}
-    \begin{minipage}{0.51\textwidth}
-        \vspace{-.15in}
+    \hspace{0.15in}
+    \begin{minipage}{0.48\textwidth}
+        \vspace{-.27in}
         \includegraphics[width=0.34\textheight]{figures/scheduler_flow.eps}
         \vspace{-.05in}
-        \caption{The replication-aware resource allocation scheme.}
+        \caption{The replication-aware resource allocation scheme with four 
+steps (\textbf{S1}$\sim$\textbf{S4}).}
         \label{fig:scheduler-workflow}
     \end{minipage}
 \end{figure}
@@ -328,10 +333,10 @@ A standby controller ignores computation results unless it becomes a new leader.
 \label{sec:workflow}\vspace{-.075in}
 
 Figure~\ref{fig:scheduler-workflow} shows the design of \tripod's scheme on 
-scheduling jobs with four steps. This scheme is similar to that in \mesos 
+scheduling tasks with four steps. This scheme is similar to that in \mesos 
 except the second and fourth steps. These two steps \tripod abstract away the 
 replication logic in its resource offers and allocations from the application. 
-An application runs as if \xxx does not replicate any of its jobs, and \tripod 
+An application runs as if \xxx does not replicate any of its tasks, and \tripod 
 transparently handles all the replication logic.
 
 In the first step, slave machines periodically report their available computing 
@@ -339,22 +344,22 @@ resources (\eg, CPU cores and memory) to the leader controller. In the second
 step, instead of offering the available resources aggregated from slave 
 machines, \tripod conservatively divides the amount of resources by each 
 application's \vv{R} value and then sends a resource offer to the application. 
-The goal is to reserve enough resources for \tripod to replicate a job with 
-\vv{R} copies, although some jobs have only \vv{R=1}.
+The goal is to reserve enough resources for \tripod to replicate a task with 
+\vv{R} copies, although some tasks have only \vv{R=1}.
 
-In the third step, an application scheduler submits jobs to the leader 
-controller. If \vv{R} is 1, the leader schedules the job without consensus and 
-revokes \vv{R-1} resources specified in this job from the application. By doing 
-so, the conservatively reserved resources are given back to \tripod. If \vv{R} 
-is larger than 1, The leader controller then invokes a consensus on this job 
-across controllers.
+In the third step, an application scheduler submits tasks to the leader 
+controller. If \vv{R} is 1, the leader schedules the task without consensus and 
+revokes \vv{R-1} resources specified in this task from the application. By 
+doing so, the conservatively reserved resources are given back to \tripod. If 
+\vv{R} is larger than 1, The leader controller then invokes a consensus on this 
+task across controllers.
 
-Once a majority of controllers agrees on executing a job, each controller 
-does the fourth step. It schedules this job on an available slave machine 
-according to the resource offer. To prevent controllers putting the same job on 
-the same slave machine, the leader controller first makes an assignment on 
-which controller should run this job on which slave machine, it then carries 
-this assignment in its consensus request. Once a consensus on this job is 
+Once a majority of controllers agrees on executing a task, each controller 
+does the fourth step. It schedules this task on an available slave machine 
+according to the resource offer. To prevent controllers putting the same task 
+on the same slave machine, the leader controller first makes an assignment on 
+which controller should run this task on which slave machine, it then carries 
+this assignment in its consensus request. Once a consensus on this task is 
 reached, each controller follows this assignment.
 
 % Two figures: one is TRIPOD arch. The other is TRIPOD results from the workshop 
