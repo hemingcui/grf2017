@@ -464,11 +464,11 @@ two techniques are adopted by industry~\cite{ftvm}, an open problem is that the
 transfered dirty bytes can be up to 1.7GB (\S\ref{sec:tracking}), causing a 
 substantial  delay and network bandwidth consumption for \emph{every} request.
 
-A key reason for this problem is that existing techniques have only one actual 
-application execution. We will use \falcon to tackle this problem as it 
-maintains multiple actual executions. By using \falcon to enforce same inputs 
-across VM replicas, most dirty pages across replicas are the same and needn't 
-transfer.
+A key reason for this problem is that existing techniques have only one real 
+application execution. We will use \falcon (\textbf{Objective 1}) to tackle 
+this problem as it maintains multiple real executions. By using \falcon to 
+enforce same inputs across VM replicas, most dirty pages across replicas are 
+same and needn't transfer.
 
 % , these two 
 % existing techniques 
