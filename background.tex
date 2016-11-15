@@ -11,10 +11,10 @@ objectives (\S\ref{sec:motivation}), others' related work
 
 Distributed consensus (typically, 
 \paxos~\cite{paxos,paxos:practical,paxos,paxos:simple,paxos:complex}) plays a 
-core role in distributed systems, including ordering 
-services~\cite{ellis:thesis,manos:hotdep10,scatter:sosp11},
-leader election~\cite{zookeeper, chubby:osdi}, and
-fault-tolerance~\cite{eve:osdi12,rex:eurosys14,crane:sosp15}. A \paxos protocol
+core role in distributed systems, 
+including fault-tolerance~\cite{eve:osdi12,rex:eurosys14,crane:sosp15},
+leader election~\cite{zookeeper, chubby:osdi}, and ordering 
+services~\cite{ellis:thesis,manos:hotdep10,scatter:sosp11}. A \paxos protocol
 replicates the same application on a group of computers (or \emph{replicas}) 
 and enforces the same order of inputs for this application, as long as 
 a majority of replicas are still alive. If leader fails, it elects a new 
