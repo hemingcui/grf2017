@@ -304,23 +304,23 @@ becomes a new leader.
 %  unless a tail-tolerance mechanism is triggered 
 % (\S\ref{sec:workflow})
 
-% Hack: use eps to avoid the 1MB terrible ps size.
+% directly save the odp file to eps, level 2.
 \vspace{.1in}
 \begin{figure}[!htb]
 %     \centering
     \begin{minipage}{.48\textwidth}
-        \vspace{-.1in}
+        \vspace{-.3in}
         \includegraphics[width=0.34\textheight]{figures/scheduler_arch.eps}
-         \vspace{-.05in}
+         \vspace{-.35in}
         \caption{The \tripod scheduler architecture. It replicates all Hadoop 
 tasks (\vv{R=3}) for fault-tolerance and runs all MPI tasks as is (\vv{R=1}).}
         \label{fig:scheduler-arch}
     \end{minipage}
     \hspace{0.16in}
     \begin{minipage}{0.48\textwidth}
-        \vspace{-.27in}
+        \vspace{-.32in}
         \includegraphics[width=0.34\textheight]{figures/scheduler_flow.eps}
-        \vspace{-.05in}
+        \vspace{-.4in}
         \caption{The replication-aware resource allocation scheme with four 
 steps (\textbf{S1}$\sim$\textbf{S4}).}
         \label{fig:scheduler-workflow}
@@ -615,6 +615,7 @@ augmented \falcon protocol as \textbf{APUS()}, which returns divergent nodes
 carried in the backup's consensus reply. Fourth, leader transfers divergent 
 pages to the major backup, then they both clear trees and dirty page flags.
 
+% directly save the odp file to eps, level 2.
 \begin{figure}[!htb]
 %     \begin{minipage}{.49\textwidth}
 %         \vspace{-.2in}
@@ -625,16 +626,16 @@ pages to the major backup, then they both clear trees and dirty page flags.
 %         \label{fig:vm-arch}
 %     \end{minipage}
     \begin{minipage}{0.47\textwidth}
-%          \vspace{-.01in}
+        \vspace{-.2in}
         \includegraphics[width=0.33\textheight]{figures/tree.eps}
-        \vspace{-.12in}
+        \vspace{-.3in}
         \caption{Data structures on tracking divergent dirty pages across 
 replicas. Dirty pages are in yellow; divergent dirty pages and parents 
 are in red.}
         \label{fig:vm-tree}
     \end{minipage}
     \begin{minipage}{0.52\textwidth}
-      \vspace{-.1in}
+      \vspace{-.2in}
       \centering
       \begin{algorithm}[H]
       \DontPrintSemicolon
