@@ -441,8 +441,8 @@ schemes that can automatically analyze an application and assign precise \vv{R}
 values to different components. We believe that all these directions will 
 generate new conceptual methods.
 
-\vspace{-.15in}\subsection{Objective 3: building a fault-tolerant VM to improve 
-application availability}\label{sec:vm}\vspace{-.075in}
+\vspace{-.15in}\subsection{Objective 3: building a new fault-tolerant VM 
+replication architecture}\label{sec:vm}\vspace{-.075in}
 
 %% TBD: must emphasis that primary-backup or migration will clean up dirty 
 % % pages after the transfer, otherwise the tree will become bigger and bigger 
@@ -453,14 +453,15 @@ application availability}\label{sec:vm}\vspace{-.075in}
 % because they can provide a virtualized abstraction of computing resources to 
 % different applications and enforce strong utilization isolation and security. 
 
-Primary-backup and live migration are two similar 
-techniques (\S\ref{sec:others-work}) for improving VM fault-tolerance. For 
-instance, after serving every request, the primary-backup technique transfers 
-all memory pages modified by applications (\ie, dirty pages in 4KB) from the 
-primary to backup. This technique consumes 2*\vv{R} resources (\vv{R} denotes 
-the amount of resources consumed by unreplicated execution). The transfered 
-dirty bytes can be up to 1.7GB (\S\ref{sec:tracking}), causing a substantial  
-delay and network bandwidth consumption for every request.
+Existing VM fault-tolerance architectures are based on two similar 
+techniques: primary-backup and live migration (\S\ref{sec:others-work}). For 
+instance, after processing every request, the primary-backup technique 
+transfers all memory pages modified by applications (\ie, dirty pages in 4KB) 
+from the primary to backup. This technique consumes 2*\vv{R} resources (\vv{R} 
+denotes the resources consumed by an unreplicated execution). Although these 
+two techniques are adopted by industry~\cite{ftvm}, an open problem is that the 
+transfered dirty bytes can be up to 1.7GB (\S\ref{sec:tracking}), causing a 
+substantial  delay and network bandwidth consumption for \emph{every} request.
 
 A key reason for this problem is that existing techniques have only one actual 
 application execution. We will use \falcon to tackle this problem as it 
@@ -500,7 +501,8 @@ transfer.
 % computer incur big resource consumption. This is contraditive to the motivation 
 % of migration: reduing computer loads on the local computer.
 
-\vspace{-.15in}\subsubsection{Integrating \falcon with KVM} 
+\vspace{-.15in}\subsubsection{Integrating \falcon into the KVM hypervisor 
+layer} 
 \label{sec:vm-arch}\vspace{-.075in}
 
 % \begin{figure}[!htb]
@@ -520,27 +522,34 @@ transfer.
 
 
 
-We propose a new fault-tolerant VM by integrating \falcon into the hypervisor 
-layer of popular VMs. Specifically, we choose the popular KVM~\cite{kvm} for 
-three main reasons. First, KVM is an open source hypervisor in Linux. 
-Second, it provides \vv{tap\_send()}, an input capturing API in its hypervisor. 
-This API allows \falcon to intercept network inputs on the leader VM and 
-transparently replicates them on backup VMs. Third, this KVM API runs in 
-user-space, which allows RDMA to work (RDMA runs in user-space).
+% We will inte \falcon 
+% into the hypervisor layer of popular VMs. 
+We choose KVM~\cite{kvm} as our base VM for two main reasons. First, KVM 
+is a mature, open source hypervisor in Linux. Second, it provides 
+\vv{tap\_send()}, an input capturing API in its hypervisor. This API allows 
+\falcon to intercept network inputs on the leader VM and transparently 
+replicates them on backup VMs.
+% Third, this KVM API runs in 
+% user-space, which allows RDMA to work (RDMA runs in user-space).
 
 %% Consume same resources as primary-backup.
-We proactively design our VM to achieve same 2*\vv{R} resource consumption as 
-existing VM fault-tolerance techniques. Although \paxos 
-normally consumes 3*\vv{R} resources, our VM design reduces this consumption 
-by letting one backup act as the \emph{major backup} with a high priority to 
-become a new leader if current leader fails. The major backup agrees on and 
-executes input requests, while the other backup acts as the \emph{standby 
-backup} which only agrees on requests without executing them. The major backup 
-periodically checkpoints application states and send them to the 
-standby backup. Checkpoints do not affect performance because the leader and 
-the standby backup still form a majority and agree on requests rapidly. Even if 
-the standby backup is elected a new leader, it extracts checkpoints and 
-uses the agreed inputs to catch up with old leader quickly.
+We proactively design our VM replication architecture to maintain same 2*\vv{R} 
+resource consumption as existing VM fault-tolerance techniques. Although \paxos 
+consumes 3*\vv{R} resources, our VM design reduces this consumption by letting 
+one backup act as the \emph{major backup} with a high priority to become a new 
+leader if current leader fails. The major backup agrees on and executes input 
+requests, and the other backup acts as the \emph{standby backup} which only 
+agrees on requests without executing them (\ie, without consuming \vv{R} 
+resources). In total, 2*\vv{R} resources are consumed by the leader and major 
+backup in our VM. To maintain the same fault-tolerance guarantee as \paxos (\ie, 
+to in case the standby backup being elected a leader), the major backup 
+periodically does a standard checkpoint operation as in existing 
+works~\cite{crane:sosp15,rex:eurosys14} and send it to the standby backup. 
+Although a checkpoint operation will slow down the major backup, it does not 
+affect our performance because the leader and standby backup still form a 
+majority and agree on requests rapidly.
+% Therefore, even if the standby backup is elected a new leader, it extracts 
+% checkpoints and uses the agreed inputs to catch up with old leader quickly.
 
 % If the leader 
 % fails, \falcon gives the major backup a high priority to become the new leader.
@@ -566,11 +575,11 @@ track divergent pages across VM replicas}
 
 
 
-Although our fault-tolerant VM has enforced same inputs across VM replicas, 
+Although our VM architecture enforces same inputs across VM replicas, 
 minor memory pages may still diverge across replicas (\eg, due to 
 data races~\cite{lu:concurrency-bugs}). We propose a synchronization 
 technique to efficiently track and transfer divergent pages, including (1) 
-an efficient \vv{log(N)} algorithm to track divergent pages, and (2) 
+an efficient \vv{O(log N)} algorithm to track divergent pages, and (2) 
 leveraging \falcon's RDMA-powered protocol to efficiently and reliably compare 
 divergent pages.
 
@@ -584,10 +593,10 @@ parents. This tree is efficient because if the roots of two trees
 have same hash, all leaves (pages) are the same.
 
 % Three steps.
-However, our VM design poses a new interesting challenge: unlike previous works 
-that tree leaves are static (\eg, Eve~\cite{eve:osdi12} treats static global 
-variables in application code as leaves), the leaves in our trees are dynamic 
-as they are dirty pages. Because dirty pages across replicas can be 
+However, our VM architecture poses a new interesting challenge: unlike 
+previous works that tree leaves are static (\eg, Eve~\cite{eve:osdi12} treats 
+static global variables in application code as leaves), the leaves in our trees 
+are dynamic as they are dirty pages. Because dirty pages across replicas can be 
 different, the structures (\ie, the number of internal nodes) of Merkle trees 
 between two replicas can be different and hard to compare.
 
@@ -599,7 +608,7 @@ and sends back to leader. Second, both leader and the major backup do
 a tree adjustment with the union bitmap (\eg, a non-dirty page in the union is 
 still appended to the tree), then leader and the backup's trees have same leaves 
 and same structure. Third, leader invokes \textbf{Algorithm 1} to do a 
-\vv{log(N)} traversal from tree root to find divergent leaves. To compare 
+\vv{O(log N)} traversal from tree root to find divergent leaves. To compare 
 internal node hashes between leader and backup, the algorithm invokes an 
 augmented \falcon protocol as \textbf{APUS()}, which returns divergent nodes 
 carried in the backup's consensus reply. Fourth, leader transfers divergent 
@@ -616,7 +625,7 @@ pages to the major backup, then they both clear trees and dirty page flags.
 %     \end{minipage}
     \begin{minipage}{0.47\textwidth}
         \vspace{-.15in}
-        \includegraphics[width=0.34\textheight]{figures/tree.ps}
+        \includegraphics[width=0.3365\textheight]{figures/tree.ps}
         \vspace{-.5in}
         \caption{Data structures on tracking divergent dirty pages across 
 replicas. Dirty pages are in yellow; divergent dirty pages and parents 
