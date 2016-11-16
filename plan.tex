@@ -283,7 +283,7 @@ application can assign different \vv{R} values to tasks when it submits them
 to \tripod's leader controller.
 
 It is often easy for an application to determine which computation tasks 
-require high availability and thus a bigger \vv{R} value. For instance, 
+are essential and thus require a bigger \vv{R} value. For instance, 
 Alluxio~\cite{alluxio}, a distributed storage application ran in \mesos, has 
 an essential manager component to manage storages across computers. When 
 running in our \tripod scheduler, Alluxio can just assign \vv{R=3} to the 
