@@ -198,7 +198,7 @@ faster than \dare by up to \fasterDARE.
 
 
 
-\para{Future work.} We will further improve \falcon's practicality in two 
+\para{Future work.} We will further improve the practicality of \falcon in two 
 dimensions. First, we will extensively evaluate its performance on broad 
 latency-critical applications using diverse input workloads. Second, we will 
 further torture its scalability on at least 10X more replicas and concurrent 
@@ -300,8 +300,8 @@ Hadoop~\cite{hadoop} tasks with \vv{R=3}. Suppose Hadoop submits two tasks to
 The leader controller then invokes a consensus on each task across controllers. 
 Once a consensus is reached, each controller assigns the same task on different 
 slave computers. The leader controller directly returns its computation result 
-to the Hadoop application. A standby controller ignores computation results 
-unless it becomes a new leader.
+to Hadoop. A standby controller ignores computation results until it becomes a 
+new leader.
 %  unless a tail-tolerance mechanism is triggered 
 % (\S\ref{sec:workflow})
 
