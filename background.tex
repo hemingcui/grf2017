@@ -17,10 +17,10 @@ including fault-tolerance~\cite{eve:osdi12,rex:eurosys14,crane:sosp15},
 leader election~\cite{zookeeper, chubby:osdi}, and ordering 
 services~\cite{ellis:thesis,manos:hotdep10,scatter:sosp11}. \paxos
 replicates the same application on a group of computers (or \emph{replicas}) 
-and enforces same inputs for this application, as long as a quorum (typically, 
-majority) of replicas work normally. If leader fails, it elects a new 
-leader~\cite{paxos:practical}. Therefore, \paxos tolerates various faults (\eg, 
-minor replica failures and packet losses). 
+and always enforces same inputs for this application across replicas, as long 
+as a quorum (typically, majority) of replicas still work normally. Therefore, 
+\paxos tolerates various types of faults (\eg, minor replica failures and packet 
+loss).
 
 % \paxos is widely used in many systems. For instance, 
 % Scatter~\cite{scatter:sosp11} runs 8$\sim$12 replicas in a

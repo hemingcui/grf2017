@@ -44,9 +44,11 @@ protocols are slow and unscalable}
 % consensus latency makes many software applications suffer. 
 For efficiency, \paxos (\S\ref{sec:consensus}) typically assigns one replica as 
 the leader to propose consensus requests, and the other replicas as backups to 
-agree on requests. To agree on an input, at least one message round-trip is 
-required between the leader and a backup. A round-trip causes big latency 
-(hundreds of \us) as it goes through various software layers (\eg, OS kernels).
+agree on requests. If leader fails, \paxos elects a new 
+leader~\cite{paxos:practical}. To agree on an input, at least one message 
+round-trip is required between the leader and a backup. A round-trip causes big 
+latency (hundreds of \us) as it goes through various software layers (\eg, OS 
+kernels).
 
 % This 
 % latency may be acceptable for leader election~\cite{chubby:osdi,zookeeper} or 
