@@ -279,15 +279,15 @@ application perspective, this figure shows two applications, Hadoop and MPI.
 Each task has a \emph{replica strength} (\vv{R}) to denote the level of 
 fault-tolerance it demands. This \vv{R} value is either 1 (default, no 
 replication) or no more than the number of controllers in \tripod. An 
-application can assign other \vv{R} numbers to a task when it submits this task 
-to \tripod.
+application can assign different \vv{R} values to tasks when it submits them 
+to \tripod's leader controller.
 
 It is often easy for an application to determine which computation tasks 
 require high availability and thus a bigger \vv{R} value. For instance, 
 Alluxio~\cite{alluxio}, a distributed storage application ran in \mesos, has 
 an essential manager component to manage storages across computers. When 
 running in our \tripod scheduler, Alluxio can just assign \vv{R=3} to the 
-launching task of this manager.
+launching task of its manager.
 
 % By default, each application has \vv{R=1}, which means that this application 
 % does not need replication. For such a default setting, \tripod runs the job as 
@@ -298,8 +298,8 @@ tasks with \vv{R=3}. Suppose Hadoop submits two tasks to \tripod's leader
 controller, each has different shapes (triangle or hexagon). The leader 
 controller then invokes a consensus on each task across controllers. Once a 
 consensus is reached, each controller assigns the same task on different slave 
-machines. The leader directly returns its computation result to the 
-Hadoop scheduler. A standby controller ignores computation results unless it 
+computers. The leader controller directly returns its computation result to the 
+Hadoop application. A standby controller ignores computation results unless it 
 becomes a new leader.
 %  unless a tail-tolerance mechanism is triggered 
 % (\S\ref{sec:workflow})
