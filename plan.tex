@@ -293,14 +293,14 @@ launching task of its manager.
 % does not need replication. For such a default setting, \tripod runs the job as 
 % is without replication, like a typical cluster management system (\eg, Mesos).
 
-Figure~\ref{fig:scheduler-arch} shows an example of replicating all Hadoop 
-tasks with \vv{R=3}. Suppose Hadoop submits two tasks to \tripod's leader 
-controller, each has different shapes (triangle or hexagon). The leader 
-controller then invokes a consensus on each task across controllers. Once a 
-consensus is reached, each controller assigns the same task on different slave 
-computers. The leader controller directly returns its computation result to the 
-Hadoop application. A standby controller ignores computation results unless it 
-becomes a new leader.
+Figure~\ref{fig:scheduler-arch} shows an example of replicating all 
+Hadoop~\cite{hadoop} tasks with \vv{R=3}. Suppose Hadoop submits two tasks to 
+\tripod's leader controller, each has different shapes (triangle or hexagon). 
+The leader controller then invokes a consensus on each task across controllers. 
+Once a consensus is reached, each controller assigns the same task on different 
+slave computers. The leader controller directly returns its computation result 
+to the Hadoop application. A standby controller ignores computation results 
+unless it becomes a new leader.
 %  unless a tail-tolerance mechanism is triggered 
 % (\S\ref{sec:workflow})
 
@@ -312,8 +312,9 @@ becomes a new leader.
         \vspace{-.3in}
         \includegraphics[width=0.34\textheight]{figures/scheduler_arch.eps}
          \vspace{-.4in}
-        \caption{The \tripod scheduler architecture. It replicates all Hadoop 
-tasks (\vv{R=3}) for fault-tolerance and runs all MPI tasks as is (\vv{R=1}).}
+        \caption{\tripod scheduler architecture. It replicates all 
+Hadoop~\cite{hadoop} tasks (\vv{R=3}) for fault-tolerance and runs all 
+MPI~\cite{mpi} tasks as is (\vv{R=1}).}
         \label{fig:scheduler-arch}
     \end{minipage}
     \hspace{0.16in}
