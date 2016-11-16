@@ -680,14 +680,14 @@ $i$.right()) \;
     \vspace{-.1in}
 \end{figure}
 
-To check whether divergent pages are rare, we ran three applications, 
+To see whether divergent pages are indeed rare, we ran three applications, 
 MongoDB~\cite{mongodb}, Redis~\cite{redis}, and Memcached~\cite{memcached}, on 
 two KVMs with same real-world workloads~\cite{ycsb}. We 
 found 261.1K$\sim$429K dirty pages (\ie, up to 1.7GB). Primary-backup 
-techniques have to transfer all dirty pages from primary to backup. We also 
-found that only 14.2$\sim$29.3K of these dirty pages diverged between two VMs. 
-These initial results imply that \textbf{Algorithm 1} can reduce up to 96.7\% 
-transfered pages compared to primary-backup techniques.
+techniques have to transfer all dirty pages. We also found that only 
+14.2$\sim$29.3K of these dirty pages diverged between two VMs. These initial 
+results imply that \textbf{Algorithm 1} can reduce up to 96.7\% transfered pages 
+compared to primary-backup techniques.
 
 % To do this, each replica 
 % maintains a Merkle tree kept 
@@ -775,14 +775,13 @@ transfered pages compared to primary-backup techniques.
 
 \para{Future directions.} We anticipate broad research outcomes in two 
 directions. First, we will implement our algorithm and quantify its performance 
-improvement compared to existing VM primary-backup 
-techniques (\eg, vSphere~\cite{ftvm}). Second, we will apply the 
-algorithm to develop new lightweight VM live migration techniques 
-(\S\ref{sec:others-work}). Because VM primary-backup and migration techniques 
-are applied to address broad challenges (\eg, improving resource utilization, 
-balancing computer loads, and saving datacenter energy), applications of our 
-techniques on these challenges will cultivate even broader innovative 
-techniques.
+improvement compared to existing primary-backup techniques (\eg, 
+vSphere~\cite{ftvm}). Second, we will apply the algorithm to develop new 
+lightweight VM live migration techniques (\S\ref{sec:others-work}). Because VM 
+primary-backup and migration techniques are applied to address broad challenges 
+(\eg, improving resource utilization, balancing computer loads, and saving 
+datacenter energy), applications of our techniques on these challenges will 
+cultivate even broader innovative techniques.
 
 
 % % TBD: need a new replication approach name.
