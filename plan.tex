@@ -142,16 +142,18 @@ consensus coordinator and an output checker (both are built on the algorithm),
 an in-memory consensus log, and a guard that handles application checkpoints 
 and recovery.
 
-Figure~\ref{fig:falcon-protocol} depicts \falcon's consensus algorithm in 
-normal case. The leader first executes the actual inbound socket call 
-(\textbf{L1}, not shown) to get actual inputs, it then invokes consensus across 
-replicas. All solid arrows (\textbf{L3}, \textbf{B2}) are one-sided RDMA WRITEs 
-(\S\ref{sec:consensus}) to remote replicas' memory. All replicas poll from their 
-own bare memory to receive consensus messages. To handle replica failures, all 
-replicas store inputs to local SSD (\textbf{L2}, \textbf{B1}). For these WRITEs, 
-sending replicas need only copy data to local RDMA NIC and WRITEs return, so
-\falcon is scalable to consensus group size. In abnormal (rare) case, \falcon 
-uses an existing algorithm~\cite{paxos:practical}.
+Figure~\ref{fig:falcon-protocol} depicts our algorithm in normal case: the 
+leader has four steps (\textbf{L1}$\sim$\textbf{L4}), and each backup has two 
+steps (\textbf{B1}$\sim$\textbf{B2}). Leader first executes the actual inbound 
+socket call (\textbf{L1}, not shown) to get actual inputs, it then invokes 
+consensus across replicas. All solid arrows (\textbf{L3}, \textbf{B2}) are 
+one-sided RDMA WRITEs (\S\ref{sec:consensus}) to remote replicas' memory. All 
+replicas poll from their own bare memory to receive consensus messages. To 
+handle replica failures, all replicas store inputs to local SSD (\textbf{L2}, 
+\textbf{B1}). For these WRITEs, sending replicas need only copy data to local 
+RDMA NIC and WRITEs return, so \falcon is scalable to replica group size. In 
+abnormal cases (\eg, the leader fails), \falcon uses an existing 
+algorithm~\cite{paxos:practical} to elect a new leader.
 
 % Three figures. First, falcon arch. Second, consensus protocol. Third, falcon 
 % results compared to traditional ones and DARE.
@@ -239,9 +241,8 @@ architecture}
 
 % ,\footnote{We name our system after 
 % the ancient Chinese three-legged tripod, a reliable, multi-purpose container.}
-This section proposes the design of \tripod, a scheduler infrastructure that 
-can replicate all or essential computations of a general application. 
-\tripod is formed by a widely used scheduler \mesos~\cite{mesos:nsdi11} and 
+\tripod replicates all or essential computations of an application. 
+It is formed by a widely used scheduler \mesos~\cite{mesos:nsdi11} and 
 \falcon (\textbf{Objective 1}). To avoid the two aforementioned issues 
 (\S\ref{sec:scheduler}), \tripod's design integrates \paxos in a scheduler, 
 not in applications. To achieve high application availability, unlike existing 
