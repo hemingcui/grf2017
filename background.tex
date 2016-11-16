@@ -36,16 +36,16 @@ kernels and software TCP/IP layers (a \vv{ping} round-trip takes about 200 \us
 in a 10Gbps network). \S\ref{sec:latency-problem} presents this problem in 
 detail.
 
-Recently, as Remote Direct Memory Access (RDMA) becomes popular in datacenter 
-networks (\eg, Infiniband~\cite{infiniband}), it becomes a promising solution 
-to address the \paxos performance challenge. A fastest type of RDMA operations 
-called ``one-sided RDMA writes" (for short, \emph{WRITE} in the rest of this 
-proposal) round-trip takes only about 3 \us~\cite{pilaf:usenix14}, because it 
-allows a local computer to directly writes to a remote computer's memory 
-without involving OS kernel or CPU on the remote computer. This ultra low 
-latency not only comes from its kernel bypassing feature, but also its 
-dedicated network stack implemented in hardware. Therefore, RDMA is considered 
-the fastest kernel bypassing 
+Recently, as Remote Direct Memory Access (RDMA) networks (\eg, 
+Infiniband~\cite{infiniband}) becomes popular within a datacenter, 
+RDMA becomes a promising solution to address the \paxos performance challenge. 
+A fastest type of RDMA operations called ``one-sided RDMA writes" (for short, 
+\emph{WRITE} in the rest of this proposal) round-trip takes only about 3 
+\us~\cite{pilaf:usenix14}, because it allows a local computer to directly 
+writes to a remote computer's memory without involving OS kernel or CPU on the 
+remote computer. This ultra low latency not only comes from its kernel 
+bypassing feature, but also its dedicated network stack implemented in 
+hardware. Therefore, RDMA is considered the fastest kernel bypassing 
 technique~\cite{herd:sigcomm14,pilaf:usenix14,dare:hpdc15}; it is several times 
 faster than software-only kernel bypassing techniques (\eg, 
 DPDK~\cite{dpdk} and Arrakis~\cite{arrakis:osdi14}).
