@@ -335,10 +335,10 @@ steps (\textbf{S1}$\sim$\textbf{S4}).}
 
 Figure~\ref{fig:scheduler-workflow} shows the design of \tripod's scheme on 
 scheduling tasks with four steps. This scheme is similar to that in \mesos 
-except the second and fourth steps. These two steps \tripod abstract away the 
-replication logic in its resource offers and allocations from the application. 
+except the second and fourth steps. In these two steps, \tripod embeds the 
+replication logic in its resource offers and allocations for the application. 
 An application runs as if \xxx does not replicate any of its tasks, and \tripod 
-transparently handles all the replication logic.
+transparently handles the replication logic.
 
 In the first step (\textbf{S1}), slave machines periodically report their 
 available computing resources (\eg, CPU cores and memory) to the leader 
