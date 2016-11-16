@@ -413,11 +413,12 @@ worthwhile on improving application availability.
 
 
 \para{Preliminary results.} We presented an early prototype of \tripod
-in~\cite{tripod:apsys16}. To evaluate a typical social-networking application, 
-we ran \tripod with \memcached~\cite{memcached}, a popular key-value store used 
-by Twitter and financial platforms~\cite{nosql:finance}. Compared to 
-\memcached's unreplicated execution, \tripod incurred merely a \tputoverhead 
-overhead in throughput and \latencyoverhead in response time.
+in APSys 2016~\cite{tripod:apsys16}. To evaluate a typical social-networking 
+application, we ran \tripod with \redis~\cite{redis}, a key-value store used by 
+Twitter and financial platforms~\cite{nosql:finance}. Although \redis is a 
+latency-critical application, compared to its own unreplicated execution, 
+\tripod incurred merely \tputoverhead overhead in throughput and 
+\latencyoverhead in response time for \redis.
 % This protocol was 40.1X faster than \zookeeper, a traditional replication
 % protocol~\cite{calvin:sigmod12} which runs on TCP/IP.
 
