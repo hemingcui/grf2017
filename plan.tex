@@ -180,14 +180,15 @@ latency.}
 \para{Preliminary results.} We developed an \falcon initial prototype in two 
 phases. First, to support unmodified applications, we implemented its 
 socket-intercepting runtime system, presented in SOSP 2015~\cite{crane:sosp15}. 
-\falcon was able to support five widely used server applications (\eg, \mysql) 
+\falcon was able to support 5 widely used server applications (\eg, \mysql) 
 without modifying them. Second, recently we implemented its RDMA-powered 
 consensus algorithm on a 40Gbps RDMA network. Figure~\ref{fig:scalability} 
-shows \falcon performance with 5 existing consensus protocols. To analyze the 
-scalability of our algorithm, we ran \falcon and \dare on up to 105 replicas. 
-\falcon's consensus latency outperforms 4 traditional \paxos  protocols by 
-\comptradlow to \comptradhigh on 3 to 9 replicas. \falcon is  faster than \dare 
-by up to \fasterDARE.
+shows \falcon performance with 5 existing consensus 
+protocols~\cite{crane:sosp15, libpaxos, zookeeper, spaxos:srds12, dare:hpdc15}. 
+To analyze the scalability of our algorithm, we ran \falcon and \dare on up to 
+105 replicas. \falcon's consensus latency outperforms 4 traditional \paxos  
+protocols by \comptradlow to \comptradhigh on 3 to 9 replicas. \falcon is  
+faster than \dare by up to \fasterDARE.
 % When changing the replica group size 
 % from 3 to 105 (a 35x increase), \falcon's consensus latency increases merely 
 % from \xxxlatencythree \us to \xxxlatencyonezerofive \us (a \xxxscalability, 
