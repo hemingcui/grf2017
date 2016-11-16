@@ -135,12 +135,12 @@ protocol and its runtime system. Figure~\ref{fig:falcon-arch} shows \falcon's
 architecture. It is designed to support unmodified applications. Its runtime 
 system will automatically deploy the same application on multiple replicas, 
 intercept the application's network inputs from its inbound socket calls (\eg, 
-\recv) with a Linux technique called LD\_PRELOAD, and invoke a RDMA-powered 
-algorithm (Figure~\ref{fig:falcon-protocol}) to enforce same network inputs 
-across replicas. \falcon architecture has four key components: an input 
-consensus coordinator and an output checker (both are built on the algorithm), 
-an in-memory consensus log, and a guard that handles application checkpoints 
-and recovery.
+\recv) with a Linux technique called LD\_PRELOAD, and invoke a 
+fast, RDMA-powered algorithm (Figure~\ref{fig:falcon-protocol}) to enforce same 
+network inputs across replicas. \falcon architecture has four key components: an 
+input consensus coordinator and an output checker (both are built on the 
+algorithm), an in-memory consensus log, and a guard that handles application 
+checkpoints and recovery.
 
 Figure~\ref{fig:falcon-protocol} depicts our algorithm in normal case: the 
 leader has four steps (\textbf{L1}$\sim$\textbf{L4}), and each backup has two 
