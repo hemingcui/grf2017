@@ -112,14 +112,14 @@ pattern.
     \begin{minipage}{.48\textwidth}    
         \vspace{-.15in}
         \includegraphics[width=0.31\textheight]{figures/arch.ps}
-        \vspace{-.35in}         
+        \vspace{-.3in}         
         \caption{The \falcon protocol architecture. Protocol components are 
 shaded (and in blue color).}
         \label{fig:falcon-arch}
     \end{minipage}
     \centering
     \begin{minipage}{0.48\textwidth}
-        \vspace{-.2in}
+        \vspace{-.17in}
         \includegraphics[width=0.34\textheight]{figures/consensus.ps}
         \vspace{-.32in}
         \caption{RDMA-powered consensus algorithm.}
@@ -144,12 +144,12 @@ and recovery.
 
 Figure~\ref{fig:falcon-protocol} depicts \falcon's consensus algorithm in 
 normal case. The leader first executes the actual inbound socket call 
-(\textbf{L1}, now shown) to get actual inputs, it then invokes consensus across 
-replicas. All solid arrows (\textbf{L3}, \textbf{B2}) are direct RDMA writes 
-to remote replicas' memory. All replicas poll from their own bare memory to 
-receive consensus messages. To handle replica failures, all replicas store 
-inputs to local SSD (\textbf{L2}, \textbf{B1}). For these WRITEs, sending 
-replicas need only copy data to local RDMA NIC and the WRITEs finish, 
+(\textbf{L1}, not shown) to get actual inputs, it then invokes consensus across 
+replicas. All solid arrows (\textbf{L3}, \textbf{B2}) are one-sided RDMA WRITEs 
+(\S\ref{sec:consensus}) to remote replicas' memory. All replicas poll from their 
+own bare memory to receive consensus messages. To handle replica failures, all 
+replicas store inputs to local SSD (\textbf{L2}, \textbf{B1}). For these WRITEs, 
+sending replicas need only copy data to local RDMA NIC and WRITEs return, so
 \falcon is scalable to consensus group size. In abnormal (rare) case, \falcon 
 uses an existing algorithm~\cite{paxos:practical}.
 
@@ -177,17 +177,17 @@ latency.}
 %         \label{fig:scalability}
 % \end{figure}
 
-\para{Preliminary results.} We developed a \falcon initial prototype in two 
+\para{Preliminary results.} We developed an \falcon initial prototype in two 
 phases. First, to support unmodified applications, we implemented its 
 socket-intercepting runtime system, presented in SOSP 2015~\cite{crane:sosp15}. 
 \falcon was able to support five widely used server applications (\eg, \mysql) 
-without modifying them. Second, we implemented its RDMA-powered consensus 
-algorithm on a 40Gbps RDMA network. Figure~\ref{fig:scalability} shows \falcon 
-performance with 5 existing consensus protocols. To analyze the scalability
-of our algorithm, we ran \falcon and \dare on up to 105 replicas. \falcon's 
-consensus latency outperforms 4 popular \paxos  protocols by \comptradlow to 
-\comptradhigh on 3 to 9 replicas. \falcon is  faster than \dare by up to 
-\fasterDARE.
+without modifying them. Second, recently we implemented its RDMA-powered 
+consensus algorithm on a 40Gbps RDMA network. Figure~\ref{fig:scalability} 
+shows \falcon performance with 5 existing consensus protocols. To analyze the 
+scalability of our algorithm, we ran \falcon and \dare on up to 105 replicas. 
+\falcon's consensus latency outperforms 4 traditional \paxos  protocols by 
+\comptradlow to \comptradhigh on 3 to 9 replicas. \falcon is  faster than \dare 
+by up to \fasterDARE.
 % When changing the replica group size 
 % from 3 to 105 (a 35x increase), \falcon's consensus latency increases merely 
 % from \xxxlatencythree \us to \xxxlatencyonezerofive \us (a \xxxscalability, 
@@ -198,10 +198,10 @@ consensus latency outperforms 4 popular \paxos  protocols by \comptradlow to
 
 
 \para{Future work.} We will further improve \falcon's practicality in two 
-dimensions. First, we will evaluate its performance on broad latency-critical 
-applications using diverse input workloads. Second, we will further torture its 
-scalability on at least 10X more replicas, identify its scalability 
-bottleneck, and refine our algorithm. 
+dimensions. First, we will extensively evaluate its performance on broad 
+latency-critical applications using diverse input workloads. Second, we will 
+further torture its scalability on at least 10X more replicas and concurrent 
+clients, identify its scalability bottleneck, and refine our algorithm. 
 
 \vspace{-.15in}\subsection{Objective 2: 
 building a fault-tolerant scheduler to improve 

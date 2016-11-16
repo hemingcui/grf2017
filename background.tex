@@ -4,7 +4,8 @@
 This section presents the background of consensus (\S\ref{sec:consensus}) and 
 datacenter computing infrastructures (\S\ref{sec:datacenter}), motivation of 
 objectives (\S\ref{sec:motivation}), others' related work 
-(\S\ref{sec:others-work}), and PI's related work (\S\ref{sec:my-work}).
+(\S\ref{sec:others-work}), and the PI and co-I's related work 
+(\S\ref{sec:my-work}).
 
 \vspace{-.15in}\subsection{\paxos: tolerating single point of failures} 
 \label{sec:consensus}\vspace{-.075in}
@@ -52,7 +53,7 @@ DPDK~\cite{dpdk} and Arrakis~\cite{arrakis:osdi14}).
 \vspace{-.15in}\subsection{Datacenter computing infrastructures}
 \label{sec:datacenter}\vspace{-.075in}
 
-More and more applications are ran in a datacenter by two 
+More and more applications are run in a datacenter by two 
 independent types of infrastructures. The first type is 
 schedulers~\cite{borg:eurosys15,mesos:nsdi11,tupperware, yarn:socc13, 
 autopilot:sosp07,quincy:sosp09,apollo:osdi14,fuxi:vldb14}. Although existing 
@@ -78,8 +79,8 @@ applications across VM replications.
 
 These two infrastructures usually work independently depending on 
 runtime trade-off such as performance or security isolation. Some applications 
-are ran solely by schedulers (e.g., Mesos~\cite{mesos:nsdi11} usually uses 
-lightweight Linux containers, not VMs), and some other applications are ran 
+are run solely by schedulers (e.g., Mesos~\cite{mesos:nsdi11} usually uses 
+lightweight Linux containers, not VMs), and some other applications are run 
 solely by VMs (e.g., Amazon EC2). Therefore, this proposal strengthens the 
 two infrastructures respectively. If people need to run an application with 
 both infrastructures, they can choose either infrastructure developed from 
@@ -121,7 +122,7 @@ our \tripod scheduler (\S\ref{sec:scheduler-arch}) and VMWare~\cite{esx:osdi02}.
 The objectives of \xxx\footnote{Gaia is an ancient Greek goddess who takes good 
 care of everything on earth, including software applications.} stem from two 
 research problems in datacenter computing. First, despite the core role and 
-wide deployments of \paxos, it suffers from high consensus latency. Therefore, 
+good deployments of \paxos, it suffers from high consensus latency. Therefore, 
 \textbf{Objective 1} addresses this problem by leveraging RDMA to create a 
 fast consensus algorithm and implementation protocol. Second, although many 
 mission-critical applications demand stringent availability, existing 
@@ -182,10 +183,10 @@ migration~\cite{vmotion:atc05,xen:migration:nsdi05}, exist for improving
 application reliability in VM. Primary-backup (\eg, vSphere~\cite{ftvm})
 uses the hypervisor on a primary VM to track memory pages modified by 
 applications, it then transfers these pages to a backup VM. Live migration 
-uses a similar technique as primary-backup. Both techniques are used to improve 
-computer load balance and consolidating many VMs on fewer computers to save 
-datacenter energy. A common problem in the two techniques is that they incur 
-substantial application downtime (\eg, 8 seconds in 
+uses a similar technique as primary-backup. These techniques can be used to 
+improve computer load balance and consolidating many VMs on fewer computers to 
+save datacenter energy. A common problem in the two techniques is that they 
+incur substantial application downtime (\eg, 8 seconds in 
 vMotion~\cite{vmotion:atc05}) and network bandwidth during the memory transfer. 
 \textbf{Objective 3} (\S\ref{sec:vm}) will greatly mitigate this problem.
 
