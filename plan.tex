@@ -463,10 +463,10 @@ instance, after processing every request, the primary-backup technique
 transfers all memory pages modified by applications (\ie, dirty pages in 4KB) 
 from the primary to backup. This technique consumes 2*\vv{V} resources (\vv{V} 
 denotes resource volumn consumed by an unreplicated execution). Although 
-these two techniques are adopted by industry~\cite{ftvm}, an open problem is 
-that the transfered dirty bytes can be up to 1.7GB (\S\ref{sec:tracking}), 
-causing a substantial  delay and network bandwidth consumption for \emph{every} 
-request.
+these two techniques are adopted by industry~\cite{ftvm,vmotion:atc05}, a major 
+problem is that the transfered dirty bytes can be up to 1.7GB 
+(\S\ref{sec:tracking}), causing a substantial  delay and network bandwidth 
+consumption for \emph{every} request.
 
 A key reason for this problem is that existing techniques have only one real 
 application execution. We will use \falcon (\textbf{Objective 1}) to tackle 
@@ -540,7 +540,7 @@ replicates them on backup VMs.
 %% Consume same resources as primary-backup.
 We proactively design our VM replication architecture to maintain same 2*\vv{V} 
 resource consumption as existing VM fault-tolerance techniques. Although \paxos 
-consumes 3*\vv{V} resources, our VM design reduces this consumption by letting 
+consumes 3*\vv{V} resources, our design reduces \vv{V} resources by letting 
 one backup act as the \emph{major backup} with a high priority to become a new 
 leader if current leader fails. The major backup agrees on and executes input 
 requests, and the other backup acts as the \emph{standby backup} which only 
@@ -549,7 +549,7 @@ resources). In total, 2*\vv{V} resources are consumed by the leader and major
 backup in our VM. To maintain the same fault-tolerance guarantee as \paxos (\ie, 
 to in case the standby backup being elected a leader), the major backup 
 periodically does a standard checkpoint operation as in existing 
-works~\cite{crane:sosp15,rex:eurosys14} and send it to the standby backup. 
+works~\cite{crane:sosp15,rex:eurosys14} and sends it to the standby backup. 
 Although a checkpoint operation will slow down the major backup, it does not 
 affect our performance because the leader and standby backup still form a 
 majority and agree on requests rapidly.
