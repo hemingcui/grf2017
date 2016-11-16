@@ -209,11 +209,11 @@ application availability}\label{sec:scheduler}\vspace{-.075in}
 
 Many existing schedulers have adopted \paxos to improve availability for 
 themselves. Typically, a scheduler use \paxos to replicate its essential 
-components such as a controller, which handles scheduling computation tasks 
-to run on resources. In normal case, only one leading controller does the real 
-work, and the other controllers act as backup to handle the leader's failure. 
-Unfortunately, most applications running by schedulers have not been made 
-highly-available (although individual applications carry a replication 
+components such as a \emph{controller}, which handles scheduling computation 
+tasks to run on resources. In normal case, only one leading controller does the 
+real work, and the other controllers act as backups to in case the leader's 
+failure. Unfortunately, most applications run by schedulers have not been 
+made highly-available (although individual applications carry a replication 
 approach~\cite{mapreduce,dolly:nsdi13}).
 
 A straw-man approach to achieve high application availability could be 
@@ -225,12 +225,12 @@ paxos:live}, or test~\cite{modist:nsdi09,demeter:sosp11}. Developing a
 nightmare~\cite{modist:nsdi09,demeter:sosp11,paxos:live} for application 
 developers.
 
-The second issue is, the scheduler can be conflicting with \paxos due to 
-unawareness of the application's \paxos replication logic. For instance, if an 
-application submits multiple replications of the same computation task to the 
-scheduler, the scheduler may incorrectly schedule several replications on the 
-same computer (it should schedule each copy on different computers to achieve 
-\paxos fault-tolerance).
+The second issue is, schedulers can be conflicting with \paxos due to 
+unawareness of an application's \paxos replication scheme. For instance, if an 
+application submits multiple replications of the same computation task, a 
+scheduler, which abstracts away computer identity, may incorrectly schedule 
+some replications on the same computer (it must schedule each replication 
+on different computers for \paxos fault-tolerance).
 
 \vspace{-.15in}\subsubsection{\tripod: a first fault-tolerant scheduler 
 architecture} 
@@ -458,11 +458,12 @@ Existing VM fault-tolerance architectures are based on two similar
 techniques: primary-backup and live migration (\S\ref{sec:others-work}). For 
 instance, after processing every request, the primary-backup technique 
 transfers all memory pages modified by applications (\ie, dirty pages in 4KB) 
-from the primary to backup. This technique consumes 2*\vv{R} resources (\vv{R} 
-denotes the resources consumed by an unreplicated execution). Although these 
-two techniques are adopted by industry~\cite{ftvm}, an open problem is that the 
-transfered dirty bytes can be up to 1.7GB (\S\ref{sec:tracking}), causing a 
-substantial  delay and network bandwidth consumption for \emph{every} request.
+from the primary to backup. This technique consumes 2*\vv{V} resources (\vv{V} 
+denotes resource volumn consumed by an unreplicated execution). Although 
+these two techniques are adopted by industry~\cite{ftvm}, an open problem is 
+that the transfered dirty bytes can be up to 1.7GB (\S\ref{sec:tracking}), 
+causing a substantial  delay and network bandwidth consumption for \emph{every} 
+request.
 
 A key reason for this problem is that existing techniques have only one real 
 application execution. We will use \falcon (\textbf{Objective 1}) to tackle 
@@ -534,14 +535,14 @@ replicates them on backup VMs.
 % user-space, which allows RDMA to work (RDMA runs in user-space).
 
 %% Consume same resources as primary-backup.
-We proactively design our VM replication architecture to maintain same 2*\vv{R} 
+We proactively design our VM replication architecture to maintain same 2*\vv{V} 
 resource consumption as existing VM fault-tolerance techniques. Although \paxos 
-consumes 3*\vv{R} resources, our VM design reduces this consumption by letting 
+consumes 3*\vv{V} resources, our VM design reduces this consumption by letting 
 one backup act as the \emph{major backup} with a high priority to become a new 
 leader if current leader fails. The major backup agrees on and executes input 
 requests, and the other backup acts as the \emph{standby backup} which only 
-agrees on requests without executing them (\ie, without consuming \vv{R} 
-resources). In total, 2*\vv{R} resources are consumed by the leader and major 
+agrees on requests without executing them (\ie, without consuming \vv{V} 
+resources). In total, 2*\vv{V} resources are consumed by the leader and major 
 backup in our VM. To maintain the same fault-tolerance guarantee as \paxos (\ie, 
 to in case the standby backup being elected a leader), the major backup 
 periodically does a standard checkpoint operation as in existing 
