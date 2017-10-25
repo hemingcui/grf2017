@@ -1,26 +1,22 @@
 \vspace{-.15in}\section{Research Plan and Methodology}
-\label{sec:rep}\vspace{-.075in}
+\label{sec:plan}\vspace{-.075in}
 
 % \xxx strengthens the reliability of datacenter 
 % computing with a holistic methodology.
-This section first proposes \falcon 
-(\S\ref{sec:protocol}), a fast consensus protocol, it then leverages \falcon to 
-construct a scheduler (\S\ref{sec:scheduler}) and a VM (\S\ref{sec:vm}) for 
-application availability. Finally, it describes 
-research plan (\S\ref{sec:plan}).
+This section first proposes the three objectives in this proposal.
 % The first two objectives include preliminary results. 
 
 \vspace{-.15in}\subsection{Objective 1: 
 preventing big-data leakage with Precise 
-IFT}\label{sec:protocol}\vspace{-.075in}
+IFT}\label{sec:obj1}\vspace{-.075in}
 
-This section presents \paxos performance problem (\S\ref{sec:latency-problem}) 
-and a fast, RDMA-powered protocol (\S\ref{sec:falcon}).
+This section presents \paxos performance problem (\S\ref{sec:ift-problem}) 
+and \kakute (\S\ref{sec:kakute}).
 
 \vspace{-.15in}
 \subsubsection{Problem: existing IFT systems are slow and incomplete for 
 big-data} 
-\label{sec:latency-problem}\vspace{-.075in}
+\label{sec:ift-problem}\vspace{-.075in}
 
 No IFT system exists for big-data, and
 we attribute it to two major challenges.
@@ -30,7 +26,7 @@ data-intensive computations. We ran a recent IFT system
 Phosphor~\cite{oo14:phosphor} in Spark with a WordCount algorithm on a dataset 
 that is merely 200MB, and
 observed 128X longer computation time compared with the native Spark execution 
-(\chref{subsec:effetiveness}). The second challenge is on the architecture of 
+(\chref{sec:bigdata}). The second challenge is on the architecture of 
 DISC frameworks.
 DISC frameworks usually contain shuffle procedures which redistribute
 data across hosts (DISC frameworks' worker nodes).
@@ -41,7 +37,7 @@ bandwidth. Therefore, efficient cross-host tag propagation
 is crucial but missing in DISC.
 
 \vspace{-.15in}\subsubsection{\kakute: a fast, precise IFT system for big-data} 
-\label{sec:falcon}\vspace{-.075in}
+\label{sec:kakute}\vspace{-.075in}
 
 \begin{figure}[h]
     \centering
@@ -172,7 +168,7 @@ big-data programs. Second, we will leverage it to improve existing security
 techniques, including anonymization techniques and diff privacy (Objective 2). 
 
 \vspace{-.15in}\subsection{Objective 2: 
-fine-grained diff privacy}\label{sec:scheduler}\vspace{-.075in}
+fine-grained diff privacy}\label{sec:obj2}\vspace{-.075in}
 
 We are proposing
 to combine IFT and differential privacy. With IFT, security levels are 
@@ -194,22 +190,22 @@ any computation to the final result. dp-1 to dp-3 varies in terms of their
 privacy budgets for differential privacy.
 We may also consider the $(\delta, \varepsilon)$-differential privacy model.
 
-\subsection{Security level and accuracy, and usability analysis}
-
-\subsection{Range Estimation}
+% \subsection{Security level and accuracy, and usability analysis}
+% 
+% \subsection{Range Estimation}
 To estimate the range of a output, so that the laps noise distribution
 can be determine.
 runs the same differentially private percentile estimation algorithm on
 the inputs to privately compute the 25-th and the 75-th percentile
 (a.k.a, lower and upper quartiles) of the inputs.
 
-\subsection{Noise Aggregation}
+% \subsection{Noise Aggregation}
 We extend the differential privacy model developed in previous
 work~\cite{differentialdp:stoc11}. We introduce two noise aggregation model
 that make use the fact that different record may have
 different security level (protection level).
 
-\subsubsection{Naive Aggregation Model}
+% \subsubsection{Naive Aggregation Model}
 A simplest model is to use the $\varepsilon$ inferred by the highest security
 level, then add noise to the output directly.
 Add noise to the output with $f(x) + Lap(\dfrac{max - min}{\varepsilon_{max}})$.
@@ -239,7 +235,7 @@ level k,
  \label{algo:naive}
 \end{algorithm}
 
-\subsubsection{Combined Aggregation Model}
+% \subsubsection{Combined Aggregation Model}
 In this model, data is partitioned into multiple parts (size of each part is 
 $m$). Each partition may consists
 different level. The noise aggregator adds noise to final result of each 
@@ -336,8 +332,8 @@ we can further formulate it as:
 
 
 
-\vspace{-.15in}\subsection{Objective 3: building a new fault-tolerant VM 
-replication architecture}\label{sec:vm}\vspace{-.075in}
+\vspace{-.15in}\subsection{Objective 3: building a 
+secure just-in-time compiler}\label{sec:obj3}\vspace{-.075in}
 
 
 In the project, we plan to tackle the problem above. We are proposing to
@@ -401,7 +397,7 @@ can write sensitive data to unprotected memory regions when the code is
 compromised.
 The OpenJDK implementation of JVM contains up to millions lines of code, which
 is unpractical for formal verifications as it is time-consuming with
-current methods~\cite{code-verification}.
+current verification methods (\chref{sec:others-work}).
 
 % Memory size
 Intel SGX contains a protected memory region call Enclave Page Cache (EPC), and 
@@ -452,16 +448,15 @@ the hotspot enclave functions. It builds a tree of callers and callee of
 functions,
 and combines two enclaves if the marginal benefit of combining them is larger 
 than
-the transition cost. Figure~\ref{on-time} shows the example. Initially, only 
-function b and d
+the transition cost. Initially, only function b and d
 are running in enclaves, but the compiler finds out that cost of running c in an 
-enclave
-is less than the transition cost (assume it to be 2), then the whole function a
-will be compile as an enclave. In another case where running function c
-takes a high cost, combinations of enclaves will not happen.
+enclave is less than the transition cost (assume it to be 2), then the whole 
+function a will be compile as an enclave. In another case where running 
+function c takes a high cost, combinations of enclaves will not happen.
 Therefore, transition of enclaves can be reduced. This technique can be applied
 online or offline. In a offline version, it sample the program and finish the
 optimisation offline.
+% % Figure~\ref{on-time} shows the example. 
 
 Asynchronous Enclave Call convert the synchronous enclave calls to asynchronous
 enclave calls. In specific, when a secure function is called,
@@ -469,10 +464,10 @@ the function call and its parameters are put into a QUEUE which will be fetch by
 the enclave can be executed. After finishing execution, the result will be 
 stored
 in QUEUE\_R and the current execution will resume and continue. 
-Figure~\ref{asynccall}
-shows the idea of this technique. This technique makes use of the multi-core
+This technique makes use of the multi-core
 hardware architecture and enclaves and the main program are running in separate
 threads.
+% Figure~\ref{asynccall} shows the idea of this technique. 
 
 These two technique can be applied simultaneously, the compiler can run the
 sample and optimisation offline. After that, the compiler run a enclave and the 
@@ -522,7 +517,8 @@ in separate threads to avoid transition of enclaves.
 % adopt emulations for simple but usually used system calls. We believe this
 % hybrid design can accomplish a fast but secure system handling in Java.
 
-\vspace{-.15in}\subsection{Research plan} \label{sec:plan}\vspace{-.075in}
+\vspace{-.15in}\subsection{Research timeline} 
+\label{sec:timeline}\vspace{-.075in}
 
 This project will require two PhD students S1 and S2 to work for 
 three years. In the first year, S1 will design and fully implement the \kakute 
