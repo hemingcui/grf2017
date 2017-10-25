@@ -1,206 +1,102 @@
-\vspace{-.15in}\section{Research Background2} 
+\vspace{-.15in}\section{Research Background} 
 \label{sec:background}\vspace{-.075in}
 
-This section presents the background of consensus (\S\ref{sec:consensus}) and 
-datacenter computing infrastructures (\S\ref{sec:datacenter}), motivation of 
-objectives (\S\ref{sec:motivation}), others' related work 
-(\S\ref{sec:others-work}), and the PI and co-I's related work 
-(\S\ref{sec:my-work}).
+TBD.
 
-\vspace{-.15in}\subsection{\paxos: tolerating single point of failures} 
-\label{sec:consensus}\vspace{-.075in}
+% This section presents the background of consensus (\S\ref{sec:consensus}) and 
+% datacenter computing infrastructures (\S\ref{sec:datacenter}), motivation of 
+% objectives (\S\ref{sec:motivation}), others' related work 
+% (\S\ref{sec:others-work}), and the PI and co-I's related work 
+% (\S\ref{sec:my-work}).
 
-Distributed consensus (typically, 
-\paxos~\cite{paxos,paxos:practical,paxos,paxos:simple,paxos:complex}) plays a 
-core role in distributed systems, 
-including fault-tolerance~\cite{eve:osdi12,rex:eurosys14,crane:sosp15},
-leader election~\cite{zookeeper, chubby:osdi}, and ordering 
-services~\cite{ellis:thesis,manos:hotdep10,scatter:sosp11}. \paxos
-replicates the same application on a group of computers (or \emph{replicas}) 
-and always enforces same inputs for this application across replicas, as long 
-as a quorum (typically, majority) of replicas still work normally. Therefore, 
-\paxos tolerates various types of faults (\eg, minor replica failures and packet 
-loss).
+\vspace{-.15in}\subsection{Big-data Computing Frameworks} 
+\label{sec:bigdata}\vspace{-.075in}
 
-% \paxos is widely used in many systems. For instance, 
-% Scatter~\cite{scatter:sosp11} runs 8$\sim$12 replicas in a
-% \paxos group to order client requests, and it lets replicas reply requests
-% in parallel. A bigger group size will improve Scatter throughput. 
-% Moreover, state machine replication (SMR) 
-% systems~\cite{eve:osdi12,rex:eurosys14,crane:sosp15} use \paxos to 
-% improve the availability of server applications (\eg, \mysql~\cite{mysql}).
+DISC frameworks (\eg Spark~\cite{nsdi12:spark},
+DryadLINQ~\cite{osdi08:dryad}, MapReduce \cite{mapreduce}) are popular for 
+computations
+on tremendous
+amounts of data, to finish tasks like data analysis and machine learning.
+Computations are split across hosts and run in parallel, such that
+computation resources are efficiently used.
+% Therefore, computation powers are beyond the limit of one single machine, as a 
+large-scale
+% cluster of machines can cooperate to process one computation task.
+Shuffles are frequent and sometimes are performance bottlenecks in DISC.
+% in these systems.
+% Spark~\cite{nsdi12:spark} has data shuffling during
+% reduce stages, graph processing frameworks (\eg Pregal~\cite{sigmod10:pregel})
+% uses messages for node updates, and Parameter Server~\cite{osdi14:pserver} has
+% parameter updates.
 
-Unfortunately, an open problem is that the consensus latency of existing 
-\paxos protocols is too high, because their consensus messages go through OS 
-kernels and software TCP/IP layers (a \vv{ping} round-trip takes about 200 \us 
-in a 10Gbps network). \S\ref{sec:latency-problem} presents this problem in 
-detail.
-
-Recently, as Remote Direct Memory Access (RDMA) networks (\eg, 
-Infiniband~\cite{infiniband}) become popular within a datacenter, 
-RDMA appears a promising solution to address the \paxos performance problem. 
-The fastest type of RDMA operations called ``one-sided RDMA writes" (for short, 
-\emph{WRITE} in the rest of this proposal) takes only about 3 
-\us~\cite{pilaf:usenix14} in a round-trip, because it allows a local computer to 
-directly writes to a remote computer's memory without involving OS kernel or CPU 
-on the remote computer. This ultra low latency not only comes from its kernel 
-bypassing feature, but also its dedicated network stack implemented in hardware. 
-Therefore, RDMA is considered the fastest kernel bypassing 
-technique~\cite{herd:sigcomm14,pilaf:usenix14,dare:hpdc15}; it is several times 
-faster than software-only kernel bypassing techniques (\eg, 
-DPDK~\cite{dpdk} and Arrakis~\cite{arrakis:osdi14}).
-
-\vspace{-.15in}\subsection{Datacenter computing infrastructures}
-\label{sec:datacenter}\vspace{-.075in}
-
-More and more applications are run in a datacenter by two 
-independent types of infrastructures. The first type is 
-schedulers~\cite{borg:eurosys15,mesos:nsdi11,tupperware, yarn:socc13, 
-autopilot:sosp07,quincy:sosp09,apollo:osdi14,fuxi:vldb14}. Although existing 
-schedulers themselves have been made available via \paxos 
-(\eg,~\cite{mesos:nsdi11}), their applications are not. Therefore, if failures 
-such as computer hardware errors occur, these schedulers have to re-launch 
-applications, leading to a substantial application downtime and thus a 
-huge lost for mission-critical applications (\eg, financial platforms and social 
-networks).
-
-The second infrastructure type is VM~\cite{amazon:vpc, openstack, esx:osdi02, 
-kvm, xen:sosp}. VM abstracts away the heterogeneous physical computing 
-resources, making computing resources easy to utilize and balance loads (\eg, 
-via live migration~\cite{vmotion:atc05,xen:migration:nsdi05}). VM is also known 
-for its secure isolation on resources~\cite{xen:sosp,kvm,vmware:sugerman}. 
-Although some VM fault-tolerance approaches such 
-as primary-backup~\cite{remus:nsdi08,ftvm} exist, they consume much 
-time and network bandwidth as they need to transfer all memory modified by 
-applications across VM replications.
-% Nowadays a computer is deploying more and more VMs due to its increasing CPU 
-% cores, a computer hardware error can turn down all VMs and applications running 
-% on them. 
-
-These two infrastructures usually work independently depending on 
-runtime trade-off such as performance or security isolation. Some applications 
-are run solely by schedulers (e.g., Mesos~\cite{mesos:nsdi11} usually uses 
-lightweight Linux containers, not VMs), and some other applications are run 
-solely by VMs (e.g., Amazon EC2). Therefore, this proposal strengthens the 
-two infrastructures respectively. If people need to run an application with 
-both infrastructures, they can choose either infrastructure developed from 
-this proposal and the other one from outside. For instance, people can choose 
-our \tripod scheduler (\S\ref{sec:scheduler-arch}) and VMWare~\cite{esx:osdi02}.
-
-% Many applications are mission-critical (\eg, financial platforms, social 
-% networks, and medical services,), so they naturally desire both high 
-% performance and availability. For instance, a trading platform must be highly 
-% available during operation hours~\cite{nosql:finance}. Another instance is 
-% social networks: minor computer failures in a Facebook datacenter led to 
-% several outages in recent years~\cite{facebook:outage}.
+% Many-to-many transformations (\eg \func{groupByKey}, \func{join}
+% and \func{aggregateByKey}) are prevalent in DISC. Each many-to-many
+% transformation takes many input records and generates many output records.
+% Given a buggy output record, extant data provenance 
+% system~\cite{icse16:bigdebug,vldb15:titian,vldb16:output} will
+% report all input records going through this transformation, including many
+% irrelevant input records that generate other output records.
 
 
+To avoid excessive computation, many DISC systems adopt the lazy transformation 
+approach.
+~\cite{pig:vldb08,nsdi12:spark,osdi08:dryad}.
+Spark uses lazy transformations (\eg \func{map}) for efficiency,
+and calls to these transformations only create a new data structure called 
+\func{RDD} with \func{lineage}.
+The real transformations are only triggered when collecting operations (\eg 
+\func{collect},
+\func{count}) are called. These collecting operations trigger transformations 
+along
+lineages, where unnecessary computations are avoided. \xxx leverages the lazy 
+transformation
+feature in DISC to present its new \lazyp technique (\chref{subsec:referencep}).
 
+\vspace{-.15in}\subsection{DFT and Diff Privacy}
+\label{sec:dft}\vspace{-.075in}
 
+% Information Flow Tracking is initially proposed for preventing sensitive 
+% information
+% leakage~\cite{dawn05:taint}.
+% IFT attaches a tag to a variable (or object),
+% and this tag will propagate throughout the computation.
+% For example, a variable-level dataflow tracking will involve combinations of
+% tags of two variables in each instruction, using an IOR operation.
+% Different granularities of computation may incur different levels
+% of computation overhead. Lower level (\eg byte-level) tracking will consume
+% a lot of resources, as each byte of data in an IFT system has its own 
+% tags~\cite{libdft:vee12}.
 % 
+% Multiple research has been focusing on efficiency and applications of IFT.
+% Shadowreplica~\cite{shadowreplica:ccs13} proposed to make use of the multicore 
+% resources while SHIFT~\cite{hardwardtaint:isca08}
+% suggests accelerating dataflow tracking with hardware support.
+% Several research~\cite{mit07:coverage,fse12:dtam} adopts IFT for providing 
+% debugging primitives
+% to improve software reliability.
+% IFT has been applied to various areas, such as preventing sensitive information 
+% (\eg GPS data and contacts)
+% leakage in cellphone~\cite{taintdroid:osdi10, cleanos:osdi12}, providing secure
+% cloud services~\cite{cloudfence:raid13} and server program 
+% runtime~\cite{libdft:vee12}.
+% To the best of
+% our knowledge, no IFT system exists for big-data.
 
+\vspace{-.15in}\subsection{Intel SGX}
+\label{sec:sgx}\vspace{-.075in}
 
-% Schedulers and VMs are largely complementary infrastructures depending on 
-% application requirements such as performance and security. Many schedulers 
-% use lightweight containers~\cite{docker,lxc} for isolation, while many other 
-% cloud deployments (\eg, Amazon EC2) simply use VMs without schedulers. 
-% Therefore, this proposal strengthens the two infrastructures respectively.
+TBD.
 
+% \vspace{-.15in}\subsection{Motivation of objectives} 
+% \label{sec:motivation}\vspace{-.075in}
 
-\vspace{-.15in}\subsection{Motivation of objectives} 
-\label{sec:motivation}\vspace{-.075in}
-
-% Several open problems. First, application is not highly-available. Second, when 
-% application runs on large number of machines, existing replication systems, 
-% which mainly target single-machine deployments, can not deploy such 
-% applications with both properly replication and resource utilization 
-% considerations. Therefore, we take a holistic approach: first create a fast, 
-% scable, yet still general consensus protocol (Objective 1), and then we 
-% integrate this protocol with two major infrastrutures (Objective 2 and 3). This 
-% novel integratation provides a clean high-availability support for general  
-% applications.
-The objectives of \xxx\footnote{Gaia is an ancient Greek goddess who takes good 
-care of everything on earth, including software applications.} stem from two 
-research problems in datacenter computing. First, despite the core role and 
-good deployments of \paxos, it suffers from high consensus latency. Therefore, 
-\textbf{Objective 1} addresses this problem by leveraging RDMA to create a 
-fast consensus algorithm and implementation protocol. Second, although many 
-mission-critical applications demand stringent availability, existing 
-infrastructures lack such support. To benefit these applications, 
-\textbf{Object 2 and 3} take a holistic methodology to integrate our protocol 
-with two major infrastructures, potentially benefiting almost all applications.
 
 
 % \vspace{-.15in}% hack, for the gaia footnote.
 \subsection{Related work by others} 
 \label{sec:others-work}\vspace{-.075in}
 
-\para{Various consensus protocols.}  
-There are a rich set of \paxos 
-algorithms~\cite{paxos:practical,paxos,paxos:simple,paxos:complex,
-epaxos:sosp13} 
-and implementations~\cite{paxos:live,paxos:practical,chubby:osdi,crane:sosp15}. 
-Since consensus protocols play a core role in 
-datacenters~\cite{matei:hotcloud11, mesos:nsdi11, 
-datacenter:os} and worldwide 
-distributed systems~\cite{spanner:osdi12,mencius:osdi08}, various works 
-have been conducted to improve specific aspects of consensus protocols, 
-including commutativity~\cite{epaxos:sosp13}, 
-understandability~\cite{raft:usenix14,paxos}, and verifiable 
-rules~\cite{modist:nsdi09,demeter:sosp11}. \paxos is notoriously difficult to be 
-fast and scalable to a large consensus 
-group~\cite{ellis:thesis,manos:hotdep10,scatter:sosp11}. 
-
-To make \paxos's throughput scalable (\ie, more replicas, higher throughput), 
-various systems leverage \paxos as a core building block to develop advanced 
-replication approaches, including partitioning program 
-states~\cite{scatter:sosp11,ssmr:dsn14}, splitting consensus 
-leadership~\cite{mencius:osdi08,spaxos:srds12}, and hierarchical 
-replication~\cite{manos:hotdep10,scatter:sosp11}. Theses approaches have 
-improved throughput. However, the core of these systems, 
-\paxos, still faces an unscalable consensus 
-latency~\cite{ellis:thesis,scatter:sosp11,manos:hotdep10}. By realizing 
-\textbf{Objective 1} (\S\ref{sec:protocol}), these systems can scale even 
-better.
-
-\para{Fault-tolerance in schedulers.} Datacenter
-schedulers~\cite{borg:eurosys15,mesos:nsdi11,tupperware,yarn:socc13,
-autopilot:sosp07,quincy:sosp09,apollo:osdi14,fuxi:vldb14} support diverse 
-applications (\eg, Hadoop~\cite{hadoop}, Dryad~\cite{dryad}, and key-value 
-stores~\cite{redis}). Existing schedulers mainly focus on obtaining high 
-availability for themselves by replicating their own essential components, or 
-focus on application recovery~\cite{fuxi:vldb14} instead of availability. 
-To the best of our knowledge, no existing schedulers provide a
-high availability support to general applications. \textbf{Objective 2} 
-(\S\ref{sec:scheduler}) aims to provide this support.
-% \xxx's consensus protocol design is general to application and 
-% schedulers so it can be integrated in other systems.
-
-%  Migration and primary-backup.
-\para{Fault-tolerance in VM.} Two 
-techniques, primary-backup~\cite{remus:nsdi08,ftvm} and live 
-migration~\cite{vmotion:atc05,xen:migration:nsdi05}, exist for improving 
-application reliability in VM. Primary-backup (\eg, vSphere~\cite{ftvm})
-uses the hypervisor on a primary VM to track memory pages modified by 
-applications, it then transfers these pages to a backup VM. Live migration 
-uses a similar technique as primary-backup. These techniques can be used to 
-improve computer load balance and consolidating many VMs on fewer computers to 
-save datacenter energy. A common problem in the two techniques is that they 
-incur substantial application downtime (\eg, 8 seconds in 
-vMotion~\cite{vmotion:atc05}) and network bandwidth during the memory transfer. 
-\textbf{Objective 3} (\S\ref{sec:vm}) will greatly mitigate this problem.
-
-% This approach consumes much network bandwidth and has weaker 
-% primary-consistency (\eg, if primary rejoins the network) than \paxos.
-
-\para{RDMA techniques.} Recently RDMA is deployed in various types of 
-datacenter networks, including Infiniband~\cite{infiniband} and 
-RoCE~\cite{roce}. RDMA has been leveraged in many 
-software systems to improve different performance aspects, including high 
-performance computing~\cite{openmpi}, key-value 
-stores~\cite{pilaf:usenix14,herd:sigcomm14,farm:nsdi14,memcached:rdma}, 
-distributed transactions~\cite{drtm:sosp15,farm:sosp15}, and file 
-systems~\cite{gibson:nfs}. These systems are complementary to \xxx objectives.
+TBD.
 
 \vspace{-.15in}\subsection{Related work by the PI and co-I} 
 \label{sec:my-work}\vspace{-.075in}
@@ -212,16 +108,15 @@ systems~\cite{gibson:nfs}. These systems are complementary to \xxx objectives.
 The PI is an expert on reliable concurrent and distributed 
 systems~\cite{smt:cacm, cui:tern:osdi10, peregrine:sosp11,
 parrot:sosp13, crane:sosp15, tripod:apsys16}. The 
-PI's works are published in premier conferences on systems (OSDI '10, 
-SOSP '11, SOSP '13, and SOSP '15) and programming languages (PLDI '12 and 
-ASPLOS '13). As preliminary results for this \xxx proposal, the PI has 
-developed a fast consensus protocol~\cite{crane:sosp15} (part of 
-\textbf{Objective 1}) and a fault-tolerant prototype 
-scheduler~\cite{tripod:apsys16} (part of \textbf{Objective 2}). The co-I is an 
+PI's works are published in premier conferences on systems (OSDI, SOSP, SOCC, 
+TPDS, and ACSAC) and programming languages (PLDI and ASPLOS). The co-I is an 
 expert on high-performance 
 computing~\cite{powerrock,hwang,jessica,cheung,khokhar}, fault-tolerance~\cite{ 
 sheng,shengdi1}, and VMs~\cite{rhymes,shengdi,jessica2}. The 
 co-I's works are published in top systems conferences (Cluster '02, SC '13, 
-and ICPADS '14) and journals (JPDC '00, TPDS '13, IEEE Tran. Computers '14).
+and ICPADS '14) and journals (JPDC '00, TPDS '13, IEEE Tran. Computers '14). As 
+preliminary results for this \xxx proposal, the PI has 
+developed Kakute~\cite{kakute:acsac17} and TPDS (parts of \textbf{Objective 
+1}). 
 
 
