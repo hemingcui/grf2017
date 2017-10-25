@@ -43,6 +43,26 @@ is crucial but missing in DISC.
 \vspace{-.15in}\subsubsection{\kakute: a fast, precise IFT system for big-data} 
 \label{sec:falcon}\vspace{-.075in}
 
+\begin{figure}[h]
+    \centering
+    \begin{minipage}{.48\textwidth}    
+        \vspace{-.15in}
+        \includegraphics[width=0.31\textheight]{figures/arch.ps}
+        \vspace{-.3in}         
+        \caption{The \falcon protocol architecture. Protocol components are 
+shaded (and in blue color).}
+        \label{fig:falcon-arch}
+    \end{minipage}
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \vspace{-.17in}
+        \includegraphics[width=0.34\textheight]{figures/consensus.ps}
+        \vspace{-.32in}
+        \caption{RDMA-powered consensus algorithm.}
+        \label{fig:falcon-protocol}
+    \end{minipage}
+\end{figure}
+
 This paper presents \kakute\footnote{Kakute is a precise, multi-purpose weapon 
 used by
 Ninja.}, the first precise and fine-grained information flow
@@ -84,8 +104,16 @@ unified API, we implemented 4 built-in checkers for \appsn
 security and reliability problems: sensitive information leakage, data 
 provenance, programming and performance bugs.
 
-We evaluated \kakute on \appeval diverse algorithms, including three text 
-processing
+\begin{wrapfigure}{r}{7cm}
+  \vspace{-.1in}
+  \includegraphics[width=7cm]{figures/time_overhead.ps}\\
+  \vspace{-.3in}
+  \caption{\kakute execution time normalized to Spark executions.}
+  \label{fig:scalability}
+\end{wrapfigure}
+
+\para{Preliminary results.} We evaluated \kakute on \appeval diverse 
+algorithms, including three text processing
 algorithms WordCount~\cite{spark:example}, WordGrep~\cite{newt:socc13} and 
 TwitterHot~\cite{spark:example}, two graph algorithms 
 TentativeClosure~\cite{spark:example}
@@ -110,68 +138,15 @@ papers~\cite{arthur:dave2013,icse16:bigdebug,airavat:nsdi10}.
 % our runtime system handles other technical challenges such as checking message 
 % delivery and recovering replica failures.
 
-\begin{figure}[h]
-    \centering
-    \begin{minipage}{.48\textwidth}    
-        \vspace{-.15in}
-        \includegraphics[width=0.31\textheight]{figures/arch.ps}
-        \vspace{-.3in}         
-        \caption{The \falcon protocol architecture. Protocol components are 
-shaded (and in blue color).}
-        \label{fig:falcon-arch}
-    \end{minipage}
-    \centering
-    \begin{minipage}{0.48\textwidth}
-        \vspace{-.17in}
-        \includegraphics[width=0.34\textheight]{figures/consensus.ps}
-        \vspace{-.32in}
-        \caption{RDMA-powered consensus algorithm.}
-        \label{fig:falcon-protocol}
-    \end{minipage}
-\end{figure}
 
 
 
-With this observation, we propose the design of \falcon,\footnote{Apus is one 
-of the fastest birds.} a new RDMA-powered \paxos 
-protocol and its runtime system. Figure~\ref{fig:falcon-arch} shows \falcon's 
-architecture. It is designed to support unmodified applications. Its runtime 
-system will automatically deploy the same application on multiple replicas, 
-intercept the application's network inputs from its inbound socket calls (\eg, 
-\recv) with a Linux technique called LD\_PRELOAD, and invoke a 
-fast, RDMA-powered algorithm (Figure~\ref{fig:falcon-protocol}) to enforce same 
-network inputs across replicas. \falcon architecture has four key components: an 
-input consensus coordinator and an output checker (both are built on the 
-algorithm), an in-memory consensus log, and a guard that handles application 
-checkpoints and recovery.
-
-Figure~\ref{fig:falcon-protocol} depicts our algorithm in normal case: the 
-leader has four steps (\textbf{L1}$\sim$\textbf{L4}), and each backup has two 
-steps (\textbf{B1}$\sim$\textbf{B2}). Leader first executes the actual inbound 
-socket call (\textbf{L1}, not shown) to get actual inputs, it then invokes 
-consensus across replicas. All solid arrows (\textbf{L3}, \textbf{B2}) are 
-one-sided RDMA WRITEs (\S\ref{sec:consensus}) to remote replicas' memory. All 
-replicas poll from their own bare memory to receive consensus messages. To 
-handle replica failures, all replicas store inputs to local SSD (\textbf{L2}, 
-\textbf{B1}). For these WRITEs, sending replicas need only copy data to local 
-RDMA NIC and WRITEs return, so \falcon is scalable to replica group size. In 
-abnormal cases (\eg, the leader fails), \falcon uses an existing 
-algorithm~\cite{paxos:practical} to elect a new leader.
-
-% Three figures. First, falcon arch. Second, consensus protocol. Third, falcon 
-% results compared to traditional ones and DARE.
 
 
 
-\begin{wrapfigure}{r}{7cm}
-  \vspace{-.1in}
-  \includegraphics[width=7cm]{figures/traditional_paxos_latency.ps}\\
-  \vspace{-.3in}
-  \caption{Consensus latency of six \paxos protocols. Both X and Y axes are 
-broken to fit in all these protocols. \falcon achieves the smallest consensus 
-latency.}
-  \label{fig:scalability}
-\end{wrapfigure}
+
+
+
 
 % \begin{figure}[!htb]
 % \centering
@@ -182,18 +157,7 @@ latency.}
 %         \label{fig:scalability}
 % \end{figure}
 
-\para{Preliminary results.} We developed an \falcon initial prototype in two 
-phases. First, to support unmodified applications, we implemented its 
-socket-intercepting runtime system, presented in SOSP 2015~\cite{crane:sosp15}. 
-\falcon was able to support 5 widely used server applications (\eg, \mysql) 
-without modifying them. Second, recently we implemented its RDMA-powered 
-consensus algorithm on a 40Gbps RDMA network. Figure~\ref{fig:scalability} 
-shows \falcon performance with 5 existing consensus 
-protocols~\cite{crane:sosp15, libpaxos, zookeeper, spaxos:srds12, dare:hpdc15}. 
-To analyze the scalability of our algorithm, we ran \falcon and \dare on up to 
-105 replicas. \falcon's consensus latency outperforms 4 traditional \paxos  
-protocols by \comptradlow to \comptradhigh on 3 to 9 replicas. \falcon is  
-faster than \dare by up to \fasterDARE.
+
 % When changing the replica group size 
 % from 3 to 105 (a 35x increase), \falcon's consensus latency increases merely 
 % from \xxxlatencythree \us to \xxxlatencyonezerofive \us (a \xxxscalability, 
@@ -203,11 +167,10 @@ faster than \dare by up to \fasterDARE.
 
 
 
-\para{Future work.} We will further improve the practicality of \falcon in two 
+\para{Future work.} We will further improve the practicality of \kakute in two 
 dimensions. First, we will extensively evaluate its performance on broad 
-latency-critical applications using diverse input workloads. Second, we will 
-further torture its scalability on at least 10X more replicas and concurrent 
-clients, identify its scalability bottleneck, and refine our algorithm. 
+big-data programs. Second, we will leverage it to improve existing security 
+techniques, including anonymization techniques and diff privacy (Objective 2). 
 
 \vspace{-.15in}\subsection{Objective 2: 
 building a fault-tolerant scheduler to improve 
