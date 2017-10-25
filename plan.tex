@@ -172,604 +172,369 @@ big-data programs. Second, we will leverage it to improve existing security
 techniques, including anonymization techniques and diff privacy (Objective 2). 
 
 \vspace{-.15in}\subsection{Objective 2: 
-building a fault-tolerant scheduler to improve 
-application availability}\label{sec:scheduler}\vspace{-.075in}
+fine-grained diff privacy}\label{sec:scheduler}\vspace{-.075in}
 
-Many existing schedulers have adopted \paxos to improve availability for 
-themselves. Typically, a scheduler use \paxos to replicate its essential 
-components such as a \emph{controller}, which handles scheduling computation 
-tasks to run on resources. In normal case, only one leading controller does the 
-real work, and the other controllers act as backups to in case the leader's 
-failure. Unfortunately, most applications run by schedulers have not been 
-made highly-available (although individual applications carry a replication 
-approach~\cite{mapreduce,dolly:nsdi13}).
+We are proposing
+to combine IFT and differential privacy. With IFT, security levels are 
+propagating
+throughout computation, while differential privacy is for preventing individual 
+information leakage.
+In this model, different records and fields can have various security levels,
+therefore, a general and fine-grained differential private framework can be 
+achieved.
+Programmer does not need to modify their analysis programs and tradeoff between
+usability and security can be achieved with different users.
 
-A straw-man approach to achieve high application availability could be 
-implementing a \paxos protocol for every application. However, this will cause 
-two major issues. First, \paxos is notoriously difficult to 
-understand~\cite{raft:usenix14,paxos:simple}, implement~\cite{paxos:practical, 
-paxos:live}, or test~\cite{modist:nsdi09,demeter:sosp11}. Developing a 
-\paxos protocol for every application is widely considered a 
-nightmare~\cite{modist:nsdi09,demeter:sosp11,paxos:live} for application 
-developers.
+It needs to determine the relation of the privacy budget and the security
+level.
+In a simplest model, there are 5 security levels: insensitive, dp-1,
+dp-2, dp-3, non-released. Insensitive record can be release directly,
+while non-released can not be used in
+any computation to the final result. dp-1 to dp-3 varies in terms of their
+privacy budgets for differential privacy.
+We may also consider the $(\delta, \varepsilon)$-differential privacy model.
 
-The second issue is, schedulers can be conflicting with \paxos due to 
-unawareness of an application's \paxos replication scheme. For instance, if an 
-application submits multiple replications of the same computation task, a 
-scheduler, which abstracts away computer identity, may incorrectly schedule 
-some replications on the same computer (it must schedule each replication 
-on different computers for \paxos fault-tolerance).
+\subsection{Security level and accuracy, and usability analysis}
 
-\vspace{-.15in}\subsubsection{\tripod: a first fault-tolerant scheduler 
-architecture} 
-\label{sec:scheduler-arch}\vspace{-.075in}
+\subsection{Range Estimation}
+To estimate the range of a output, so that the laps noise distribution
+can be determine.
+runs the same differentially private percentile estimation algorithm on
+the inputs to privately compute the 25-th and the 75-th percentile
+(a.k.a, lower and upper quartiles) of the inputs.
 
-% ,\footnote{We name our system after 
-% the ancient Chinese three-legged tripod, a reliable, multi-purpose container.}
-\tripod replicates all or essential computations of an application. 
-It is formed by a widely used scheduler \mesos~\cite{mesos:nsdi11} and 
-\falcon (\textbf{Objective 1}). To avoid the two aforementioned issues 
-(\S\ref{sec:scheduler}), \tripod's design integrates \paxos in a scheduler, 
-not in applications. To achieve high application availability, unlike existing 
-schedulers which let only one controller schedule tasks, \tripod runs replicas 
-of the same task using replicas of controllers: after controllers agree on a 
-new task with \falcon, \tripod lets each controller independently schedule a 
-replication of this task. To seamlessly resolve conflicts between the resource 
-allocation scheme and replication scheme, \tripod introduces a 
-replication-aware 
-resource allocation scheme (\S\ref{sec:workflow}).
+\subsection{Noise Aggregation}
+We extend the differential privacy model developed in previous
+work~\cite{differentialdp:stoc11}. We introduce two noise aggregation model
+that make use the fact that different record may have
+different security level (protection level).
 
-% Doing so has three benefits. First, \tripod's \paxos acts as a single, general 
-% fault-tolerance service to applications. We can just leverage existing 
-% verification tools~\cite{modist:nsdi09,demeter:sosp11} to make sure that our 
-% \falcon protocol is robust and correct, and then we can benefit many 
-% applications. Second, application developers can now just focus on their own 
-% application logic, greatly saving development time and money. Third, now 
-% \tripod's own scheduler can handle the replication logic and do careful, 
-% replication-aware scheduling for jobs  (\S\ref{sec:workflow}). 
+\subsubsection{Naive Aggregation Model}
+A simplest model is to use the $\varepsilon$ inferred by the highest security
+level, then add noise to the output directly.
+Add noise to the output with $f(x) + Lap(\dfrac{max - min}{\varepsilon_{max}})$.
+This simple model may generate two much noise to the final result, which
+make the result unusable. The complete algorithm is showed in 
+Algorithm~\ref{algo:naive}.
 
+\begin{algorithm}[t]
+\SetAlgoLined
+\KwIn{Dataset T, dataset size N, privacy budget $\varepsilon_k$ for security 
+level k,
+  output range (min, max)}
+  n = 4
 
-% To 
-% ahieve application fault-tolerance, 
+ \For{$i\leftarrow 1$ \KwTo $n$}{
+    $O_i$ $\leftarrow$ $f(T_i)$\;
+    if $O_i$ > max, $O_i$ $\leftarrow$ max
+    if $O_i$ < max, $O_i$ $\leftarrow$ min
+ }
+ \For{dimension $j$ of the output $O$}{
+    k $\leftarrow$ $max(getLevel(O_{j}))$\;
+    $O_j$ $\leftarrow$ $\dfrac{1}{n}\sum\limits_{i=1}^n O_{ij} + Lap(\dfrac{max 
+- min}{\varepsilon_{k}})$
+  }
+  \KwOut{$O$}
+ \caption{Naive Aggregation Model}
+ \label{algo:naive}
+\end{algorithm}
 
+\subsubsection{Combined Aggregation Model}
+In this model, data is partitioned into multiple parts (size of each part is 
+$m$). Each partition may consists
+different level. The noise aggregator adds noise to final result of each 
+partition
+according to the security level of each partition.
 
+Formally, data is partitioned into multiple parts denoted as $p_1$, $p_2$, ..., 
+$p_n$.
+The security level and its corresponding $\varepsilon$ are $\varepsilon_1$,
+$\varepsilon_2$, ..., $\varepsilon_n$. Therefore, the final aggregated result
+is
 
-% In an implementation level, \tripod integrates \mesos~\cite{mesos:nsdi11}, a 
-% widely used cluster management system, with a new RDMA-enabled \paxos 
-% protocol~\cite{falcon:github}. Compared to a prior RDMA-enabled \paxos 
-% protocol~\cite{dare:hpdc15}, our new protocol can support general programs 
-% transparently without modifications.
+\begin{align}
+\dfrac{\sum\limits_{i=1}^n f(x_i) + Lap(\dfrac{max_i - 
+min_i}{\varepsilon_i})}{n}
+\end{align}
 
-Figure~\ref{fig:scheduler-arch} depicts \tripod's architecture, and its key 
-components are shaded (and in blue). To illustrate how \tripod works in an 
-application perspective, this figure shows two applications, Hadoop and MPI. 
-Each task has a \emph{replica strength} (\vv{R}) to denote the level of 
-fault-tolerance it demands. This \vv{R} value is either 1 (default, no 
-replication) or no more than the number of controllers in \tripod. An 
-application can assign different \vv{R} values to tasks when it submits them 
-to \tripod's leader controller.
+The complete algorithm is showed in Algorithm~\ref{algo:combined}.
 
-It is often easy for an application to determine which computation tasks 
-are essential and thus require a bigger \vv{R} value. For instance, 
-Alluxio~\cite{alluxio}, a distributed storage application ran in \mesos, has 
-an essential manager component to manage storages across computers. When 
-running in our \tripod scheduler, Alluxio can just assign \vv{R=3} to the 
-launching task of its manager.
+\begin{algorithm}[t]
+\SetAlgoLined
+\KwIn{Dataset T, dataset size N, privacy budget $\varepsilon_k$ for security 
+level k,
+  output range (min, max)}
+  n = 4
 
-% By default, each application has \vv{R=1}, which means that this application 
-% does not need replication. For such a default setting, \tripod runs the job as 
-% is without replication, like a typical cluster management system (\eg, Mesos).
+ \For{$i\leftarrow 1$ \KwTo $n$}{
+    $O_i$ $\leftarrow$ $f(T_i)$\;
+    if $O_i$ > max, $O_i$ $\leftarrow$ max
+    if $O_i$ < max, $O_i$ $\leftarrow$ min
+    \For{dimension $j$ of the output $O$}{
+       k $\leftarrow$ $max(getLevel(O_{ij}))$\;
+       $O_{ij}$ $\leftarrow$ $O_{ij} + Lap(\dfrac{max - min}{\varepsilon_{k}})$
+     }
+ }
+ \lForEach{partition $i$ of the output $O$}{$O_j$ $\leftarrow$ $ 
+\dfrac{1}{n}\sum\limits_{i=1}^n O_{ij}$}
+  \KwOut{$O$}
+ \caption{Combined Aggregation Model}
+ \label{algo:combined}
+\end{algorithm}
 
-Figure~\ref{fig:scheduler-arch} shows an example of replicating all 
-Hadoop~\cite{hadoop} tasks with \vv{R=3}. Suppose Hadoop submits two tasks to 
-\tripod's leader controller, each has different shapes (triangle or hexagon). 
-The leader controller then invokes a consensus on each task across controllers. 
-Once a consensus is reached, each controller assigns the same task on different 
-slave computers. The leader controller directly returns its computation result 
-to Hadoop. A standby controller ignores computation results until it becomes a 
-new leader.
-%  unless a tail-tolerance mechanism is triggered 
-% (\S\ref{sec:workflow})
+The error of the final result incurs in this aggregator comes from two parts:
+the Laps noise error and the partition error. It is crucial to reduce the final
+error incurs by this aggregator while keeping the differential security 
+guarantee.
+The error of this model (when the eps is the same) is
+
+\begin{align}
+|\dfrac{1}{n}\sum\limits_{i=1}^n f(T_i) - f(T)| + 
+\dfrac{1}{n}\sqrt{2}\bigtriangleup{f}\sum\limits_{i=1}^n\dfrac{1}{\varepsilon_i}
+\end{align}, and it should be minimized.
+% TODO: do this model
+
+As final result of each partition may consist
+different security levels, the final noise can be less than previous method.
+
+If we can get the statistic of security levels, we can estimate the block
+size in a better way. In specific, suppose there are k security levels and
+$M_k$ means that $M_k$ partitions has a maximum security level as k. The the
+above equation can be rewritten as
+\begin{align}
+  |\dfrac{1}{n}\sum\limits_{i=1}^n f(T_i) - f(T)| +  
+\dfrac{1}{n}\sqrt{2}\bigtriangleup{f}\sum\limits_{i=1}^k\dfrac{1}{\varepsilon_i} 
+* M_i
+\end{align}
+$M_k$ can be calculated according to the total partition number $n$ and
+the number of block that has security level as $k$ (denoted as $p_k$), then
+we can further formulate it as:
 
 % directly save the odp file to eps, level 2.
-\vspace{.1in}
-\begin{figure}[!htb]
-%     \centering
-    \begin{minipage}{.48\textwidth}
-        \vspace{-.3in}
-        \includegraphics[width=0.34\textheight]{figures/scheduler_arch.eps}
-         \vspace{-.4in}
-        \caption{\tripod scheduler architecture. It replicates all 
-Hadoop~\cite{hadoop} tasks (\vv{R=3}) for fault-tolerance and runs all 
-MPI~\cite{mpi} tasks as is (\vv{R=1}).}
-        \label{fig:scheduler-arch}
-    \end{minipage}
-    \hspace{0.16in}
-    \begin{minipage}{0.48\textwidth}
-        \vspace{-.3in}
-        \includegraphics[width=0.34\textheight]{figures/scheduler_flow.eps}
-        \vspace{-.4in}
-        \caption{The replication-aware resource allocation scheme with four 
-steps (\textbf{S1}$\sim$\textbf{S4}).}
-        \label{fig:scheduler-workflow}
-    \end{minipage}
-\end{figure}
-
-% \vspace{-.15in}
-\vspace{-.3in}
-\subsubsection{Replication-aware resource allocation scheme}
-\label{sec:workflow}\vspace{-.075in}
-
-Figure~\ref{fig:scheduler-workflow} shows the design of \tripod's scheme on 
-scheduling tasks with four steps. This scheme is similar to that in \mesos 
-except the second and fourth steps. In these two steps, \tripod embeds the 
-replication logic in its resource offers and allocations for the application. 
-An application runs as if \xxx does not replicate any of its tasks, and \tripod 
-transparently handles all the replication logic.
-
-In the first step (\textbf{S1}), slave computers periodically report their 
-available computing resources (\eg, CPU cores and memory) to the leader 
-controller. In the second step (\textbf{S2}), instead of offering the exact 
-available resources aggregated from slave computers, \tripod conservatively 
-divides the amount of resources by each application's max \vv{R} value and then 
-sends a resource offer to the application. The goal is to reserve enough 
-resources for \tripod to replicate a task with \vv{R} copies, although some 
-tasks have only \vv{R=1}.
-
-In the third step (\textbf{S3}), an application submits tasks with \vv{R} 
-values determined by itself to the leader controller. If a task has \vv{R=1}, 
-leader schedules the task without consensus and revokes \vv{R-1} resources 
-specified in this task from the application. By doing so, the conservatively 
-reserved resources are given back to \tripod. If a task has \vv{R>1}, The 
-leader then invokes a consensus on this task across controllers.
-
-Once a majority of controllers agrees on executing a task with \vv{R>1}, each 
-controller does the fourth step  (\textbf{S4}): it schedules this task on an 
-available slave computer according to the resource offer. To prevent 
-controllers putting the same task on the same slave computer, the leader 
-controller first makes an assignment on which controller should run this task on 
-which slave computer, it then carries this assignment in its consensus request. 
-Once a consensus on this task is reached, each controller follows this 
-assignment.
-
-% Two figures: one is TRIPOD arch. The other is TRIPOD results from the workshop 
-% paper. Figure~\ref{fig:scheduler-arch} and Figure~\ref{fig:scheduler-workflow} 
-% and Figure~\ref{fig:scheduler-latency}.
-
-
-% \para{Availability versus resource consumption.} 
-\tripod is designed to make a mission-critical application highly available by 
-using \vv{R-1} more resources than those consumed by the application's 
-essential computations. Non-essential computations use same resources as those 
-in \mesos. Given that minor computer failures have caused severe outage 
-disasters  (\eg, 2015 NYSE trading halts~\cite{nyse:halt} and several Facebook 
-outage events in recent 
-years~\cite{facebook:outage}), we consider these extra resource consumptions 
-worthwhile on improving application availability.
-
-% We deemed 
-% this extra resource consumption reasonable, because even minor computer 
-% failures can turn down an entire application. 
-
-% For instance, Both 
-% NYSE and Nasdaq have experienced outage of their whole site~\cite{nyse:halt} or 
-% specific IPO events~\cite{facebook:ipo:delay} due to minor machine errors. 
-% In addition, social-networking applications like Facebook has 
-% strong fault-tolerance requirements, because minor machine failures have turned 
-% down the whole Facebook site for several times in the last few 
-% years~\cite{facebook:outage}, costing huge money lost. 
-% for two reasons.
-% Second, it is already a common practice to replicate critical computations by 
-% using \vv{R} times of resources, and doing so can improve both availability and 
-% performance. For instance, Scatter~\cite{scatter:sosp11} runs 8$\sim$12 
-% replicas in a \paxos group to order client requests, and it lets replicas reply 
-% requests in parallel. A bigger group size will improve Scatter throughput. 
-% Moreover, several recent replication 
-% systems~\cite{eve:osdi12,rex:eurosys14,crane:sosp15} 
-% improve the availability of general server applications (\eg, 
-% \mysql~\cite{mysql}) by replicating them.
-
-% Therefore, \tripod's design favors more on availability and performance 
-% (low consensus latency). It's design tends to use \vv{R} times of resources 
-% compared to traditional applications. We argue that this extra resource 
-% utilizations are acceptable for critical applications, because if they have 
-% high 
-% demand on availability and response times, they can often tolerate costs on 
-% computing resources (\eg, trading and medical platforms).
-
-
-
-\para{Preliminary results.} We presented an early prototype of \tripod
-in APSys 2016~\cite{tripod:apsys16}. To evaluate a typical social-networking 
-application, we ran \tripod with \redis~\cite{redis}, a key-value store used by 
-Twitter and financial platforms~\cite{nosql:finance}. Although \redis is a 
-latency-critical application, compared to its own unreplicated execution, 
-\tripod incurred merely \tputoverhead overhead in throughput and 
-\latencyoverhead in response time.
-% This protocol was 40.1X faster than \zookeeper, a traditional replication
-% protocol~\cite{calvin:sigmod12} which runs on TCP/IP.
-
-% Disable the figure for now. Not much information.
+% \vspace{.1in}
 % \begin{figure}[!htb]
-% \centering
-% \includegraphics[width=0.34\textheight]{figures/scheduler_latency.ps}
-%         \vspace{0.1in}
-%         \caption{Performance overhead of scheduler.}
-%         \label{fig:scheduler-latency}
+% %     \centering
+%     \begin{minipage}{.48\textwidth}
+%         \vspace{-.3in}
+%         \includegraphics[width=0.34\textheight]{figures/scheduler_arch.eps}
+%          \vspace{-.4in}
+%         \caption{\tripod scheduler architecture. It replicates all 
+% Hadoop~\cite{hadoop} tasks (\vv{R=3}) for fault-tolerance and runs all 
+% MPI~\cite{mpi} tasks as is (\vv{R=1}).}
+%         \label{fig:scheduler-arch}
+%     \end{minipage}
+%     \hspace{0.16in}
+%     \begin{minipage}{0.48\textwidth}
+%         \vspace{-.3in}
+%         \includegraphics[width=0.34\textheight]{figures/scheduler_flow.eps}
+%         \vspace{-.4in}
+%         \caption{The replication-aware resource allocation scheme with four 
+% steps (\textbf{S1}$\sim$\textbf{S4}).}
+%         \label{fig:scheduler-workflow}
+%     \end{minipage}
 % \end{figure}
 
-\para{Future directions.} We foresee three directions for \tripod's future 
-development. First, we will further improve the performance of its 
-replication-aware resource allocation scheme through an extensive study on 
-diverse applications. Second, currently this scheme is tied to \mesos. We will 
-study other popular schedulers, summarize general resource allocation scheme 
-patterns, then we will develop a scheduler-agnostic scheme for general 
-datacenter schedulers. Third, currently this scheme requires application 
-developers to determine \vv{R} values for application components. We will 
-leverage our expertise on precise 
-program analysis~\cite{peregrine:sosp11,woodpecker:asplos13} to create new 
-schemes that can automatically analyze an application and assign precise \vv{R} 
-values to different components. We believe that all these directions will 
-generate new conceptual methods.
+
 
 \vspace{-.15in}\subsection{Objective 3: building a new fault-tolerant VM 
 replication architecture}\label{sec:vm}\vspace{-.075in}
 
-%% TBD: must emphasis that primary-backup or migration will clean up dirty 
-% % pages after the transfer, otherwise the tree will become bigger and bigger 
-% and we have not optimization.
 
-% Virtual machines (VM) infrastructures (\eg, Amazon EC2~\cite{amazon:vpc} and 
-% OpenStack~\cite{openstack}) are widely deployed in datacenters and clouds 
-% because they can provide a virtualized abstraction of computing resources to 
-% different applications and enforce strong utilization isolation and security. 
-
-Existing VM fault-tolerance architectures are based on two similar 
-techniques: primary-backup and live migration (\S\ref{sec:others-work}). For 
-instance, after processing every request, the primary-backup technique 
-transfers all memory pages modified by applications (\ie, dirty pages in 4KB) 
-from the primary to backup. This technique consumes 2*\vv{V} resources (\vv{V} 
-denotes resource volumn consumed by an unreplicated execution). Although 
-these two techniques are adopted by industry~\cite{ftvm,vmotion:atc05}, a major 
-problem is that the transfered dirty bytes can be up to 1.7GB 
-(\S\ref{sec:tracking}), causing a substantial  delay and network bandwidth 
-consumption for \emph{every} request.
-
-A key reason for this problem is that existing techniques have only one real 
-application execution. We will use \falcon (\textbf{Objective 1}) to tackle 
-this problem as it maintains multiple real executions. By using \falcon to 
-enforce same inputs across VM replicas, most dirty pages across replicas are 
-same and needn't transfer.
-
-% , these two 
-% existing techniques 
-% face the problems of significant application downtime (\eg, 8 seconds in 
-% vMotion~\cite{vmotion:atc05}) and network bandwidth consumption.
-
-%  Therefore, to transfer dirty pages to a 
-% remote computer, substantial downtime and network bandwidth consumption are 
-% unavoidable.
-
-
-
-
-% Therefore
-% Mainly introduce EC2, Openstak. VM only.
-
-% Briefly introduce VM fault-tolerance techniques. Primary-backup. Remus. 
-% Hypervisor replication (old paper). FaRM.
-% 
-% Talk about migration. It is similar to primary-backup, but mainly for load 
-% balance, not to overcome failures. Main approach is live migration that aims to 
-% reduce application down time. VMotion.
-
-% However, there is still substantial down time and resource consumption. E.g., 
-% vMotion, for memory intensive applications, the down time can be up to 30 
-% seconds. As migration tends to invoke frequently for load balancing, 
-% consolidation, energy saving, this downtime may incur big money lost for cloud 
-% deployers.
-
-% When doing migration, both the local computer and the migration destination 
-% computer incur big resource consumption. This is contraditive to the motivation 
-% of migration: reduing computer loads on the local computer.
-
-\vspace{-.15in}\subsubsection{Integrating \falcon into the KVM hypervisor 
-layer} 
-\label{sec:vm-arch}\vspace{-.075in}
-
-% \begin{figure}[!htb]
-% \centering
-% \vspace{-.2in}
-% \includegraphics[width=0.25\textheight]{figures/vm_arch.ps}
-%         \vspace{-.3in}
-%         \caption{The \falcon and KVM eco-system.}
-%         \label{fig:vm-arch}
-%         \vspace{-.2in}
-% \end{figure}
-
-
-
-
-
-
-
-
-% We will inte \falcon 
-% into the hypervisor layer of popular VMs. 
-We choose KVM~\cite{kvm} as our base VM for two main reasons. First, KVM 
-is a mature, open source hypervisor in Linux. Second, it provides 
-\vv{tap\_send()}, an input capturing API in its hypervisor. This API allows 
-\falcon to intercept network inputs on the leader VM and transparently 
-replicates them on backup VMs.
-% Third, this KVM API runs in 
-% user-space, which allows RDMA to work (RDMA runs in user-space).
-
-%% Consume same resources as primary-backup.
-We proactively design our VM replication architecture to maintain same 2*\vv{V} 
-resource consumption as existing VM fault-tolerance techniques. Although \paxos 
-consumes 3*\vv{V} resources, our design reduces \vv{V} resources by letting 
-one backup act as the \emph{major backup} with a high priority to become a new 
-leader if current leader fails. The major backup agrees on and executes input 
-requests, and the other backup acts as the \emph{standby backup} which only 
-agrees on requests without executing them (\ie, without consuming \vv{V} 
-resources). In total, 2*\vv{V} resources are consumed by the leader and major 
-backup in our VM. To maintain the same fault-tolerance guarantee as \paxos (\ie, 
-to in case the standby backup being elected a leader), the major backup 
-periodically does a standard checkpoint operation as in existing 
-works~\cite{crane:sosp15,rex:eurosys14} and sends it to the standby backup. 
-Although a checkpoint operation will slow down the major backup, it does not 
-affect our performance because the leader and standby backup still form a 
-majority and agree on requests rapidly.
-% Therefore, even if the standby backup is elected a new leader, it extracts 
-% checkpoints and uses the agreed inputs to catch up with old leader quickly.
-
-% If the leader 
-% fails, \falcon gives the major backup a high priority to become the new leader.
-
-% This design has three important benefits: (1) our new VM fault-tolerance 
-% technique consumes roughly same 2*\vv{R} computing resources as existing 
-% techniques; (2) a \paxos majority group still holds; (3) it is robust 
-% because even if the standby backup is elected as a new leader, it can extract 
-% checkpoints and use the aggreed inputs to catch up with the old leader quickly.
-
-% Figure~\ref{fig:vm-arch} shows the architecture of the eco-system. To provide 
-% the same fault-tolerance guarantee with primary-backup, a typical replication 
-% factor of this eco-system is \vv{R=3}. 
-
-% A key benefit of such a \paxos-based VM replication over primary-backup is that 
-% its leadership is strongly consistent (through a majority agreement, which 
-% primary-backup lacks), and it saves the bandwidth consumption for transferring 
-% application execution states in primary-backup.
-
-\vspace{-.15in}\subsubsection{A new synchronization technique to 
-track divergent pages across VM replicas}
-\label{sec:tracking}\vspace{-.075in}
-
-
-
-Although our VM architecture enforces same inputs across VM replicas, 
-minor memory pages may still diverge across replicas (\eg, due to 
-data races~\cite{lu:concurrency-bugs}). We propose a synchronization 
-technique to efficiently track and transfer divergent pages, including (1) 
-an efficient \vv{O(log N)} algorithm to track divergent pages, and (2) 
-leveraging \falcon's RDMA-powered protocol to efficiently and reliably compare 
-divergent pages.
-
-A naive way is linearly comparing all \vv{N} dirty pages between replicas to 
-find divergent ones, but it is as slow as prior primary-backup 
-techniques. Instead, our algorithm uses a Merkle tree~\cite{eve:osdi12} to track 
-dirty pages on each replica. As shown in Figure~\ref{fig:vm-tree}, if a 
-physical page is modified, our VM hypervisor appends it as a leaf to a
-Merkle and incrementally recomputes a  hash with the page content towards all 
-parents. This tree is efficient because if the roots of two trees 
-have same hash, all leaves (pages) are the same.
-
-% Three steps.
-However, our VM architecture poses a new interesting challenge: unlike 
-previous works that tree leaves are static (\eg, Eve~\cite{eve:osdi12} treats 
-static global variables in application code as leaves), the leaves in our trees 
-are dynamic as they are dirty pages. Because dirty pages across replicas can be 
-different, the structures (\ie, the number of internal nodes) of Merkle trees 
-between two replicas can be different and hard to compare.
-
-Our synchronization technique tackles this challenge by introducing a 
-\emph{tree adjustment} phase. It works with four steps. First, after 
-processing one request, leader sends a dirty page bitmap provided by KVM to 
-the major backup. Major backup does a union on this bitmap and its own one 
-and sends back to leader. Second, both leader and the major backup do 
-a tree adjustment with the union bitmap (\eg, a non-dirty page in the union is 
-still appended to the tree), then leader and the backup's trees have same leaves 
-and same structure. Third, leader invokes \textbf{Algorithm 1} to do a 
-\vv{O(log N)} traversal from tree root to find divergent leaves. To compare 
-internal node hashes between leader and backup, the algorithm invokes an 
-augmented \falcon protocol as \textbf{APUS()}, which returns divergent nodes 
-carried in the backup's consensus reply. Fourth, leader transfers divergent 
-pages to the major backup, then they both clear trees and dirty page flags.
-
-% directly save the odp file to eps, level 2.
-\begin{figure}[!htb]
-%     \begin{minipage}{.49\textwidth}
-%         \vspace{-.2in}
-%         \includegraphics[width=0.34\textheight]{figures/vm_arch.ps}
-%         \vspace{-.3in}
-%         \caption{A new fault-tolerant VM for improving application 
-% availability.}
-%         \label{fig:vm-arch}
-%     \end{minipage}
-    \begin{minipage}{0.47\textwidth}
-        \vspace{-.2in}
-        \includegraphics[width=0.33\textheight]{figures/tree.eps}
-        \vspace{-.3in}
-        \caption{Data structures on tracking divergent dirty pages across 
-replicas. Dirty pages are in yellow; divergent dirty pages and parents 
-are in red.}
-        \label{fig:vm-tree}
-    \end{minipage}
-    \begin{minipage}{0.52\textwidth}
-      \vspace{-.2in}
-      \centering
-      \begin{algorithm}[H]
-      \DontPrintSemicolon
-      \scriptsize
-      \SetCommentSty{textrm}
-      \SetKwInOut{Input}{Input}
-      \SetKwInOut{Output}{Output}
-      \Input{The root of Merkle tree on leader, $root$}
-      \Output{Different memory pages between leader and replica, $pages$}
-      
-      \SetKwBlock{Titlea}{Track($root$)}{end}
-      \Titlea {
-%         $diverged$ $\leftarrow$ empty sequence \;
-        $pages$ $\leftarrow$ empty sequence \;
-        $diverged$ $\leftarrow$ \textbf{APUS}($root$, $root$.left(), 
-$root$.right()) \;
-        \For {{\rm $i$ $\leftarrow$ $diverged$.push\_front()}} {
-          \If {{\rm $i$ is\_leaf()}} {
-            $pages$.append($i$) \;
-          }
-          \Else {
-            $diff$ $\leftarrow$ \textbf{APUS}($i$, $i$.left(), 
-$i$.right()) \;
-            $diverged$.append($diff$) \;
-          }
-        }
-        \Return $pages$ \;
-      }
-      \caption{Tracking divergent memory pages}
-      \label{alg:slice}
-      \end{algorithm}
-    \vspace{-.1in}
-    %     \caption{Sketch of path slicing algorithm}
-
-%         \label{fig:algo}
-
-\end{minipage}
-    \vspace{-.1in}
+In the project, we plan to tackle the problem above. We are proposing to
+run unmodified Java program in enclaves to protect computation in public
+clouds or untrusted servers. We will design a Just-In-Time compiler for JVM
+and run secured functions in enclaves.\\
+\textbf{Thread Model} We evaluate the program setup in public clouds.
+In a public cloud, only data provider, and a portion of code
+in the analytic platform
+that is running in the enclaved are trusted. In specific, the JIT compiler and
+the secure functions should be trusted.
+All other components, including operating system,
+hypervisor are trusted. Figure~\ref{fig:threat_public} shows the model (TODO).
+\begin{figure}[!h]
+  \center
+  \footnotesize
+  \includegraphics[width=0.5\textwidth]{figures/threat_public.ps}
+  \caption{\footnotesize{Threat model in public cloud. All grey boxes are not 
+trusted and red lines
+  represent potential leakages or attacks. Data is encrypted outside enclave and 
+is in blue.}}
+  \label{fig:threat_public}
 \end{figure}
 
-To see whether divergent pages are indeed rare, we ran three applications, 
-MongoDB~\cite{mongodb}, Redis~\cite{redis}, and Memcached~\cite{memcached}, on 
-two KVMs with same real-world workloads~\cite{ycsb}. We 
-found 261.1K$\sim$429K dirty pages (\ie, up to 1.7GB). Primary-backup 
-techniques have to transfer all dirty pages. We also found that only 
-14.2$\sim$29.3K of these dirty pages diverged between two VMs. These initial 
-results imply that \textbf{Algorithm 1} can reduce up to 96.7\% transfered pages 
-compared to primary-backup techniques.
+Figure \ref{arch} shows the architecture
+of the system. Programmers annotate some functions as secure, so code of the 
+functions
+and data processed by these functions should be kept as secrets.
+The annotated secure functions are compiled and executed inside
+enclaves so that data and code will not be leaked.
+The Java byte-codes of these function are compiled to native enclave
+codes, and are executed inside enclaves upon function calls.
 
-% To do this, each replica 
-% maintains a Merkle tree kept 
-% updating from the dirty pages. By "dirty", we mean the memory page has been 
-% modified since last synchronization. One problem here is that each VM may have 
-% dirtied different pages. This leads to different structures of Merkle trees and 
-% they are not comparable. \xxx addresses this problem using a fast method as 
-% follows:
+\begin{figure}[tbh]
+  \center
+  \includegraphics[width=0.75\textwidth]{figures/jit_arch.ps}
+  \caption{Architecture of Running Java with SGX. Some of the functions are
+  annotated as secured function and they are compiled by a JIT in a enclave.
+  The compiler compiles the functions into enclave code, so that the program 
+will
+  call into a enclave when calling into this function.}
+  \label{arch}
+\end{figure}
 
-% \begin{small} \textit{(We use $A$ to denote the diverged replica; it will fetch 
-% state 
-% from replica $B$)} \end{small}
-% \begin{enumerate}
-% \item $A$ sends its dirty page bitmap $M_A$ to $B$.
-% \item $B$ does a \textit{bitwise or} calculation \ $M_{union} = M_A | M_B $, 
-% and sends $M_{union}$ back to $A$.
-% \item $A$ and $B$ both update their own Merkle tree according to $M_{union}$. 
-% $A$ sends its updated Merkle tree to $B$. 
-% \item $B$ does a comparison on both Merkle tress to find the differences, as 
-% illustrated in Figure~\ref{fig:tree}.
-% \end{enumerate}
+There are two challenges that we need to address in our design:
+running unmodified Java programs with minimum TCB and
+reducing excessive enclave transitions.
 
-% Our method is efficient for two reasons. First, it only transfers the different 
-% pages between replicas. Because we have made consensus on inputs and we can 
-% turn off \textit{Address Space Layout Randomization} to trade for correctness, 
-% the difference rate will be really small. Second, the use of Merkle tree 
-% optimizes the time complexity of comparison between memory states to $O(\log 
-% n)$.
+% \subsubsection{Running Unmodified Java Programs with Minimum TCB}
+A straightforward approach to run unmodified Java programs in enclaves for
+code and data protections is to run the whole JVM in enclaves.
+However, as argued in a previous work~\cite{securekeeper},
+it will blow up the TCB and cause a high overhead by running the whole JVM in 
+enclaves.
 
-% Describe the infrastructure. Take Ning's figure. Hypervisor. tap\_send().
+% TCB
+SGX is for protecting data and code running in enclaves, but code inside 
+enclaves
+also have accesses to the regular memory region. Therefore, code in the enclaves
+can write sensitive data to unprotected memory regions when the code is 
+compromised.
+The OpenJDK implementation of JVM contains up to millions lines of code, which
+is unpractical for formal verifications as it is time-consuming with
+current methods~\cite{code-verification}.
 
-% \vspace{-.15in}\subsubsection{\paxos-based Live Migration} 
-% \label{sec:vm-migration}\vspace{-.075in}
+% Memory size
+Intel SGX contains a protected memory region call Enclave Page Cache (EPC), and 
+evictions
+from this cache cause expensive encryption costs.
+Although next generation of SGX~\cite{intel-sgx2} may support a larger EPC,
+current generation of SGX only has an EPC up to 128MB. In practice, only around
+90 MB can be allocated. Therefore, running programs with large memory 
+consumption
+will cause much higher overhead. A recent work~\cite{opaque:nsdi17} shows that
+running program below this limit incur an only 7.46\% overhead, while slightly
+exceeding this limit causes 50\% to 60\% overhead.
+Therefore, we have to reduce the TCB size for running unmodified Java programs
+in enclaves.
+
+To reduce TCB size, we propose to run only some programmer-annotated functions
+in enclave. To this end, we propose a split execution framework.
+Only the Intermediate Representation (IR)
+and Code Generation model are trusted in the system. There will be two instances
+of compilers for compiling Java bytecode, one for secure code compilations and 
+one
+for untrusted code compilations. Therefore, the TCB is greatly reduced, as we
+do not need to trust the JVM runtime (\eg{} Garbage Collection). Also, as only
+some functions should be executed securely, the split execution framework
+should not cause high performance overhead.
+
+When calling into and out of a function in enclaves, an ECALL and OCALL
+will be invoked in the CPU. In specific, the CPU is trapped into a new mode 
+(except from
+the User and Privileged mode), and the current frame is encrypted and saved.
+A recent work~\cite{sgxkernel:cf17} shows that enclave transitions are 60X 
+slower
+than system calls and several hundreds times slower than user function calls.
+Moreover, encryption and decryption are required for secure function calls,
+which makes enclave transitions even more time-consuming.
+Our evaluation on a recent privacy-preserving data analytic 
+system~\cite{opaque:nsdi17} shows that
+it incurs 3.4k transitions for processing 10k data (for two operations select 
+and groupBy).
+In fact, these processing functions can be pipelined and processed in a single
+enclave function. Our project takes reducing transitions as one of our targets.
+% Therefore, system with frequent enclave transitions would have high
+
+We introduce two techniques, Cost-based Compilation and Asynchronous
+Enclave Call, to tackle this challenge.
+Cost-based Compilation can make use of the JVM hotspot features, and analyse
+the hotspot enclave functions. It builds a tree of callers and callee of 
+functions,
+and combines two enclaves if the marginal benefit of combining them is larger 
+than
+the transition cost. Figure~\ref{on-time} shows the example. Initially, only 
+function b and d
+are running in enclaves, but the compiler finds out that cost of running c in an 
+enclave
+is less than the transition cost (assume it to be 2), then the whole function a
+will be compile as an enclave. In another case where running function c
+takes a high cost, combinations of enclaves will not happen.
+Therefore, transition of enclaves can be reduced. This technique can be applied
+online or offline. In a offline version, it sample the program and finish the
+optimisation offline.
+
+Asynchronous Enclave Call convert the synchronous enclave calls to asynchronous
+enclave calls. In specific, when a secure function is called,
+the function call and its parameters are put into a QUEUE which will be fetch by
+the enclave can be executed. After finishing execution, the result will be 
+stored
+in QUEUE\_R and the current execution will resume and continue. 
+Figure~\ref{asynccall}
+shows the idea of this technique. This technique makes use of the multi-core
+hardware architecture and enclaves and the main program are running in separate
+threads.
+
+These two technique can be applied simultaneously, the compiler can run the
+sample and optimisation offline. After that, the compiler run a enclave and the 
+program
+in separate threads to avoid transition of enclaves.
+
+% \para{Oblivious Execution}. Our current design does not consider data leakage 
+% through access pattern, but
+% recent work~\cite{access:pattern:ccs15, access:pattern:ndss12} has showed
+% that access pattern can leak a significant amount of
+% sensitive information. Intel SGX does not provide protection for access pattern,
+% and attackers can get the code paths
+% or data access patterns inside the enclave by side channel
+% attacks~\cite{sgx-explain}.
 % 
-% Interestingly, this replication ability not only provides high 
-% availability for fault-tolerance (suitable for the primary-backup scenario), 
-% but can also greatly save resource consumption if fault-tolerance is not a 
-% major concern (suitable for the live migration scenario). Consider the live 
-% migration scenario, \paxos backups can only agree on inputs without actually 
-% executing them, then the overall application execution consumes almost same 
-% resources as the unreplicated one. A backup now can just absorb occasional, 
-% periodical application checkpoints from the leader when the leader replica is 
-% idle, and catches up with the leader when a migration destination is decided on 
-% this backup.
+% Oblivious Ram~\cite{oram:jacm96, hashoram:soda12,oram:soda12, pathoram:ccs13, 
+% circuit:oram:ccs15}
+% is proposed to prevent access pattern leakage, but they need to modify the
+% original program. ObliVM~\cite{oblivm:sp15} is a programming framework for 
+% writing
+% programs with oblivious
+% executions, and it provides a convenient programming language for writing 
+% programs.
+% Oblivious Data Structure~\cite{obli:data:ccs14, obli:data:asiacrypt14} provides
+% efficient oblivious implementation of data structure such as queue, and so on,
+% which is useful for writing oblivious programs. A previous 
+% work~\cite{autooram:sp14} automatically
+% translate a program to a oblivious implementation.
 % 
-% % We propose our own replication approach. The non-leader only agree on new 
-% % inputs, they can opt to execute requests or absorb periodic checkpoints.
-% Leveraging this idea, we propose a fast, network bandwidth-friendly live 
-% migration approach called ``\paxos-based live migration". A key benefit of this 
-% approach is that, now migration does not require transferring all execution 
-% states of application, but only transferring the \paxos leadership (almost as 
-% fast as \paxos consensus latency) to a destination backup which has idle 
-% resources. To increase the chance on finding a proper destination, we can 
-% leverage \falcon's high availability to run many backups within a datacenter.
-
-% This approach is othorgnal to the VM replication. 
-% This \paxos-based live migration approach contains four steps. First, in 
-% normal case, the current computing instance (the leader) just agrees on 
-% incoming inputs with backups using \falcon. A set of backups run on highly 
-% loaded computers and agree on inputs (also record the inputs persistently). 
+% To support oblivious execution for Java programs, we can further
+% extend the secure compiler for compiling a Java program to a oblivious native
+% code, including replacing the branch, loop operations to oblivious operators
+% and making use of the oblivious data structure abstraction.
+% % It can compile the a program% to a sequence of circuits.
+% Therefore, this secure abstraction will be a strong abstraction for
+% secure computations.
 % 
-% Second, the leader does a periodical checkpoint when it's idle (no incoming 
-% requests), and sends the checkpoint to the backups. The backups only keeps 
-% the latest checkpoint and discards prior ones.
+% \para{Support System Calls in Enclaves}. Our current design focus on supporting 
+% secure data analytic programming, so
+% it does not provide support for system calls. We aim to support system
+% calls in the future.
 % 
-% Third, when the VM invokes a migration on the leader computer, it uses a 
-% standard migration mechanism to determine which backup should be the migration 
-% destination (the next leader). Then, the destination extracts the latest
-% checkpoint on local computer, restores the application state, and then catches 
-% up with the leader with executing the recorded but not executed inputs.
-% 
-% Fourth, we invoke a \falcon protocol level operation: migration the 
-% leadership, which is similar to a traditional \paxos leader election 
-% process~\cite{paxos:practical}, but we just explicitly decide the destination 
-% computer as the new leader. \falcon's protocol handles various failure 
-% scenarios (\eg, the destination computer crashes during the migration) as its 
-% \paxos nature.
-
-% TBD: mention the leader election latency in Objective 2.
-% Analysis: this approach incurs almost zero time and resource for a few reasons. 
-% First, the leadership migration is fast (tens of micro seconds). Second, no 
-% frequent execution state transfer during the migration time, only at the 
-% leader's idle time. Third, robust to various scenarios (\eg, destination fails 
-% during the migration), thanking to \paxos.
-
-\para{Future directions.} We anticipate broad research outcomes in two 
-directions. First, we will implement our algorithm and quantify its performance 
-improvement compared to existing primary-backup techniques (\eg, 
-vSphere~\cite{ftvm}). Second, we will apply the algorithm to develop new 
-lightweight VM live migration techniques (\S\ref{sec:others-work}). Because VM 
-primary-backup and migration techniques are applied to address broad challenges 
-(\eg, improving resource utilization, balancing computer loads, and saving 
-datacenter energy), applications of our techniques on these challenges will 
-cultivate even broader innovative techniques.
-
-
-% % TBD: need a new replication approach name.
-% \vspace{-.15in}\subsubsection{Idea I: Hybrid Replication} 
-% \label{sec:defense-arch}\vspace{-.075in}
-% 
-% TBD.
+% We plan to adopt a combination of emulation and delegation design of system call
+% handling like a
+% previous work~\cite{sgxkernel:cf17,graphene:atc17}. Emulation of system calls
+% reduce cost of enclave transition, while delegation can reduce TCB size. We will
+% adopt emulations for simple but usually used system calls. We believe this
+% hybrid design can accomplish a fast but secure system handling in Java.
 
 \vspace{-.15in}\subsection{Research plan} \label{sec:plan}\vspace{-.075in}
 
 This project will require two PhD students S1 and S2 to work for 
-three years. In the first year, S1 will design and fully implement the \falcon 
-protocol (part of \textbf{Objective~1}), and S2 will evaluate its performance 
+three years. In the first year, S1 will design and fully implement the \kakute 
+system (part of \textbf{Objective~1}), and S2 will evaluate its performance 
 and robustness on various real-world storage applications (part of 
 \textbf{Objective~1}). In the second year, S1 will 
-integrate \falcon to a scheduler \mesos (part of \textbf{Objective~2}), and S2 
-will make \falcon and KVM form an eco-system (part of \textbf{Objective~3}). In 
+integrate \kakute with fine-grained privacy (part of \textbf{Objective~2}), and 
+S2 
+will form an eco-system (part of \textbf{Objective~3}). In 
 the third year, S1 and S2 will respectively evaluate the efficacy of their 
 infrastructures built from \textbf{Objective 2} and \textbf{Objective 3} on 
-diverse
-real-world applications.
+diverse real-world applications.
 % Both students will 
 % involve theoretical methods, implement real software systems, and 
 % perform real-world study.
