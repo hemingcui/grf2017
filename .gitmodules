@@ -1,0 +1,6 @@
+[submodule "big2"]
+	path = big2
+	url = https://github.com/hemingcui/bib
+[submodule "bib2"]
+	path = bib2
+	url = https://github.com/hemingcui/bib
