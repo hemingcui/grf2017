@@ -3,7 +3,7 @@ FILES = proposal.toc proposal.bbl proposal.aux proposal.blg proposal.dvi *.log p
 
 all:: bbl proposal
 
-proposal: *.tex bib/biblio.bib figures/*.eps code/*.tex
+proposal: *.tex bib2/biblio.bib figures/*.eps code/*.tex
 	dvipdf proposal.dvi
 	dvips -o proposal.ps -t letter proposal.dvi
 	pdflatex reference.tex
