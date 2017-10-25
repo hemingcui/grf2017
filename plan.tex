@@ -10,99 +10,100 @@ application availability. Finally, it describes
 research plan (\S\ref{sec:plan}).
 % The first two objectives include preliminary results. 
 
-\vspace{-.15in}\subsection{Objective 1: building fast distributed consensus via
-RDMA}\label{sec:protocol}\vspace{-.075in}
+\vspace{-.15in}\subsection{Objective 1: 
+preventing big-data leakage with Precise 
+IFT}\label{sec:protocol}\vspace{-.075in}
 
 This section presents \paxos performance problem (\S\ref{sec:latency-problem}) 
 and a fast, RDMA-powered protocol (\S\ref{sec:falcon}).
 
 \vspace{-.15in}
-\subsubsection{Problem: consensus latency of existing \paxos 
-protocols are slow and unscalable} 
+\subsubsection{Problem: existing IFT systems are slow and incomplete for 
+big-data} 
 \label{sec:latency-problem}\vspace{-.075in}
 
-% P1: as mentioned in background, a key reason is thread interleavings, 
-% so we need to reason about the general patterns we have. Or we say our 
-% methodology is just like pattern matching.
-% Traditional \paxos protocols incur high consensus latency because they go 
-% through OS kernels and software TCP/IP layers. In this 
-% section, \S\ref{sec:problem} analyzes this latency problem and its poor 
-% scalability in detail, and then presents our new RDMA-based \paxos 
-% protocol called \falcon (\S\ref{sec:falcon}).
+No IFT system exists for big-data, and
+we attribute it to two major challenges.
+% performance is slow, reduce two ..by...
+First, existing IFT systems incur high performance overhead, especially for 
+data-intensive computations. We ran a recent IFT system
+Phosphor~\cite{oo14:phosphor} in Spark with a WordCount algorithm on a dataset 
+that is merely 200MB, and
+observed 128X longer computation time compared with the native Spark execution 
+(\chref{subsec:effetiveness}). The second challenge is on the architecture of 
+DISC frameworks.
+DISC frameworks usually contain shuffle procedures which redistribute
+data across hosts (DISC frameworks' worker nodes).
+However, most existing IFT systems ignore dataflows across hosts.
+For the few~\cite{cloudfence:raid13} who support cross-host dataflows,
+transferring all tags in shuffles consumes excessive network
+bandwidth. Therefore, efficient cross-host tag propagation
+is crucial but missing in DISC.
 
-% First, mainly introduce the problems in traditional protocols.
-% Due to the strong fault-tolerance of \paxos, it is widely served in many 
-% systems. For instance, Scatter~\cite{scatter:sosp11} runs 8$\sim$12 replicas in 
-% each \paxos group to order client requests, and it lets replicas respond 
-% requests in parallel. A bigger group size will improve Scatter throughput. 
-% Moreover, recent state machine replication (SMR) 
-% systems~\cite{eve:osdi12,rex:eurosys14,crane:sosp15} use \paxos to greatly 
-% improve the availability of
-% general server programs.
-
-% Despite the wide deployments of \paxos (\S\ref{sec:consensus}), its high 
-% consensus latency makes many software applications suffer. 
-For efficiency, \paxos (\S\ref{sec:consensus}) typically assigns one replica as 
-the leader to propose consensus requests, and the other replicas as backups to 
-agree on requests. If leader fails, \paxos elects a new 
-leader~\cite{paxos:practical}. To agree on an input, at least one message 
-round-trip is required between the leader and a backup. A round-trip causes big 
-latency (hundreds of \us) as it goes through various software layers (\eg, OS 
-kernels).
-
-% This 
-% latency may be acceptable for leader election~\cite{chubby:osdi,zookeeper} or 
-% heavyweight transactions~\cite{crane:sosp15,eve:osdi12}, but undesirable for
-% key-value store applications~\cite{redis,memcached}.
-
-As replica group size increases, \paxos consensus latency scales poorly: it increases
-drastically~\cite{scatter:sosp11} due to the linearly increasing number of 
-consensus messages. One common approach to improve \paxos scalability is 
-leveraging parallel techniques such as multithreading~\cite{zookeeper, 
-spaxos:srds12} or asynchronous IO~\cite{crane:sosp15, libpaxos}. However, the 
-high TCP/IP round-trip latency still exists, and synchronizations in these 
-techniques frequently invoke expensive OS events such as context switches.
-
-Our preliminary study (Figure~\ref{fig:scalability}) ran four \paxos-like 
-protocols~\cite{zookeeper, spaxos:srds12, crane:sosp15, libpaxos} on 40Gbps 
-network with only one client sending consensus requests. When changing the 
-replica group size from 3 to 9, the consensus latency of three protocols 
-increased by \tradlatencyincreaselow to \tradlatencyincreasehigh, and 
-\systemcostlow to \systemcosthigh of this increase was in OS kernel. The only
-exception is S\-Paxos~\cite{spaxos:srds12} because it batches requests from backups
-and starts consensus when the batch is full. More replicas causes shorter time
-to form a batch, but batching aggravates latency.
-
-% Second, briefly mention the problem in DARE. and its scalability bottleneck.
-RDMA appears a promising solution (\S\ref{sec:consensus}) to speed up \paxos. 
-However, fully exploiting RDMA speed in software systems is widely considered 
-challenging by the community~\cite{pilaf:usenix14,herd:sigcomm14,
-farm:sosp15,dare:hpdc15}. For instance, \dare~\cite{dare:hpdc15} presents a
-two-round, RDMA-based \paxos protocol in a sole-leader manner: leader does all 
-RDMA workloads and backups do nothing. Although \dare is fast with 3$\sim$5 
-replicas, our study (Figure~\ref{fig:scalability}) shows that \dare's sole-leader
-nature incurred a scalability bottleneck and thus a linearly increasing 
-latency.
-
-\vspace{-.15in}\subsubsection{\falcon: a fast, scalable RDMA-powered \paxos 
-protocol} 
+\vspace{-.15in}\subsubsection{\kakute: a fast, precise IFT system for big-data} 
 \label{sec:falcon}\vspace{-.075in}
 
-Our key observation is that we should carefully separate RDMA workloads among
-the leader and backups, especially in a scalability-sensitive context. 
-Intuitively, we can let both leader and backups do RDMA writes directly on 
-destination replicas' memory, and let all replicas poll their local memory to 
-receive messages.
+This paper presents \kakute\footnote{Kakute is a precise, multi-purpose weapon 
+used by
+Ninja.}, the first precise and fine-grained information flow
+analysis system in DISC frameworks.
+Our key insight to address the IFT efficiency challenge is that multiple fields 
+of a record
+often have the same tags.
+Leveraging this insight, we present two new techniques, \lazyp and \tagcache.
+\lazyp avoids unnecessary tag combinations by only keeping the \textit{lineage 
+of tags} in
+the same UDF, while \tagcache reduces memory usage by sharing
+tags among multiple fields in each record.
+To tackle the architecture challenge,
+\kakute completely captures dataflows in shuffles, and it efficiently
+reduces the amount of transferred IFT tags using \tagcache.
 
-Although doing so will consume more CPU resources than a sole-leader 
-protocol~\cite{dare:hpdc15}, it has two major benefits. First, both leader and 
-backups participate in consensus, making it possible to reach consensus 
-with only one round~\cite{paxos:practical}. Second, all replicas can just 
-receive consensus messages on their bare, local memory. An analogy is threads 
-receiving other threads' data via bare memory, a fast and scalable computation 
-pattern.
+We will implement \kakute in Spark.
+We leverage Phosphor~\cite{oo14:phosphor}, an efficient IFT system working
+in the Java byte-code level.
+\kakute instruments computations of a Spark worker process
+to capture dataflow inside user-defined-functions (UDFs).
+Dataflow information
+is kept in a worker process and \kakute propagates it to other processes while 
+shuffling.
+Therefore, IFT is completely captured across hosts and processes.
+In this paper, DISC frameworks and \kakute are trusted; UDFs are untrusted and 
+they
+may be malicious or buggy.
+\kakute provides different granularities of tracking with two types of tags: 
+\func{Integer}
+and \func{Object} tags. \func{Integer} provides 32 distinct tags,
+which is suitable for detecting information
+leakage and performance bugs. \func{Object}
+provides an
+arbitrary number of tags, which is suitable for
+data provenance and programming debugging.
+\kakute provides a unified API to tackle diverse problems. Based on this 
+unified API, we implemented 4 built-in checkers for \appsn
+security and reliability problems: sensitive information leakage, data 
+provenance, programming and performance bugs.
 
-
+We evaluated \kakute on \appeval diverse algorithms, including three text 
+processing
+algorithms WordCount~\cite{spark:example}, WordGrep~\cite{newt:socc13} and 
+TwitterHot~\cite{spark:example}, two graph algorithms 
+TentativeClosure~\cite{spark:example}
+and ConnectComponent~\cite{spark:example}, and two medical analysis programs 
+MedicalSort~\cite{pigmix} and MedicalGroup~\cite{pigmix}.
+These algorithms cover
+all big-data algorithms evaluated in two related 
+papers~\cite{vldb15:titian,icse16:bigdebug}.
+We evaluated these algorithms with real-world datasets that are comparable with
+related systems~\cite{vldb16:output, icse16:bigdebug, vldb15:titian}.
+We compared \kakute with Titian~\cite{vldb15:titian}, a popular provenance 
+system, on precision and performance.
+Our evaluation shows that: (1) \kakute is fast. Kakute had merely \timeavg 
+overhead with \func{Integer}
+  tag, suitable for production runs; and (2) \kakute is precise;
+ it effectively detected 13 real-world security and reliability
+  bugs presented in other 
+papers~\cite{arthur:dave2013,icse16:bigdebug,airavat:nsdi10}.
 
 % In \xxx, all replicas directly write to destination
 % replicas' memory and poll messages from local memory to receive messages, and 
