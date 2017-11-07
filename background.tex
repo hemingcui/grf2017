@@ -59,8 +59,8 @@ of resources, as each byte of data in an DFT system has its own
 tags~\cite{libdft:vee12}. DFT has been applied to various areas, such as 
 preventing sensitive information 
 (\eg GPS data and contacts) leakage in cellphone~\cite{taintdroid:osdi10, 
-cleanos:osdi12}, providing secure cloud services~\cite{cloudfence:raid13} and 
-server program runtime~\cite{libdft:vee12}. To the best of our knowledge, no 
+cleanos:osdi12}, providing secure web services~\cite{cloudfence:raid13} and 
+server programs~\cite{libdft:vee12}. To the best of our knowledge, no 
 DFT system exists for big-data computing.
  
 % Multiple research has been focusing on efficiency and applications of DFT.
@@ -71,37 +71,43 @@ DFT system exists for big-data computing.
 % debugging primitives to improve software reliability.
 
 
-Complimentary to DFT, statistical techniques works adopt complicated 
-anonymization methods~\cite{kanonymity,icde06:ldiversity} or
-differential privacy~\cite{gupt:sigmod12, pinq:sigmod09,airavat:nsdi10} that 
-enforces statistical
-bounds to prevent individual information leakage.
+Complimentary to DFT, statistical techniques allow the aggregration of 
+sensitive data while preserving the privacy of any individual one. These 
+statistical techniques include k\-anonymization 
+methods~\cite{kanonymity,icde06:ldiversity} or
+differential privacy~\cite{gupt:sigmod12, pinq:sigmod09,airavat:nsdi10}, which 
+enforce statistical bounds to prevent individual information leakage.
 % Therefore, third-parties can
 % not get sensitive data with different queries.
 
-However, these approaches are
-either not secure (anonymization) or suffering from great losses of accuracy 
-(differential privacy).
-A recent
+However, these statistical techniques are either not secure (k\-anonymization) 
+or suffering from great losses of accuracy (differential privacy). A recent
 work~\cite{differentialresult:vldb15} reported more than 30\% losses of accuracy 
-when the security
-guarantee is high (the probability of leakages is low). In such case, a simple 
-KMeans program
-will return centroids far from the accurate ones, and the accuracy loss rate is
-much larger than the training error rate which is several percents in practice.
-% 4. They are not accurate and per-record, only some field are sensitive
+when the security guarantee is high (the probability of leakages is low). In 
+such case, a simple KMeans program will return centroids far from the accurate 
+ones, and the accuracy loss rate is much larger than the training error rate 
+which is several percents in practice. Overall, despite much effort, existing 
+differential privacy techniques can only favor privacy or utility of results, 
+but not both, and key reason is that these techniques lack a precise tracking 
+of how sensitive data fields flow to query results, so they have to take a 
+coarse-grained approach, which conservatively adds noise to all fields and 
+records.
+
 
 In practice, only some fields in a data record may be sensitive and it is too 
-rigorous
-to make all fields inaccurate. Moreover, different data records may have various
-security levels.
-For example, in an Taobao order record $\langle$\v{time},
-\v{userId}, \v{productID}$\rangle$, the \v{userId} field is sensitive
-and it must not be leaked, and different owners of movie rating records may 
-demand different
-levels of protection for their data.
+rigorous to make all fields inaccurate. Moreover, different data records may 
+have various security levels. For example, in an Taobao order record 
+$\langle$\v{time}, \v{userId}, \v{productID}$\rangle$, the \v{userId} field is 
+sensitive and it must not be leaked, and different owners of movie rating 
+records may demand different levels of protection for their 
+data. \textbf{Objective 2} (\chref{sec:obj2}) 
+proposes a novel fine-grained differential privacy technique, which combines  
+the strengths of DFT and differential privacy.
+% 4. They are not accurate and per-record, only some field are sensitive
 
-\vspace{-.15in}\subsection{Intel SGX}
+
+
+\vspace{-.15in}\subsection{Hardware-based Privacy Techniques}
 \label{sec:sgx}\vspace{-.075in}
 
 Trusted Execution Environment (TEE) is a promising technique that
