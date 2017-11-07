@@ -4,54 +4,46 @@
 
 This section introduces the background of big-data 
 frameworks (\S\ref{sec:bigdata}), sofware-based privacy techniques  
-(\S\ref{sec:dft}), and hardware-based privacy techniques (\S\ref{sec:dft}).
-% datacenter computing infrastructures (\S\ref{sec:datacenter}), motivation of 
-% objectives (\S\ref{sec:motivation}), others' related work 
-% (\S\ref{sec:others-work}), and the PI and co-I's related work 
-% (\S\ref{sec:my-work}).
+(\S\ref{sec:dft}), hardware-based privacy techniques (\S\ref{sec:sgx}), 
+motivation of objectives (\S\ref{sec:motivation}), and related work 
+(\S\ref{sec:others-work} and \S\ref{sec:my-work}).
+
 
 \vspace{-.15in}\subsection{Big-data Computing Frameworks} 
 \label{sec:bigdata}\vspace{-.075in}
 
-DISC frameworks (\eg Spark~\cite{nsdi12:spark},
+Big-data frameworks (\eg Spark~\cite{nsdi12:spark}, 
 DryadLINQ~\cite{osdi08:dryad}, MapReduce \cite{mapreduce}) are popular for 
-computations
-on tremendous
-amounts of data, to finish tasks like data analysis and machine learning.
-Computations are split across hosts and run in parallel, such that
-computation resources are efficiently used.
-% Therefore, computation powers are beyond the limit of one single machine, as a 
-large-scale
-% cluster of machines can cooperate to process one computation task.
-Shuffles are frequent and sometimes are performance bottlenecks in DISC.
-% in these systems.
-% Spark~\cite{nsdi12:spark} has data shuffling during
-% reduce stages, graph processing frameworks (\eg Pregal~\cite{sigmod10:pregel})
-% uses messages for node updates, and Parameter Server~\cite{osdi14:pserver} has
-% parameter updates.
+computations on tremendous amounts of data. These frameworks provide 
+self-defined functions (\eg, map and reduce) to let computation providors 
+write their algorithms to perform queries or transformations on data, and these 
+frameworks automatically apply the functions on the data stored across 
+computers in parallel. To exchange intermediate results across hosts, shuffles 
+operations are often invoked and sometimes they are performance bottlenecks in 
+big-data frameworks. For instance, Spark~\cite{nsdi12:spark} has intensive data 
+shuffling beteen its map and reduce stages.
 
 % Many-to-many transformations (\eg \func{groupByKey}, \func{join}
-% and \func{aggregateByKey}) are prevalent in DISC. Each many-to-many
+% and \func{aggregateByKey}) are prevalent in these frameworks. Each many-to-many
 % transformation takes many input records and generates many output records.
-% Given a buggy output record, extant data provenance 
-% system~\cite{icse16:bigdebug,vldb15:titian,vldb16:output} will
+% Given an output record, extant data provenance 
+% techniques~\cite{icse16:bigdebug,vldb15:titian,vldb16:output}, which track the 
+% sequence of transformation operations for data records and can infer the input 
+% records on a given output record, will
 % report all input records going through this transformation, including many
 % irrelevant input records that generate other output records.
 
 
 To avoid excessive computation, many DISC systems adopt the lazy transformation 
-approach.
-~\cite{pig:vldb08,nsdi12:spark,osdi08:dryad}.
-Spark uses lazy transformations (\eg \func{map}) for efficiency,
-and calls to these transformations only create a new data structure called 
-\func{RDD} with \func{lineage}.
+approach~\cite{pig:vldb08,nsdi12:spark,osdi08:dryad}. Spark uses lazy 
+transformations (\eg \func{map}) for efficiency, and calls to these 
+transformations only create a new data structure called \func{RDD} with 
+\func{lineage} (the sequence of transformation operations for a data record).
 The real transformations are only triggered when collecting operations (\eg 
-\func{collect},
-\func{count}) are called. These collecting operations trigger transformations 
-along
-lineages, where unnecessary computations are avoided. 
-\kakute (\chref{sec:kakute}) leverages the lazy transformation
-feature in DISC to present its new \lazyp technique.
+\func{collect}, \func{count}) are called. These collecting operations trigger 
+transformations along lineages, where unnecessary computations are avoided. 
+\textbf{Objective 1} (\chref{sec:kakute}) leverages the lazy transformation
+feature in big-data frameworks to develop its new \lazyp technique.
 
 \vspace{-.15in}\subsection{DFT and Diff Privacy}
 \label{sec:dft}\vspace{-.075in}
@@ -104,20 +96,18 @@ These methods causes two problems. First, modifications are necessary to run
 programs in enclaves. Second, running C++ in JVM breaks the protections
 provided Java.
 
-% \vspace{-.15in}\subsection{Motivation of objectives} 
-% \label{sec:motivation}\vspace{-.075in}
+\vspace{-.15in}\subsection{Motivation of objectives} 
+\label{sec:motivation}\vspace{-.075in}
+TBD.
 
-
-
-% \vspace{-.15in}% hack, for the gaia footnote.
 \subsection{Related work by others} 
 \label{sec:others-work}\vspace{-.075in}
 
-\subsection{Software-based Privacy-preserving Analytic}
-Homomorphic encryption~\cite{fullmomo:stoc09,paillier,elgamal} is a 
-software-based
-techniques for protecting data in untrusted environments. Homomorphic encryption
-can be sorted as two kinds: Fully homomorphic encryption (FHE) and partial 
+\para{Computing on encrypted data}. Homomorphic 
+encryption~\cite{fullmomo:stoc09,paillier,elgamal} is a
+technique for performing computations on encryted data in untrusted 
+environments. Homomorphic encryption contain two kinds: Fully 
+homomorphic encryption (FHE) and partial 
 homomorphic encryption.
 Partial homomorphic encryption (\eg{} Additive Homomorphic 
 Encryption~\cite{paillier})
