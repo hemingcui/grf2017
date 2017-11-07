@@ -110,23 +110,34 @@ the strengths of DFT and differential privacy.
 \vspace{-.15in}\subsection{Hardware-based Privacy Techniques}
 \label{sec:sgx}\vspace{-.075in}
 
-Trusted Execution Environment (TEE) is a promising technique that
-protects computation on cloud even through the operating system is
-compromised. The program is running in a secure environment, and memory can not
-be seen by malicious parties. For example, Intel-SGX~\cite{intel-sgx} runs 
-programs
-in a enclave, which is protected and can not be see by the system.
+Trusted Execution Environment (TEE) is a promising technique for
+protecting computation in a public cloud even if the cloud's operating system 
+is compromised. When a program runs in a TEE, the memory can 
+not be seen by outside parties. Intel-SGX~\cite{intel-sgx} is a commercial TEE 
+implimenon which runs programs in a hardwareprote enclave, so code and data 
+are protected and can not be seen by the attackers.
+Compared with the approach based on encryption, the hardware-based approach is 
+much
+faster. A current big-data analytic
+system opaque~\cite{opaque:nsdi17} reports only 30\% overhead, which makes it
+a practical system for production employment.
 
-However, running programs in a enclave needs modifications to the original
+However, it is challenging to run programs in enclaves. First,
+running programs in a enclave needs modifications to the original
 programs, which needs a great effort and is error-prone. Recent
 work~\cite{securekeeper,opaque:nsdi17} run Zookeeper and SparkSQL in enclaves,
 and both of them rewrote codes running in enclaves using C++.
-BigMatrix~\cite{bigmatrix:ccs17} proposes a secure and oblivious vectorization
-abstraction for Python, but it also needs modifications to the original 
-programs.
-These methods causes two problems. First, modifications are necessary to run
-programs in enclaves. Second, running C++ in JVM breaks the protections
-provided Java.
+SGX-BigMatrix~\cite{bigmatrix:ccs17} proposes a secure and oblivious 
+vectorization
+abstraction for Python, but it needs to rewrite programs with its abstraction.
+% These methods causes two problems.
+% First, modifications are necessary to run
+% programs in enclaves.
+Moreover, running C++ in JVM breaks the protections
+provided by Java. Second, it is challenging to run programs in enclaves with 
+minimum
+TCB. Running a whole JVM in enclaves is considered impractical as size of TCB
+is too large~\cite{securekeeper}.
 
 \vspace{-.15in}\subsection{Motivation of objectives} 
 \label{sec:motivation}\vspace{-.075in}
