@@ -111,33 +111,36 @@ the strengths of DFT and differential privacy.
 \label{sec:sgx}\vspace{-.075in}
 
 Trusted Execution Environment (TEE) is a promising technique for
-protecting computation in a public cloud even if the cloud's operating system 
-is compromised. When a program runs in a TEE, the memory can 
-not be seen by outside parties. Intel-SGX~\cite{intel-sgx} is a commercial TEE 
-implimenon which runs programs in a hardwareprote enclave, so code and data 
-are protected and can not be seen by the attackers.
-Compared with the approach based on encryption, the hardware-based approach is 
-much
-faster. A current big-data analytic
-system opaque~\cite{opaque:nsdi17} reports only 30\% overhead, which makes it
-a practical system for production employment.
+protecting computation in a public cloud even if the cloud's operating systems 
+or hypervisors are compromised. When a program runs in a TEE, the memory can 
+not be seen by outside parties. Intel-SGX~\cite{intel-sgx} is a popular 
+commercial TEE implementation which runs programs in a hardware-protected 
+enclave, so code and data are protected and can not be seen by the attackers. 
+Compared with the approach of computating on encrypted data 
+(\S\ref{sec:others-work}), TEE is much safer and 100X to 1000X faster. A 
+SGX-based work Opaque~\cite{opaque:nsdi17} reports only 30\% overhead compared 
+to native big-data queries, promising for real-world demployment.
 
-However, it is challenging to run programs in enclaves. First,
-running programs in a enclave needs modifications to the original
-programs, which needs a great effort and is error-prone. Recent
-work~\cite{securekeeper,opaque:nsdi17} run Zookeeper and SparkSQL in enclaves,
-and both of them rewrote codes running in enclaves using C++.
+However, to practically run Java big-data queries with SGX, two open challenges 
+remain. First, running programs in a enclave needs rewriting the readily 
+pervasive Java queries into SGX-compatible C++, which is extremely 
+time-consuming and error-prone. Recent work~\cite{securekeeper,opaque:nsdi17} 
+run Zookeeper and SparkSQL in enclaves, and both of them rewrote codes running 
+in enclaves using C++. In the long run, SGX tends not to support Java 
+(partially due to minimizing TCB, see below), thus running unmodified big-data 
+queries with SGX is highly desirable.
+
+% Running C++ in JVM breaks the protections
+% provided by Java. 
+Second, existing SGX-based systems for big-data have too large Trusted 
+Computing Base (TCB). Running a whole JVM in enclaves is considered impractical 
+as size of TCB is too large~\cite{securekeeper}, because JVM code comes from 
+many different parties/vendors and extremely hard to verified. 
 SGX-BigMatrix~\cite{bigmatrix:ccs17} proposes a secure and oblivious 
-vectorization
-abstraction for Python, but it needs to rewrite programs with its abstraction.
-% These methods causes two problems.
-% First, modifications are necessary to run
-% programs in enclaves.
-Moreover, running C++ in JVM breaks the protections
-provided by Java. Second, it is challenging to run programs in enclaves with 
-minimum
-TCB. Running a whole JVM in enclaves is considered impractical as size of TCB
-is too large~\cite{securekeeper}.
+vectorization abstraction for Python, but it needs to rewrite programs with its 
+abstraction. Overall, it is challenging to run programs in enclaves 
+with minimum TCB. \textbf{Objective 3} (\chref{sec:obj3}) aims to tackle these 
+two open challenges.
 
 \vspace{-.15in}\subsection{Motivation of objectives} 
 \label{sec:motivation}\vspace{-.075in}
