@@ -2,7 +2,7 @@
 \label{sec:background}\vspace{-.075in}
 
 
-This section introduces the background of big-data 
+This section presents the background of big-data 
 frameworks (\S\ref{sec:bigdata}), sofware-based privacy techniques  
 (\S\ref{sec:dft}), hardware-based privacy techniques (\S\ref{sec:sgx}), 
 motivation (\S\ref{sec:motivation}), and related work 
@@ -12,16 +12,16 @@ motivation (\S\ref{sec:motivation}), and related work
 \vspace{-.15in}\subsection{Big-data Computing Frameworks} 
 \label{sec:bigdata}\vspace{-.075in}
 
-Big-data frameworks (\eg Spark~\cite{nsdi12:spark}, 
-DryadLINQ~\cite{osdi08:dryad}, MapReduce \cite{mapreduce}) are popular for 
-computations on tremendous amounts of data. These frameworks provide 
-self-defined functions (\eg, map and reduce) to let computation providors 
-write their algorithms to perform queries or transformations on data, and these 
-frameworks automatically apply the functions on the data stored across 
-computers in parallel. To exchange intermediate results across hosts, shuffles 
-operations are often invoked and sometimes they are performance bottlenecks in 
-big-data frameworks. For instance, Spark~\cite{nsdi12:spark} has intensive data 
-shuffling beteen its map and reduce stages.
+Big-data frameworks (\eg, Spark~\cite{nsdi12:spark} and MapReduce 
+\cite{mapreduce}) are popular for computations on tremendous amounts of data. 
+These frameworks provide self-defined Java functions (\eg, 
+\func{map}/\func{reduce}) to let computational providers write their 
+algorithms, and they and automatically apply these functions on the data stored 
+across computers in parallel.
+% To exchange results across computers, shuffles 
+% operations are often invoked and sometimes they are performance bottlenecks in 
+% big-data frameworks. For instance, Spark~\cite{nsdi12:spark} has intensive data 
+% shuffling beteen its \func{map} and \func{reduce} stages.
 
 % Many-to-many transformations (\eg \func{groupByKey}, \func{join}
 % and \func{aggregateByKey}) are prevalent in these frameworks. Each many-to-many
@@ -34,34 +34,33 @@ shuffling beteen its map and reduce stages.
 % irrelevant input records that generate other output records.
 
 
-To avoid excessive computation, many DISC systems adopt the lazy transformation 
-approach~\cite{pig:vldb08,nsdi12:spark,osdi08:dryad}. Spark uses lazy 
-transformations (\eg \func{map}) for efficiency, and calls to these 
-transformations only create a new data structure called \func{RDD} with 
-\func{lineage} (the sequence of transformation operations for a data record).
-The real transformations are only triggered when collecting operations (\eg 
-\func{collect}, \func{count}) are called. These collecting operations trigger 
-transformations along lineages, where unnecessary computations are avoided. 
-\textbf{Objective 1} (\chref{sec:kakute}) leverages the lazy transformation
-feature in big-data frameworks to develop the new \lazyp technique.
+To avoid excessive computation, big-data frameworks adopt a lazy 
+transformation approach~\cite{pig:vldb08,nsdi12:spark,osdi08:dryad}. Spark 
+often uses lazy transformations (\eg, \func{map}), and calls to 
+these transformations only create a new data structure called \func{RDD} with 
+\emph{lineage} (the sequence of transformations for a data record).
+The actual transformations are only triggered when collecting 
+operations (\eg, \func{collect}, \func{count}) are called. These collecting 
+operations trigger transformations along lineages, so unnecessary 
+computations are avoided. \textbf{Objective 1} will leverage lazy 
+transformation to create a fast DFT technique called \lazyp (\S\ref{sec:obj1}).
 
 \vspace{-.15in}\subsection{Software-based Privacy Techniques}
 \label{sec:dft}\vspace{-.075in}
 
 Data Flow Tracking (DFT) is a mandatory access control technique for preventing 
 sensitive information leakage~\cite{dawn05:taint}. DFT attaches a tag to a 
-variable (or object), and this tag will propagate throughout the computation at 
-runtime. For example, a variable-level dataflow tracking will involve 
-combinations of tags of two variables in each instruction, using an IOR 
-operation. Different granularities of computation may incur different levels of 
-computation overhead. Lower level (\eg byte-level) tracking will consume a lot 
-of resources, as each byte of data in an DFT system has its own 
-tags~\cite{libdft:vee12}. DFT has been applied to various areas, such as 
-preventing sensitive information 
-(\eg GPS data and contacts) leakage in cellphone~\cite{taintdroid:osdi10, 
-cleanos:osdi12}, providing secure web services~\cite{cloudfence:raid13} and 
-server programs~\cite{libdft:vee12}. To the best of our knowledge, no 
-DFT system exists for big-data computing.
+variable (or object), and this tag will propagate throughou computations on the 
+variable at runtime. DFT has been applied to various areas, such as preventing 
+sensitive information (\eg GPS data and contacts) leakage in 
+cellphone~\cite{taintdroid:osdi10,cleanos:osdi12}, web 
+services~\cite{cloudfence:raid13}, and server programs~\cite{libdft:vee12}. To 
+the best of our knowledge, no DFT system exists for big-data computing.
+ 
+% Different granularities of computation may incur different levels of 
+% computation overhead. Lower level (\eg byte-level) tracking will consume a lot 
+% of resources, as each byte of data in an DFT system has its own 
+% tags~\cite{libdft:vee12}.  
  
 % Multiple research has been focusing on efficiency and applications of DFT.
 % Shadowreplica~\cite{shadowreplica:ccs13} proposed to make use of the multicore 
@@ -71,38 +70,47 @@ DFT system exists for big-data computing.
 % debugging primitives to improve software reliability.
 
 
-Complimentary to DFT, statistical techniques allow the aggregration of 
-sensitive data while preserving the privacy of any individual one. These 
-statistical techniques include k\-anonymization 
-methods~\cite{kanonymity,icde06:ldiversity} or
-differential privacy~\cite{gupt:sigmod12, pinq:sigmod09,airavat:nsdi10}, which 
-enforce statistical bounds to prevent individual information leakage.
+Complimentary to DFT, statistical techniques, including \func{k}-anonymization 
+methods~\cite{kanonymity,icde06:ldiversity} and
+differential privacy~\cite{gupt:sigmod12, pinq:sigmod09,airavat:nsdi10}, allow 
+the aggregration of sensitive data while adding random noise to preserve 
+individual privacy. However, these statistical techniques are either not secure 
+(\func{k}-anonymization) or suffering from great losses of accuracy 
+(differential privacy). A recent work~\cite{differentialresult:vldb15} reports 
+more than 30\% losses of accuracy. For a query results, low accuracy means 
+bad utility: a simple KMeans program will return centroids far from the 
+accurate ones, and the accuracy loss rate is much larger than the training error 
+rate which is several percents in practice.
+
+A key reason for this bad utility problem is that differential privacy can not 
+track how sensitive data fields flow to query results, so they have to take a 
+coarse-grained approach, which conservatively adds noise to all fields and 
+records. \textbf{Objective 2} (\chref{sec:obj2}) proposes a novel fine-grained 
+differential privacy technique, which combines  the strengths of DFT and 
+differential privacy.
+% These 
+% statistical techniques  which 
+% enforce statistical bounds to prevent individual information leakage.
 % Therefore, third-parties can
 % not get sensitive data with different queries.
 
-However, these statistical techniques are either not secure (k\-anonymization) 
-or suffering from great losses of accuracy (differential privacy). A recent
-work~\cite{differentialresult:vldb15} reported more than 30\% losses of accuracy 
-when the security guarantee is high (the probability of leakages is low). In 
-such case, a simple KMeans program will return centroids far from the accurate 
-ones, and the accuracy loss rate is much larger than the training error rate 
-which is several percents in practice. Overall, despite much effort, existing 
-differential privacy techniques can only favor privacy or utility of results, 
-but not both, and key reason is that these techniques lack a precise tracking 
-of how sensitive data fields flow to query results, so they have to take a 
-coarse-grained approach, which conservatively adds noise to all fields and 
-records.
 
 
-In practice, only some fields in a data record may be sensitive and it is too 
-rigorous to make all fields inaccurate. Moreover, different data records may 
-have various security levels. For example, in an Taobao order record 
-$\langle$\v{time}, \v{userId}, \v{productID}$\rangle$, the \v{userId} field is 
-sensitive and it must not be leaked, and different owners of movie rating 
-records may demand different levels of protection for their 
-data. \textbf{Objective 2} (\chref{sec:obj2}) 
-proposes a novel fine-grained differential privacy technique, which combines  
-the strengths of DFT and differential privacy.
+% Overall, despite much effort, existing 
+% differential privacy techniques can only favor privacy or utility of results, 
+% but not both, and key reason is that these techniques lack a precise tracking 
+% of how sensitive data fields flow to query results, so they have to take a 
+% coarse-grained approach, which conservatively adds noise to all fields and 
+% records.
+% 
+% 
+% In practice, only some fields in a data record may be sensitive and it is too 
+% rigorous to make all fields inaccurate. Moreover, different data records may 
+% have various security levels. For example, in an Taobao order record 
+% $\langle$\v{time}, \v{userId}, \v{productID}$\rangle$, the \v{userId} field is 
+% sensitive and it must not be leaked, and different owners of movie rating 
+% records may demand different levels of protection for their 
+% data. 
 % 4. They are not accurate and per-record, only some field are sensitive
 
 
@@ -112,35 +120,25 @@ the strengths of DFT and differential privacy.
 
 Trusted Execution Environment (TEE) is a promising technique for
 protecting computation in a public cloud even if the cloud's operating systems 
-or hypervisors are compromised. When a program runs in a TEE, the memory can 
-not be seen by outside parties. Intel-SGX~\cite{intel-sgx} is a popular 
-commercial TEE implementation which runs programs in a hardware-protected 
-enclave, so code and data are protected and can not be seen by the attackers. 
-Compared with the approach of computating on encrypted data 
-(\S\ref{sec:others-work}), TEE is much safer and 100X to 1000X faster. A 
-SGX-based work Opaque~\cite{opaque:nsdi17} reports only 30\% overhead compared 
-to native big-data queries, promising for real-world demployment.
+or hypervisors are compromised. For instance, Intel-SGX~\cite{intel-sgx}, a 
+popular commercial TEE product, runs a program in a hardware-protected 
+\emph{enclave}, so code and data are protected from outside. Compared with the 
+approach of computating on encrypted data (\S\ref{sec:others-work}), TEE is much 
+safer and 100X to 1000X faster. For instance, a SGX-based system 
+Opaque~\cite{opaque:nsdi17} incurs a moderate performance overhead of 30\% 
+compared to native big-data queries.
 
 However, to practically run Java big-data queries with SGX, two open challenges 
-remain. First, running programs in a enclave needs rewriting the readily 
-pervasive Java queries into SGX-compatible C++, which is extremely 
-time-consuming and error-prone. Recent work~\cite{securekeeper,opaque:nsdi17} 
-run Zookeeper and SparkSQL in enclaves, and both of them rewrote codes running 
-in enclaves using C++. In the long run, SGX tends not to support Java 
-(partially due to minimizing TCB, see below), thus running unmodified big-data 
-queries with SGX is highly desirable.
-
-% Running C++ in JVM breaks the protections
-% provided by Java. 
+remain. First, existing SGX-based systems~\cite{opaque:nsdi17}requres 
+computational providers to manually rewrite the readily pervasive Java 
+queries into SGX-compatible C++, a time-consuming and error-prone process.
 Second, existing SGX-based systems for big-data have too large Trusted 
-Computing Base (TCB). Running a whole JVM in enclaves is considered impractical 
-as size of TCB is too large~\cite{securekeeper}, because JVM code comes from 
-many different parties/vendors and extremely hard to verified. 
-SGX-BigMatrix~\cite{bigmatrix:ccs17} proposes a secure and oblivious 
-vectorization abstraction for Python, but it needs to rewrite programs with its 
-abstraction. Overall, it is challenging to run programs in enclaves 
-with minimum TCB. \textbf{Objective 3} (\chref{sec:obj3}) aims to tackle these 
-two open challenges.
+Computing Base (TCB). Existing systems 
+(\eg, SGX-BigMatrix~\cite{bigmatrix:ccs17}) run a whole language interpreter 
+(\eg, JVM and Python runtime) in enclaves, causing a too large (and too 
+dangerous) TCB: JVM code comes from many different parties/vendors and 
+extremely hard to verified. \textbf{Objective 3} (\chref{sec:obj3}) takles
+these two open challenges by building a new just-in-time compiler.
 
 \vspace{-.15in}\subsection{Motivation of objectives} 
 \label{sec:motivation}\vspace{-.075in}
@@ -198,6 +196,11 @@ abstraction on python, but it has limited expressiveness and it needs to
 rewrite the original program with this new abstraction. Although BigMatrix 
 provides guideline for writing a oblivious program, but it would be a 
 time-consuming and error-prone process.
+
+% Recent work~\cite{securekeeper,opaque:nsdi17} run Zookeeper and SparkSQL in 
+% enclaves, and both of them rewrote codes running in enclaves using C++. In the 
+% long run, SGX tends not to support Java (partially due to minimizing TCB, see 
+% below), thus running unmodified big-data queries with SGX is highly desirable.
 
 \para{Big-data privacy systems}. Big-data privacy has been a top 
 emerging threat as more and more user sensitive data is captured and processed 
