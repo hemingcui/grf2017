@@ -98,7 +98,8 @@ performance bugs.
   \vspace{-.1in}
   \includegraphics[width=7cm]{figures/time_overhead.ps}\\
   \vspace{-.3in}
-  \caption{\kakute execution time normalized to Spark executions.}
+  \caption{\kakute execution time normalized to native Spark executions. 100\% 
+means no overhead.}
   \label{fig:scalability}
 \end{wrapfigure}
 
@@ -115,9 +116,9 @@ real-world datasets that are comparable with related
 systems~\cite{vldb16:output, icse16:bigdebug, vldb15:titian}.
 We compared \kakute with Titian~\cite{vldb15:titian}, a popular provenance 
 system, on precision and performance. Our evaluation shows that: (1) \kakute is 
-fast. Kakute had merely \timeavg overhead with \func{Integer} tag, suitable for 
-production runs; and (2) \kakute is precise; it effectively detected 13 
-real-world security and reliability bugs presented in 
+fast. Kakute had merely \timeavg overhead (Figure~\ref{fig:scalability}) with 
+\func{Integer} tag, suitable for production runs; and (2) \kakute is precise; it 
+detected 13 real-world security and reliability bugs presented in 
 other papers~\cite{arthur:dave2013,icse16:bigdebug,airavat:nsdi10}.
 
 % In \xxx, all replicas directly write to destination
