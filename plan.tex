@@ -1,40 +1,38 @@
 \vspace{-.15in}\section{Research Plan and Methodology}
-\label{sec:plan}\vspace{-.075in}
+\label{sec:plan}
 
-% \xxx strengthens the reliability of datacenter 
-% computing with a holistic methodology.
-This section first proposes the three objectives in this proposal.
+% \vspace{-.075in}
+% 
+% % \xxx strengthens the reliability of datacenter 
+% % computing with a holistic methodology.
+% This section first proposes the three objectives in this proposal.
 % The first two objectives include preliminary results. 
 
 \vspace{-.15in}\subsection{Objective 1: 
-preventing big-data leakage with Precise 
-IFT}\label{sec:obj1}\vspace{-.075in}
-
-This section presents \paxos performance problem (\S\ref{sec:ift-problem}) 
-and \kakute (\S\ref{sec:kakute}).
+preventing big-data computational leakage with \kakute}\label{sec:obj1}
+\vspace{-.075in}
+% % 
+This section presents major challenges in existing DFT systems 
+(\S\ref{sec:ift-problem}) and \kakute (\S\ref{sec:kakute}).
 
 \vspace{-.15in}
-\subsubsection{Problem: existing IFT systems are slow and incomplete for 
+\subsubsection{Challenges: existing DFT systems are too slow and incomplete for 
 big-data} 
 \label{sec:ift-problem}\vspace{-.075in}
 
-No IFT system exists for big-data, and
-we attribute it to two major challenges.
-% performance is slow, reduce two ..by...
-First, existing IFT systems incur high performance overhead, especially for 
-data-intensive computations. We ran a recent IFT system
-Phosphor~\cite{oo14:phosphor} in Spark with a WordCount algorithm on a dataset 
-that is merely 200MB, and
-observed 128X longer computation time compared with the native Spark execution 
-(\chref{sec:bigdata}). The second challenge is on the architecture of 
-DISC frameworks.
-DISC frameworks usually contain shuffle procedures which redistribute
-data across hosts (DISC frameworks' worker nodes).
-However, most existing IFT systems ignore dataflows across hosts.
-For the few~\cite{cloudfence:raid13} who support cross-host dataflows,
-transferring all tags in shuffles consumes excessive network
-bandwidth. Therefore, efficient cross-host tag propagation
-is crucial but missing in DISC.
+Although DFT is a powerful access control technique, existing DFT systems incur 
+high performance overhead, especially for data-intensive computations. For 
+instance, we ran a recent DFT system Phosphor~\cite{oo14:phosphor} in Spark 
+with a WordCount algorithm on a small dataset of merely 200MB, and we observed 
+128X longer computation time compared with the native Spark 
+execution~\cite{kakute:acsac17}. The second challenge is completeness: 
+big-data frameworks usually contain \emph{shuffle} operations, which 
+redistribute data and results across computers. However, most existing DFT 
+systems ignore dataflows across computers. For the 
+few~\cite{cloudfence:raid13} who support cross-host dataflows, transferring all 
+tags in shuffles consumes excessive network bandwidth.
+% Therefore, efficient 
+% cross-host tag propagation is crucial but missing in DISC.
 
 \vspace{-.15in}\subsubsection{\kakute: a fast, precise IFT system for big-data} 
 \label{sec:kakute}\vspace{-.075in}
@@ -58,46 +56,43 @@ is crucial but missing in DISC.
     \end{minipage}
 \end{figure}
 
-This paper presents \kakute\footnote{Kakute is a precise, multi-purpose weapon 
-used by
-Ninja.}, the first precise and fine-grained information flow
-analysis system in DISC frameworks.
-Our key insight to address the IFT efficiency challenge is that multiple fields 
-of a record
-often have the same tags.
-Leveraging this insight, we present two new techniques, \lazyp and \tagcache.
-\lazyp avoids unnecessary tag combinations by only keeping the \textit{lineage 
-of tags} in
-the same UDF, while \tagcache reduces memory usage by sharing
-tags among multiple fields in each record.
-To tackle the architecture challenge,
-\kakute completely captures dataflows in shuffles, and it efficiently
-reduces the amount of transferred IFT tags using \tagcache.
+We present \kakute, the first precise and complete DFT system for big-data 
+frameworks. Our key insight to address the DFT performance challenge is that 
+multiple fields of a record often have the same tags with the same sensitivity 
+level. For example, in an Taobao order record $\langle$\v{time}, 
+\v{userId}, \v{productID}$\rangle$, only the \v{userId} field is 
+sensitive, while the other fields are insensitive and they can share the same 
+tag. Leveraging this insight, we present two new techniques, \lazyp and 
+\tagcache. \lazyp avoids unnecessary tag combinations by only keeping the 
+\textit{lineage of tags} in the same self-defined queries, while \tagcache 
+reduces memory usage by sharing tags among multiple fields in each record. To 
+tackle the completeness challenge, \kakute completely captures dataflows in 
+shuffles by intercepting the , and it efficiently reduces the amount of 
+transferred IFT tags using \tagcache.
 
-We will implement \kakute in Spark.
-We leverage Phosphor~\cite{oo14:phosphor}, an efficient IFT system working
-in the Java byte-code level.
-\kakute instruments computations of a Spark worker process
-to capture dataflow inside user-defined-functions (UDFs).
-Dataflow information
-is kept in a worker process and \kakute propagates it to other processes while 
-shuffling.
-Therefore, IFT is completely captured across hosts and processes.
-In this paper, DISC frameworks and \kakute are trusted; UDFs are untrusted and 
-they
-may be malicious or buggy.
-\kakute provides different granularities of tracking with two types of tags: 
-\func{Integer}
-and \func{Object} tags. \func{Integer} provides 32 distinct tags,
-which is suitable for detecting information
-leakage and performance bugs. \func{Object}
-provides an
-arbitrary number of tags, which is suitable for
-data provenance and programming debugging.
-\kakute provides a unified API to tackle diverse problems. Based on this 
-unified API, we implemented 4 built-in checkers for \appsn
-security and reliability problems: sensitive information leakage, data 
-provenance, programming and performance bugs.
+Figure~\ref{fig:falcon-arch} defines \kakute's threat 
+model. Figure~\ref{fig:falcon-protocol} shows \kakute's architecture 
+design: the InputTainter component provides easy-to-use APIs for 
+data providoers to automatically tag sensitive fields, the DFT component is 
+enabled in self-defined functions, the Local- and Global-Checker components 
+detect and prevent illegal flows of sensitive fields (\eg, credit cards flow to 
+IO functions self-defined functions). Shuffle operations across computers are 
+intercepted and added tags. Therefore, DFT is completely captured across 
+computers.
+
+We will implement \kakute and integrate it with Spark. We will leverage 
+Phosphor~\cite{oo14:phosphor}, an efficient DFT system working in the Java 
+byte-code level. \kakute instruments computations of a Spark worker process
+to capture dataflow inside self-defined-functions. \kakute provides different 
+granularities of tracking with two types of tags: \func{Integer}
+and \func{Object} tags. \func{Integer} provides 32 distinct tags for 
+identifying 32 sensitivity levels, suitable for detecting data leakage and 
+performance bugs. \func{Object} provides an arbitrary number of tags, which is 
+suitable for data provenance and programming debugging. \kakute provides a 
+unified API to tackle diverse problems. Based on this unified API, we 
+will implement 4 built-in checkers for \appsn security and reliability 
+problems: sensitive information leakage, data provenance, programming and 
+performance bugs.
 
 \begin{wrapfigure}{r}{7cm}
   \vspace{-.1in}
@@ -107,26 +102,23 @@ provenance, programming and performance bugs.
   \label{fig:scalability}
 \end{wrapfigure}
 
-\para{Preliminary results.} We evaluated \kakute on \appeval diverse 
-algorithms, including three text processing
-algorithms WordCount~\cite{spark:example}, WordGrep~\cite{newt:socc13} and 
-TwitterHot~\cite{spark:example}, two graph algorithms 
-TentativeClosure~\cite{spark:example}
+\para{Preliminary results.} We have implemented a \kakute preliminary propotype 
+and evaluated it on \appeval diverse algorithms, including three text 
+processing algorithms WordCount~\cite{spark:example}, 
+WordGrep~\cite{newt:socc13} and TwitterHot~\cite{spark:example}, two graph 
+algorithms TentativeClosure~\cite{spark:example}
 and ConnectComponent~\cite{spark:example}, and two medical analysis programs 
 MedicalSort~\cite{pigmix} and MedicalGroup~\cite{pigmix}.
-These algorithms cover
-all big-data algorithms evaluated in two related 
-papers~\cite{vldb15:titian,icse16:bigdebug}.
-We evaluated these algorithms with real-world datasets that are comparable with
-related systems~\cite{vldb16:output, icse16:bigdebug, vldb15:titian}.
+These algorithms cover all big-data algorithms evaluated in two related 
+papers~\cite{vldb15:titian,icse16:bigdebug}. We evaluated these algorithms with 
+real-world datasets that are comparable with related 
+systems~\cite{vldb16:output, icse16:bigdebug, vldb15:titian}.
 We compared \kakute with Titian~\cite{vldb15:titian}, a popular provenance 
-system, on precision and performance.
-Our evaluation shows that: (1) \kakute is fast. Kakute had merely \timeavg 
-overhead with \func{Integer}
-  tag, suitable for production runs; and (2) \kakute is precise;
- it effectively detected 13 real-world security and reliability
-  bugs presented in other 
-papers~\cite{arthur:dave2013,icse16:bigdebug,airavat:nsdi10}.
+system, on precision and performance. Our evaluation shows that: (1) \kakute is 
+fast. Kakute had merely \timeavg overhead with \func{Integer} tag, suitable for 
+production runs; and (2) \kakute is precise; it effectively detected 13 
+real-world security and reliability bugs presented in 
+other papers~\cite{arthur:dave2013,icse16:bigdebug,airavat:nsdi10}.
 
 % In \xxx, all replicas directly write to destination
 % replicas' memory and poll messages from local memory to receive messages, and 
