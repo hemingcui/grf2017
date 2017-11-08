@@ -91,12 +91,13 @@ granularities of tracking with two types of tags: \func{Integer}
 and \func{Object} tags. \func{Integer} provides 32 distinct tags for 
 identifying 32 sensitivity levels, suitable for detecting data leakage and 
 performance bugs. \func{Object} provides an arbitrary number of tags, which is 
-suitable for data provenance and programming debugging. \kakute provides a 
-unified API to tackle diverse problems. Based on this unified API, we 
-will implement 4 built-in checkers for \appsn security and reliability 
-problems: sensitive information leakage, data provenance, programming and 
-performance bugs. These promising preliminary results are published in ACSAC 
-'17 and TPDS '17.
+suitable for data provenance and programming debugging.
+% \kakute provides a 
+% unified API to tackle diverse problems.
+% Based on this unified API, we 
+% will implement 4 built-in checkers for \appsn security and reliability 
+% problems: sensitive information leakage, data provenance, programming and 
+% performance bugs. 
 
 \begin{wrapfigure}{r}{7cm}
   \vspace{-.1in}
@@ -107,23 +108,24 @@ means no overhead.}
   \label{fig:scalability}
 \end{wrapfigure}
 
-\para{Preliminary results.} We have implemented a \kakute preliminary propotype 
-and evaluated it on \appeval diverse algorithms, including three text 
+\para{Preliminary results.} We have implemented a \kakute propotype 
+and evaluated it on \appeval popular big-data algorithms, including three text 
 processing algorithms WordCount~\cite{spark:example}, 
 WordGrep~\cite{newt:socc13} and TwitterHot~\cite{spark:example}, two graph 
 algorithms TentativeClosure~\cite{spark:example}
 and ConnectComponent~\cite{spark:example}, and two medical analysis programs 
 MedicalSort~\cite{pigmix} and MedicalGroup~\cite{pigmix}.
-These algorithms cover all big-data algorithms evaluated in two related 
-papers~\cite{vldb15:titian,icse16:bigdebug}. We evaluated these algorithms with 
+We evaluated these algorithms with 
 real-world datasets that are comparable with related 
 systems~\cite{vldb16:output, icse16:bigdebug, vldb15:titian}.
-We compared \kakute with Titian~\cite{vldb15:titian}, a popular provenance 
-system, on precision and performance. Our evaluation shows that: (1) \kakute is 
-fast. Kakute had merely \timeavg overhead (Figure~\ref{fig:scalability}) with 
-\func{Integer} tag, suitable for production runs; and (2) \kakute is precise; it 
-detected 13 real-world security and reliability bugs presented in 
-other papers~\cite{arthur:dave2013,icse16:bigdebug,airavat:nsdi10}.
+Our evaluation shows that: (1) \kakute 
+incurred merely \timeavg overhead (Figure~\ref{fig:scalability}) with 
+\func{Integer} tag, about two orders of magnitudes faster than a recent DFT 
+system Phorspor~\cite{oo14:phosphor}; and (2) \kakute effectively 
+detected 13 real-world security and reliability bugs presented in other 
+papers~\cite{arthur:dave2013,icse16:bigdebug,airavat:nsdi10}. These promising 
+preliminary results are published in ACSAC 
+'17 and TPDS '17.
 
 % In \xxx, all replicas directly write to destination
 % replicas' memory and poll messages from local memory to receive messages, and 
