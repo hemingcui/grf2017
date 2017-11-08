@@ -279,40 +279,105 @@ The threat model of FDP is the same as \kakute's
 (Figure~\ref{fig:falcon-arch}), because FDP aims to defend against malicious 
 computational providers in private clouds. 
 
+FDP provides a fine-grained privacy control on data. Each record
+belongs to a user who assigns a security tag to all its data records.
+A security tag that is related to the privacy budget $\varepsilon$ (or accuracy 
+level).
+When the privacy budget is high, the probability of leakages is high.
+We adopts the Personalised Differential Privacy (PDP) model in recent
+work~\cite{pdp:icde15}. $\Phi(x)$ return the $\varepsilon$ of a particular 
+record x.
 
-The complete algorithm is showed in Algorithm~\ref{algo:combined}.
+\begin{definition}{Differential Privacy}
+For two neighbor dataset $D$ and $D'$ differing at record x,
+a mechanism ${\cal M}(y)$ is differentially private with the following 
+condition:
+\begin{align}
+Pr[{\cal M}(D) \in O] \leq e^{\Phi(x)} \times Pr[{\cal M}(D') \in O]
+\end{align}
+\end{definition}
+
+Intuitively, Differential Privacy guarantees that the probability of
+producing different result with neighbouring dataset is low. For the 
+personalised model, the probability is different for records belonging to 
+different users, so that different users have various levels of protections.
+
+To start with, we need to determine the relation of the privacy budget and the 
+security
+level (a getLevel function).
+We adopt a deterministic model, and there are 6 security levels: insecure, 
+$dp_1$,
+$dp_2$, $dp_3$, $dp_4$ and non-released. Insecure records can be release 
+directly,
+while non-released can not be used in
+any computation to the final result. $dp_1$ to $dp_4$ varies in terms of their
+privacy budgets for differential privacy.
+We may also consider the $(\delta, \varepsilon)$-differential privacy model.
+
+We extend the differential privacy model developed in previous
+work~\cite{differentialdp:stoc11}. We introduce two noise calibration model
+that make use the fact that different record may have
+different security level (protection level).
 
 
+\begin{theorem}{Laplace Mechanism~\cite{laplace}}
+  Adding noise with Laplace distribution $Laplace(\dfrac{\Delta 
+f}{\varepsilon})$ enforces
+  Differential Privacy, and global sensitivity $\Delta f$ is defined as
+
+  \begin{align}
+    \Delta f = max || f(D) - f(D') ||_1
+  \end{align}
+
+\end{theorem}
+
+To calibrate out to enforce differential privacy,
+a simple approach is to use the $\varepsilon$ inferred by the highest security
+level of each dimension, then add noise to the output directly, but this 
+approach
+is too naive for diversity of security levels.
+
+We adopt the sample-and-aggregate framework proposed in previous 
+work~\cite{differentialdp:stoc11}.
+In this model, data is partitioned into multiple parts (size of each part is 
+$m$).
+Each partition may consists
+different level. The noise aggregator adds noise to final result of each 
+partition
+according to the security level of each partition.
+
+Formally, data is partitioned into multiple parts denoted as $p_1$, $p_2$, ..., 
+$p_n$.
+The security level and its corresponding $\varepsilon$ are $\varepsilon_1$,
+$\varepsilon_2$, ..., $\varepsilon_n$.
+
+\begin{theorem}
+  For any output record in $O$, the
+  estimator is $max(\varepsilon_k)$-differentially private.
+\end{theorem}
+\begin{proof}
+  For each dimension, we can divide the output dataset as k parts
+  according to their security levels. Then we apply the Laplace Mechanism
+  to each subset of data using their privacy budget $\varepsilon_k$. According
+  to the composition theorem~\cite{dp:recommender:kdd09, dp:dwork:stoc09, 
+dp:book17}, the whole output dataset
+  is $max(\varepsilon_k)$-differentially private.
+\end{proof}
 
 The error of the final result incurs in this aggregator comes from two parts:
 the Laps noise error and the partition error. It is crucial to reduce the final
 error incurs by this aggregator while keeping the differential security 
-guarantee.
-The error of this model (when the eps is the same) is
+guarantee. We can adopt a hill-climbing approach for optimisation.
 
-\begin{align}
-|\dfrac{1}{n}\sum\limits_{i=1}^n f(T_i) - f(T)| + 
-\dfrac{1}{n}\sqrt{2}\bigtriangleup{f}\sum\limits_{i=1}^n\dfrac{1}{\varepsilon_i}
-\end{align}, and it should be minimized.
-% TODO: do this model
-
-As final result of each partition may consist
-different security levels, the final noise can be less than previous method.
-
-If we can get the statistic of security levels, we can estimate the block
-size in a better way. In specific, suppose there are k security levels and
-$M_k$ means that $M_k$ partitions has a maximum security level as k. The the
-above equation can be rewritten as
-\begin{align}
-  |\dfrac{1}{n}\sum\limits_{i=1}^n f(T_i) - f(T)| +  
-\dfrac{1}{n}\sqrt{2}\bigtriangleup{f}\sum\limits_{i=1}^k\dfrac{1}{\varepsilon_i} 
-* M_i
-\end{align}
-$M_k$ can be calculated according to the total partition number $n$ and
-the number of block that has security level as $k$ (denoted as $p_k$), then
-we can further formulate it as:
-
-
+\para{Future directions}. We will fully develop this FDP technique by going 
+along two directions. First, we will do an extensive study on real-world 
+big-data queries and quantify the improvments on result accuracy. Second, 
+currently we propose a end-to-end differentially private computation
+system. It adopts a personalised differential privacy model~\cite{pdp:icde15},
+which improves usability without reducing the security guarantee. As for future 
+direction, we can consider a 
+$(\varepsilon, \delta)$-differentially~\cite{differntialprivacy:tcc06}
+private model (TBD: add an intuitive explanation).
 
 
 \vspace{-.15in}\subsection{Objective 3: building a 
