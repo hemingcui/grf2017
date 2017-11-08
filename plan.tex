@@ -40,17 +40,19 @@ tags in shuffles consumes excessive network bandwidth.
 \begin{figure}[h]
     \centering
     \begin{minipage}{.48\textwidth}    
-        \vspace{-.15in}
-        \includegraphics[width=0.31\textheight]{figures/threat_private.ps}
-        \vspace{-.3in}         
-        \caption{Threat model).}
+%         \vspace{-.15in}
+        \includegraphics[width=0.95\textwidth]{figures/threat_private.ps}
+%         \vspace{-.1in}         
+        \caption{Threat model of \kakute. Red colors means sensitive data or 
+leaking channels. Shaded (grey) components may leak data, and \kakute is 
+designed to defend against them.}
         \label{fig:falcon-arch}
     \end{minipage}
     \centering
     \begin{minipage}{0.48\textwidth}
-        \vspace{-.17in}
-        \includegraphics[width=0.34\textheight]{figures/kakute_arch.ps}
-        \vspace{-.32in}
+         \vspace{-.7in}
+        \includegraphics[width=0.95\textwidth]{figures/kakute_arch.ps}
+         \vspace{-.4in}
         \caption{\kakute architecture.}
         \label{fig:falcon-protocol}
     \end{minipage}
