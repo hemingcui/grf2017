@@ -156,7 +156,9 @@ Objective 1 (Kakute) and Object 2 (fine-grained differential privacy) to avoid
 leakage from the computational providers. This two objectives can already 
 effectively preserve privacy in a private cloud setting. Second, we propose a 
 new privacy-preserving just-in-time compiler to avoid privacy leakage from the 
-(public) cloud providers.
+(public) cloud providers. By integrating the outcomes from all three 
+objectives, data privacy will be effectively preserved against both the 
+computational providers and cloud providers.
 
 
 \subsection{Related work by others} 
@@ -176,38 +178,55 @@ Systems that adopts PHE (\eg{} Monomi~\cite{monomi:vldb13},
 Crypsis~\cite{crypsis:hotcloud14}, CryptDB~\cite{cryptdb:sosp11},
 MrCrypt~\cite{mrcrypt:oospsla14})
 reports a much better overhead, but it has limited expressiveness
-(\eg{} SQL operators) and requires extra trusted servers for computations.
+(\eg, SQL operators) and requires extra trusted servers for computations.
 Seabed~\cite{seabed:osdi16} proposes asymmetric encryption schemes and reduces 
-performance overhead
-incur by AHE, but it still has limited expressiveness.
+performance overhead incur by AHE, but it still has limited expressiveness.
 
-\para{Trusted execution envoriments (TEE)}. 
-Intel SGX is a promising technique to provide privacy-preserving analytic
-in public clouds. Compared with software-based solutions, hardware-based 
-solutions
-incurs much lower overhead. TrustedDB~\cite{trusteddb:sigmod11} is a
-hardware-based secure database.
+\para{Trusted execution envoriments (TEE)}. Intel SGX is a promising technique 
+to provide privacy-preserving analytic in public clouds. Compared with 
+software-based solutions, hardware-based solutions incurs much lower overhead. 
+TrustedDB~\cite{trusteddb:sigmod11} is a hardware-based secure database.
 VC3~\cite{vc3:sp15} proposes a secure distributed analytic platform
 with read-write validations on Mapreduce~\cite{mapreduce}. 
-Opaque~\cite{opaque:nsdi17}
-supports secure and oblivious SQL operators on 
-SparkSQL~\cite{sparksql:sigmod15}.
-However, all these systems have limited expressiveness (\eg SQL operators), and
-VC3 even needs to rewrite the program with C++. A recent 
-work~\cite{oblivious:security16} proposes a oblivious machine leaning
-framework on trusted processors.
+Opaque~\cite{opaque:nsdi17} supports secure and oblivious SQL operators on 
+SparkSQL~\cite{sparksql:sigmod15}. However, all these systems have limited 
+expressiveness (\eg SQL operators), and VC3 even needs to rewrite the program 
+with C++. A recent work~\cite{oblivious:security16} proposes a oblivious 
+machine leaning framework on trusted processors. 
 BigMatrix~\cite{bigmatrix:ccs17} proposes an oblivious and secure vectorization
 abstraction on python, but it has limited expressiveness and it needs to
-rewrite the original program with this new abstraction.
-Although BigMatrix provides guideline for
-writing a oblivious program, but it would be a time-consuming and error-prone
-process. By integrating the outcomes of all three objectives, data privacy will 
-be effectively preserved against both the computational providers and cloud 
-providers.
+rewrite the original program with this new abstraction. Although BigMatrix 
+provides guideline for writing a oblivious program, but it would be a 
+time-consuming and error-prone process.
 
-\para{Data provenance}. TBD. 
+\para{Big-data privacy systems}. Big-data privacy has been a top 
+emerging threat as more and more user sensitive data is captured and processed 
+in clouds. Airavat\cite{airavat:nsdi10}, PINQ~\cite{pinq:sigmod09} and 
+GUPT~\cite{gupt:sigmod12} propose to apply differential 
+privacy~\cite{noise:tcc06,differential:focs07} in Mapreduce,
+to prevent leakage from user query, but differential privacy can result in 
+incorrect results. Sedic~\cite{sedic:cloud13} proposes to offload sensitive 
+computations to private clouds. MrLazy~\cite{hotcloud14:mrlazy}
+proposes a framework of combining data provenance and static DFT analysis for 
+self-defined queries, to provide fine-grained information flow for security. 
+However, static DFT is not precise and may suffer from false positive. \kakute 
+provides fine-grained information control of sensitive data, with no need to 
+modify the original program.
 
-% \para{Other aspects of security}. 
+\para{Data provenance}. Given an output record, the data provenance technique 
+can identify inputs that produce this output, so it has shown wide range of 
+applications, including security and 
+debugging~\cite{icse16:bigdebug,dtap:vldb12}.
+RAMP~\cite{ramp:cidr11}, Newt~\cite{newt:socc13}, 
+Pig~\cite{pig:dataflow:pvldb12} and Titian~\cite{vldb15:titian}
+adopt a record-level tracking approach for data provenance in DISC frameworks.
+Chothia~\cite{vldb16:output} introduces a novel framework for output explaining 
+in iterative programs with differential dataflow abstraction. These systems 
+also adopt the record-level tracking approach, so they have low precision in 
+programs containing many-to-many transformations. \kakute, however, provides 
+fine-grained DFT in terms of data field level, so \kakute is much more 
+precise than existing these existing systems on data provenance.
+
 
 \vspace{-.15in}\subsection{Related work by the PI and co-I} 
 \label{sec:my-work}\vspace{-.075in}
@@ -223,11 +242,11 @@ confluence:tpds17}. The PI's works are published in top conferences on systems
 (OSDI, SOSP, SOCC, TPDS, and ACSAC) and programming languages (PLDI and ASPLOS). 
 The co-I is an expert on high-performance 
 computing~\cite{powerrock,hwang,jessica,cheung,khokhar}, fault-tolerance~\cite{ 
-sheng,shengdi1}, and VMs~\cite{rhymes,shengdi,jessica2}. The 
+sheng,shengdi1}, and Java compilers~\cite{rhymes,shengdi,jessica2}. The 
 co-I's works are published in top systems conferences (Cluster '02, SC '13, 
 and ICPADS '14) and journals (JPDC '00, TPDS '13, IEEE Tran. Computers '14). As 
-preliminary works for this proposal, the PI and co-I have developed 
-Kakute~\cite{kakute:acsac17} and TPDS~\cite{confluence:tpds17} (parts of 
-\textbf{Objective 1}). 
+preliminary results for this proposal, the PI has published 
+Kakute~\cite{kakute:acsac17} in ACSAC '17, and the PI and co-I have collaborated 
+to publish Confluence~\cite{confluence:tpds17} in TPDS '17.
 
 
