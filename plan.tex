@@ -163,94 +163,124 @@ preliminary results are published in ACSAC
 
 \para{Future work.} We will further improve and extend \kakute in 
 two directions. First, we will extend \kakute to detect broader types of
-security bugs, including access patterns and timing channels. Second, will 
+security bugs, including access patterns and timing channels. Second, we will 
 leverage \kakute to improve other complementary privacy techniques, including 
-anonymization techniques and differential privacy (Objective 2). 
+anonymization techniques and differential privacy (\textbf{Objective 2}). 
 
-\vspace{-.15in}\subsection{Objective 2: 
-fine-grained diff privacy}\label{sec:obj2}\vspace{-.075in}
+\vspace{-.15in}\subsection{Objective 2: developing the Fine-grained 
+Differential Privacy (FDP) technique}\label{sec:obj2}\vspace{-.075in}
 
-We are proposing
-to combine IFT and differential privacy. With IFT, security levels are 
-propagating
-throughout computation, while differential privacy is for preventing individual 
-information leakage.
-In this model, different records and fields can have various security levels,
-therefore, a general and fine-grained differential private framework can be 
-achieved.
-Programmer does not need to modify their analysis programs and tradeoff between
-usability and security can be achieved with different users.
 
-It needs to determine the relation of the privacy budget and the security
-level.
-In a simplest model, there are 5 security levels: insensitive, dp-1,
-dp-2, dp-3, non-released. Insensitive record can be release directly,
-while non-released can not be used in
-any computation to the final result. dp-1 to dp-3 varies in terms of their
-privacy budgets for differential privacy.
-We may also consider the $(\delta, \varepsilon)$-differential privacy model.
 
-% \subsection{Security level and accuracy, and usability analysis}
-% 
-% \subsection{Range Estimation}
-To estimate the range of a output, so that the laps noise distribution
-can be determine by running the same, differentially private percentile 
-estimation algorithm on the inputs to compute the 25-th and the 75-th 
-percentile privately (a.k.a, lower and upper quartiles) for the inputs.
+\kakute (\textbf{Objective 1}) stricly prevents
+sensitive data flowing to IO functions or query results, but in some scenarios 
+it is still desirable to let computational providers acquire aggregation 
+results (\eg, the sum of citizens who have got brain cancer in a country) 
+on sensitive fields as long as individual information is not leaked. Therefore, 
+differential privacy, which enforces statistical
+bounds on aggregation results to prevent individual information leakage, has 
+attracted much attention from academia and industry recently.
 
-% \subsection{Noise Aggregation}
-We extend the differential privacy model developed in previous
-work~\cite{differentialdp:stoc11}. We introduce two noise aggregation model
-that make use the fact that different record may have
-different security level (protection level).
+Differential privacy is a robust privacy standard proposed by Dwork et
+al\cite{Dwork2006Differential, Dwork2008Differential, Dwork2011a}.
+His work shows that differential privacy can be achieved by adding
+Laplace distributed noise whose scale is related to the sensitivity of queries.
+This simple algorithm can handle all kinds of queries but inevitably has some
+drawbacks. For instance, the number of query is limited and too much noise will
+be injected to continuous queries. To reduce noise magnitude, a 
+sample-and-aggregation
+framework~\cite{differentialdp:stoc11} is proposed.
 
-% \subsubsection{Naive Aggregation Model}
-A simplest model is to use the $\varepsilon$ inferred by the highest security
-level, then add noise to the output directly.
-Add noise to the output with $f(x) + Lap(\dfrac{max - min}{\varepsilon_{max}})$.
-This simple model may generate two much noise to the final result, which
-make the result unusable. The complete algorithm is showed in 
-Algorithm~\ref{algo:naive}.
+\vspace{-.15in}
+\subsubsection{Challenge: existing differential privacy techniques are 
+coarse-grained and thus inaccurate} 
+\label{sec:ift-problem}\vspace{-.075in}
 
-\begin{algorithm}[t]
-\SetAlgoLined
-\KwIn{Dataset T, dataset size N, privacy budget $\varepsilon_k$ for security 
-level k,
-  output range (min, max)}
-  n = 4
+Unfortunately, despite much effort, existing differential privacy technqiues 
+often suffer from great losses of accuracy. To prevent computational providers 
+revealing individual information, differential privacy typically adds noise 
+either on input data records or output query results. However, due to the lack 
+of precisely tracking how inputs are computed and propagated to outpus, to 
+enforce statistical guarantee on outputs, differential privacy often 
+conservatively, universally add the same noise to all fields of a data record 
+and to all records, causing too much noise to be added and too inaccurate 
+query results. For instance, A recent
+work~\cite{differentialresult:vldb15} reported more than 30\% losses of accuracy 
+when the security guarantee is high (the probability of leakages is low). In 
+such case, a simple KMeans program will return centroids far from the accurate 
+ones, and the accuracy loss rate is much larger than the training error rate 
+which is several percents in practice.
 
- \For{$i\leftarrow 1$ \KwTo $n$}{
-    $O_i$ $\leftarrow$ $f(T_i)$\;
-    if $O_i$ > max, $O_i$ $\leftarrow$ max
-    if $O_i$ < max, $O_i$ $\leftarrow$ min
- }
- \For{dimension $j$ of the output $O$}{
-    k $\leftarrow$ $max(getLevel(O_{j}))$\;
-    $O_j$ $\leftarrow$ $\dfrac{1}{n}\sum\limits_{i=1}^n O_{ij} + Lap(\dfrac{max 
-- min}{\varepsilon_{k}})$
-  }
-  \KwOut{$O$}
- \caption{Naive Aggregation Model}
- \label{algo:naive}
-\end{algorithm}
+\vspace{-.15in}
+\subsubsection{FDP and its new algorithm} 
+\label{sec:ift-problem}\vspace{-.075in}
 
-% \subsubsection{Combined Aggregation Model}
-In this model, data is partitioned into multiple parts (size of each part is 
-$m$). Each partition may consists
-different level. The noise aggregator adds noise to final result of each 
-partition
-according to the security level of each partition.
+\begin{figure}[!htb]
+    \begin{minipage}{0.47\textwidth}
+        \vspace{-.2in}
+        \includegraphics[width=0.33\textheight]{figures/selective_arch.ps}
+        \vspace{-.3in}
+        \caption{The workflow of FDP.}
+        \label{fig:vm-tree}
+    \end{minipage}
+    \begin{minipage}{0.52\textwidth}
+      \vspace{-.2in}
+      \centering
+      \begin{algorithm}[H]
+      \DontPrintSemicolon
+      \scriptsize
+      \SetCommentSty{textrm}
+      \SetKwInOut{Input}{Input}
+      \SetKwInOut{Output}{Output}
+      \Input{The root of Merkle tree on leader, $root$}
+      \Output{Different memory pages between leader and replica, $pages$}
+      
+      \SetKwBlock{Titlea}{Track($root$)}{end}
+      \Titlea {
+%         $diverged$ $\leftarrow$ empty sequence \;
+        $pages$ $\leftarrow$ empty sequence \;
+        $diverged$ $\leftarrow$ \textbf{APUS}($root$, $root$.left(), 
+$root$.right()) \;
+        \For {{\rm $i$ $\leftarrow$ $diverged$.push\_front()}} {
+          \If {{\rm $i$ is\_leaf()}} {
+            $pages$.append($i$) \;
+          }
+          \Else {
+            $diff$ $\leftarrow$ \textbf{APUS}($i$, $i$.left(), 
+$i$.right()) \;
+            $diverged$.append($diff$) \;
+          }
+        }
+        \Return $pages$ \;
+      }
+      \caption{Tracking divergent memory pages}
+      \label{alg:slice}
+      \end{algorithm}
+    \vspace{-.1in}
+    %     \caption{Sketch of path slicing algorithm}
 
-Formally, data is partitioned into multiple parts denoted as $p_1$, $p_2$, ..., 
-$p_n$.
-The security level and its corresponding $\varepsilon$ are $\varepsilon_1$,
-$\varepsilon_2$, ..., $\varepsilon_n$. Therefore, the final aggregated result
-is
+%         \label{fig:algo}
 
-\begin{align}
-\dfrac{\sum\limits_{i=1}^n f(x_i) + Lap(\dfrac{max_i - 
-min_i}{\varepsilon_i})}{n}
-\end{align}
+\end{minipage}
+    \vspace{-.1in}
+\end{figure}
+
+Our key insight is that DFT and differential privacy can complement each other, 
+getting the best of the both worlds. Considering each data racord, DFT can 
+precisely track how sensitive data fields flow to which query result, so 
+differential privacy needs only add noise to the sensitive part, not all query 
+results. Considering all data records, DFT can also distinguish which records 
+are more important, so differential privacy can add more noise to the more 
+important records than the others. This insight spurs FDP, a novel differential 
+privacy technique that can achieve same statistical bounds as prior 
+differential privacy techniques, while preverving reasonable accuracy for query 
+results.
+
+
+The threat model of FDP is the same as \kakute's 
+(Figure~\ref{fig:falcon-arch}), because FDP aims to defend against malicious 
+computational providers in private clouds. 
+
 
 The complete algorithm is showed in Algorithm~\ref{algo:combined}.
 
