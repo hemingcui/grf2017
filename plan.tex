@@ -217,45 +217,43 @@ which is several percents in practice.
 
 \begin{figure}[!htb]
     \begin{minipage}{0.47\textwidth}
-        \vspace{-.2in}
-        \includegraphics[width=0.33\textheight]{figures/selective_arch.ps}
-        \vspace{-.3in}
-        \caption{The workflow of FDP.}
+        \vspace{-.1in}
+        \includegraphics[width=0.3\textheight]{figures/selective_arch.ps}
+        \vspace{-.1in}
+        \caption{The workflow of FDP with five steps.}
         \label{fig:vm-tree}
     \end{minipage}
     \begin{minipage}{0.52\textwidth}
       \vspace{-.2in}
       \centering
-      \begin{algorithm}[H]
-      \DontPrintSemicolon
-      \scriptsize
-      \SetCommentSty{textrm}
-      \SetKwInOut{Input}{Input}
-      \SetKwInOut{Output}{Output}
-      \Input{The root of Merkle tree on leader, $root$}
-      \Output{Different memory pages between leader and replica, $pages$}
+
       
-      \SetKwBlock{Titlea}{Track($root$)}{end}
-      \Titlea {
-%         $diverged$ $\leftarrow$ empty sequence \;
-        $pages$ $\leftarrow$ empty sequence \;
-        $diverged$ $\leftarrow$ \textbf{APUS}($root$, $root$.left(), 
-$root$.right()) \;
-        \For {{\rm $i$ $\leftarrow$ $diverged$.push\_front()}} {
-          \If {{\rm $i$ is\_leaf()}} {
-            $pages$.append($i$) \;
-          }
-          \Else {
-            $diff$ $\leftarrow$ \textbf{APUS}($i$, $i$.left(), 
-$i$.right()) \;
-            $diverged$.append($diff$) \;
-          }
-        }
-        \Return $pages$ \;
-      }
-      \caption{Tracking divergent memory pages}
-      \label{alg:slice}
-      \end{algorithm}
+      
+      \begin{algorithm}[H]
+\SetAlgoLined
+\KwIn{Dataset T, dataset size N, privacy budget $\varepsilon_k$ for security 
+level k,
+  output range (min, max)}
+  n = a suitable partition
+
+ \For{$i\leftarrow 1$ \KwTo $n$}{
+    $O_i$ $\leftarrow$ $f(T_i)$\;
+    if $O_i$ $>$ max, $O_i$ $\leftarrow$ max
+    if $O_i$ $<$ min, $O_i$ $\leftarrow$ min
+ }
+ \For{dimension $j$ of the output $O$}{
+    k $\leftarrow$ $getLevel(O_{j})$\;
+    $O_j$ $\leftarrow$ $\dfrac{1}{n}\sum\limits_{i=1}^n O_{ij} + Lap(\dfrac{max 
+- min}{n\varepsilon_{k}})$
+  }
+  \KwOut{$O$}
+ \caption{The FDP aggregation algorithm}
+ \label{algo:combined}
+\end{algorithm}
+      
+      
+      
+      
     \vspace{-.1in}
     %     \caption{Sketch of path slicing algorithm}
 
@@ -284,28 +282,7 @@ computational providers in private clouds.
 
 The complete algorithm is showed in Algorithm~\ref{algo:combined}.
 
-\begin{algorithm}[t]
-\SetAlgoLined
-\KwIn{Dataset T, dataset size N, privacy budget $\varepsilon_k$ for security 
-level k,
-  output range (min, max)}
-  n = 4
 
- \For{$i\leftarrow 1$ \KwTo $n$}{
-    $O_i$ $\leftarrow$ $f(T_i)$\;
-    if $O_i$ > max, $O_i$ $\leftarrow$ max
-    if $O_i$ < max, $O_i$ $\leftarrow$ min
-    \For{dimension $j$ of the output $O$}{
-       k $\leftarrow$ $max(getLevel(O_{ij}))$\;
-       $O_{ij}$ $\leftarrow$ $O_{ij} + Lap(\dfrac{max - min}{\varepsilon_{k}})$
-     }
- }
- \lForEach{partition $i$ of the output $O$}{$O_j$ $\leftarrow$ $ 
-\dfrac{1}{n}\sum\limits_{i=1}^n O_{ij}$}
-  \KwOut{$O$}
- \caption{Combined Aggregation Model}
- \label{algo:combined}
-\end{algorithm}
 
 The error of the final result incurs in this aggregator comes from two parts:
 the Laps noise error and the partition error. It is crucial to reduce the final
@@ -335,29 +312,6 @@ $M_k$ can be calculated according to the total partition number $n$ and
 the number of block that has security level as $k$ (denoted as $p_k$), then
 we can further formulate it as:
 
-% directly save the odp file to eps, level 2.
-% \vspace{.1in}
-% \begin{figure}[!htb]
-% %     \centering
-%     \begin{minipage}{.48\textwidth}
-%         \vspace{-.3in}
-%         \includegraphics[width=0.34\textheight]{figures/scheduler_arch.eps}
-%          \vspace{-.4in}
-%         \caption{\tripod scheduler architecture. It replicates all 
-% Hadoop~\cite{hadoop} tasks (\vv{R=3}) for fault-tolerance and runs all 
-% MPI~\cite{mpi} tasks as is (\vv{R=1}).}
-%         \label{fig:scheduler-arch}
-%     \end{minipage}
-%     \hspace{0.16in}
-%     \begin{minipage}{0.48\textwidth}
-%         \vspace{-.3in}
-%         \includegraphics[width=0.34\textheight]{figures/scheduler_flow.eps}
-%         \vspace{-.4in}
-%         \caption{The replication-aware resource allocation scheme with four 
-% steps (\textbf{S1}$\sim$\textbf{S4}).}
-%         \label{fig:scheduler-workflow}
-%     \end{minipage}
-% \end{figure}
 
 
 
