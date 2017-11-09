@@ -147,17 +147,20 @@ these two open challenges by building a new just-in-time compiler.
 % more pronounced due to more and more data providers, including application 
 % vendors individual computer users, are putting their important data on clouds
 
-Data leakage is a top threat in cloud computing~\cite{top-threats}. 
-In a data provider's perspective, there have been severe real-world data 
-privacy breaches~\cite{real-breaches} caused by computational providers and 
-cloud providers. This proposal aims to preserve the data provider's 
-privacy by going two directions. First, we propose two novel complimentary 
-techniques in \textbf{Objective 1} (\kakute) and \textbf{Objective 2} 
-(fine-grained differential privacy) to protect privacy against the computational 
-providers in private clouds. Second, we propose \textbf{Objective 3} (a new 
-privacy-preserving compiler) to protect privacy against the (public) cloud 
-providers. By integrating the outcomes from all three objectives, data privacy 
-will be effectively preserved.
+Data leakage (or breach) is a top threat in 
+cloud computing~\cite{top-threats,kazim2015survey}. In a data provider's 
+perspective, both computation providers (\eg, the 2017 
+iCloud account leakage caused by third-parties~\cite{icloud-breach}) and 
+cloud providers (the 2013 Yahoo Cloud compromise~\cite{yahoo-dropbox-breach} and 
+the 2014 JP Morgan Chase account leakage~\cite{yahoo-dropbox-breach}) have 
+caused severe data leakage and huge losts. This proposal aims to preserve the 
+data provider's privacy by going two directions. First, we propose two novel 
+complimentary techniques in \textbf{Objective 1} (\kakute) and \textbf{Objective 
+2} (fine-grained differential privacy) to protect privacy against the 
+computational providers in private clouds. Second, we propose \textbf{Objective 
+3} (a new privacy-preserving compiler) to protect privacy against the (public) 
+cloud providers. By integrating the outcomes from all three objectives, data 
+privacy will be effectively preserved.
 
 
 \subsection{Related work by others} 
@@ -204,8 +207,9 @@ time-consuming and error-prone process.
 % below), thus running unmodified big-data queries with SGX is highly desirable.
 
 \para{Big-data privacy systems}. Big-data privacy has been a top 
-emerging threat as more and more user sensitive data is captured and processed 
-in clouds. Airavat\cite{airavat:nsdi10}, PINQ~\cite{pinq:sigmod09} and 
+emerging threat~\cite{top-threats-nine, kazim2015survey} as more and more user 
+sensitive data is stored and processed in clouds. 
+Airavat\cite{airavat:nsdi10}, PINQ~\cite{pinq:sigmod09} and 
 GUPT~\cite{gupt:sigmod12} propose to apply differential 
 privacy~\cite{noise:tcc06,differential:focs07} in Mapreduce,
 to prevent leakage from user query, but differential privacy can result in 

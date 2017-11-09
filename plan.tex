@@ -459,11 +459,12 @@ executions of big-data queries or inject malicious code to the queries during
 Our \maat architecture contains two software components: our JIT translator 
 and our own management library. The JIT translator is a thin layer which 
 translate each Java bytecode instruction into a number of SGX-compatible 
-assembly code (\eg, Figure~\ref{fig:jit-arch}). The management is for our own 
+assembly code (\eg, Figure~\ref{fig:maat-arch}). The management is for our own 
 use of encryption/decription on data records and maintaining SGX memory for the 
 queries at runtime. We will proactively implementat the JIT translator and 
 management library to be easy to verify, and we plan to use state-of-the-art 
-verification techniques~\cite{xi:sosp17} to verify both of them, so 
+verification techniques~\cite{xi:sosp17} to verify both of them, 
+so 
 that we do not need to include them into \maat's TCB. Specifically, we plan to 
 implement the two components without recursions and with as few as loops.
 
