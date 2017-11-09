@@ -385,40 +385,40 @@ private model (TBD: add an intuitive explanation).
 \vspace{-.15in}\subsection{Objective 3: creating a prvicy-preserving compiler 
 for big-data queries in public clouds}\label{sec:obj3}\vspace{-.075in}
 
-In order to reduce maintainance costs, more and more sensitive data are stored 
-and processed in public clouds (\eg, Amazon EC2 and Dropbox). Although data can 
-be securely encrypted while in rest, recent real-world privacy breaches have 
-shown that data are often leaked while being processed. The reason is that 
-homomophic encryption is still pre-mature (a notable analytic database 
-CryptoDB~\cite{cryptdb:sosp11} reports a 1000X overhead compared with
-the unencrypted execution), and most data is being processed in plaintext. 
+% In order to reduce maintainance costs, more and more sensitive data are stored 
+% and processed in public clouds (\eg, Amazon EC2 and Dropbox). Although data can 
+% be securely encrypted while in rest, recent real-world privacy breaches have 
+% shown that data are often leaked while being processed. The reason is that 
+% homomophic encryption is still pre-mature (a notable analytic database 
+% CryptoDB~\cite{cryptdb:sosp11} reports a 1000X overhead compared with
+% the unencrypted execution), and most data is being processed in plaintext. 
 
-Recently, Trusted Execution Environment (TEE) becomes a promising technique to
-protect computation on public clouds even if the cloud's operating system is
-compromised. For example, Intel-SGX~\cite{intel-sgx} runs programs
-in a enclave, so code and data are protected and can not be seen by the 
-attackers. Meanwhile, SGX is good fit for big-data queries because these queries 
-are data-intensive in userspace and they hardly invoke system calls (the 
-monolithic kernel space can easily break SGX's security guarantee). A latest 
-big-data analytic system opaque~\cite{opaque:nsdi17} reports only 30\% overhead, 
-which makes it a practical system for production employment.
+More and more sensitive data are stored and processed in public clouds (\eg, 
+Amazon EC2 and Dropbox), and recent real-world privacy breaches have shown that 
+data are often leaked while being processed by pubilc cloud providers. Trusted 
+Execution Environment (TEE) is a promising technique to protect computation on 
+public clouds even if the cloud's operating system is compromised. For example, 
+Intel-SGX~\cite{intel-sgx} runs programs in a enclave, so code and data are 
+protected and can not be seen by the attackers. Meanwhile, SGX is good fit for 
+big-data queries because these queries are data-intensive in userspace and they 
+hardly invoke system calls (OS kernel can easily break SGX's security on 
+memory). A latest big-data analytic system Opaque~\cite{opaque:nsdi17} reports 
+only 30\% overhead compared to native, unsecure executions.
 
 \vspace{-.15in}
 \subsubsection{Challenges: existing SGX-based systems require rewriting 
 queries and have too-large TCB} 
 \label{sec:ift-problem}\vspace{-.075in}
 
-Despite recent systems (Opaque, VC3, SGX-BigMatrix) on building SGX-based 
-systems for big-data queries, two major challenges still remain. First,
-running programs in a enclave needs completely rewriting the readily pervasive 
-Jaba big-data queries into C++, an extreme time-consuming and error-prone 
-process. Second, to easy implementation, existing systems typically run the 
-entire language runtime (\eg, JVM or Python runtime) within SGX, causing the 
-Trusted Computing Base (TCB) to be too large and potentially unsecure, a major 
-source of privacy breaches. For instance, JVM contains millions of lines of 
-code from many different parties/companies, which is extremely hard to verify 
-the security and easy to breach via conflicinting interests or insider 
-attacks~\cite{top-threats}.
+Despite recent advances (Opaque, VC3, Coco, and SGX-BigMatrix) on building 
+SGX-based systems for big-data queries, two major challenges still remain. 
+First, enclaves require completely rewriting the readily pervasive Jaba 
+big-data queries into C++, an time-consuming and error-prone process. 
+Second, to easy implementation, existing systems typically run the entire 
+language runtime (\eg, JVM or Python runtime) within SGX, causing the Trusted 
+Computing Base (TCB) to be too large and vulnerable (\eg, JVM has millions of 
+lines of code from many companies and is vulnerabile to insider 
+attacks~\cite{top-threats}).
 % SGX-BigMatrix~\cite{bigmatrix:ccs17} proposes a secure and oblivious 
 % vectorization
 % abstraction for Python, but it needs to rewrite programs with its abstraction.
@@ -452,65 +452,59 @@ shaded (and in blue).}
 \end{figure}
 
 We propose \maat, the first compiler that runs unmodified Java big-data queries 
-in SGX enclaves securely with minimal TCB (\ie, we only need to trust SGX). 
-\maat works as a SGX-aware java JIT compiler which automatically compiles 
-self-defined big-data functions (\eg, \func{map}/\func{reduce}) into 
-enclave-compatible assembly code. Therefore, the JVM itself does not need to be 
-trusted, and people can run unmodified big-data Java algorithms in \maat with a 
-strong privacy protection.
+in SGX enclaves securely with minimal TCB (\ie, the TCB contains only SGX and 
+self-defined code itself). \maat works as a Java JIT compiler which 
+automatically compiles self-defined big-data functions (\eg, 
+\func{map}/\func{reduce}) into enclave-compatible assembly code. Therefore, the 
+JVM itself does not run in \maat's enclaves.
 
-The motivation of \maat is to keep confidentiality of data processed in 
-enclaves, while other attacks such as changing of execution path and Denies of 
-Services (DoS) are not our concerns, because we tend to defend against a 
-public, malicous cloud proficer. There is an orthogonal approach that hardens 
-the security of JVM itself~\cite{jitguard:ccs17}.
+The motivation of \maat is to keep the confidentiality of data processed in 
+enclaves. Other attacks such as changing of execution path (\ie, integrity) have 
+been well defended in prior work~\cite{jitguard:ccs17}, which \maat can directly 
+leverage.
 
-Figure~\ref{fig:maat-threat} shows the threat model of \maat. Specifically, the 
-public cloud could be malicious. Figure \ref{fig:maat-arch} shows the 
-architecture of \maat. Self-defined functions and data processed by these 
-functions should be kept as secrets. The secure functions are compiled and 
-executed inside enclaves so that data and code will not be leaked. The Java 
-byte-codes of these function are compiled to native enclave codes, and are 
-executed inside enclaves using a standard enclave ECALL upon function calls of 
-the running program.
+Figure~\ref{fig:maat-threat} shows \maat's threat model: both SGX and 
+computation providers are trusted, and cloud providers are malicious. Figure 
+\ref{fig:maat-arch} shows the architecture of \maat. In \maat, both the 
+translation of self-defined code and the execution of the code are protected by 
+enclaves, so that even if the cloud's OS compromised, it can not see the 
+executions of big-data queries or inject malicious code to the queries during 
+\maat's translation.
+% Self-defined functions and data processed by these 
+% functions are protected by \maat . The Java byte-codes of these functions are 
+% compiled to enclave-comptabile assembly code.
 
 Our \maat architecture contains two software components: our JIT translator 
 and our own management library. The JIT translator is a thin layer which 
 translate each Java bytecode instruction into a number of SGX-compatible 
 assembly code (\eg, Figure~\ref{fig:jit-arch}). The management is for our own 
 use of encryption/decription on data records and maintaining SGX memory for the 
-queries at runtime. SGX is for protecting data and code running in enclaves, but 
-code inside 
-enclaves also have accesses to the regular memory region. Therefore, code in 
-the enclaves can write sensitive data to unprotected memory regions when the 
-code is compromised. The OpenJDK implementation of JVM contains up to millions 
-lines of code, which is impractical for formal verifications as it is 
-time-consuming with current verification methods (\chref{sec:others-work}).
-
-We plan to proactively 
-implementation the JIT translator and mem library to be easy to verify, and we 
-plan to use state-of-the-art verification techniques to verify both of them, so 
+queries at runtime. We will proactively implementat the JIT translator and 
+management library to be easy to verify, and we plan to use state-of-the-art 
+verification techniques~\cite{xi:sosp17} to verify both of them, so 
 that we do not need to include them into \maat's TCB. Specifically, we plan to 
-implement the two components without recursions and with as few as loops. By 
-realizing this goal, our \maat compiler will achieve a minimum TCB: only the SGX 
-hardware, nothing else.
+implement the two components without recursions and with as few as loops.
 
-One subtle issue for \maat is that it should have reasonable performance 
-overhead compared to native Spark executions. When calling into and out of a 
-function in enclaves, an ECALL and OCALL will be invoked in the CPU. In 
-specific, the CPU is trapped into a new mode (except from
-the User and Privileged mode), and the current frame is encrypted and saved.
-A recent work~\cite{sgxkernel:cf17} shows that enclave transitions are 60X 
-slower than system calls and several hundreds times slower than user function 
-calls.
-Moreover, encryption and decryption are required for secure function calls,
-which makes enclave transitions even more time-consuming.
-Our evaluation on a recent privacy-preserving data analytic 
-system~\cite{opaque:nsdi17} shows that
-it incurs 3.4k transitions for processing 10k data (for two operations select 
-and groupBy).
-In fact, these processing functions can be pipelined and processed in a single
-enclave function. Our project takes reducing transitions as one of our targets.
+
+% We don't plan to use OpenJDK as our management library 
+% because it contains up to millions lines of code, which is impractical for 
+% formal verifications as it is time-consuming with current verification methods 
+% (\chref{sec:others-work}).
+
+
+
+One subtle performance challenge for \maat is that it should have reasonable 
+performance overhead compared to native executions. When calling into and 
+out of a function in enclaves, an ECALL and OCALL will be invoked in the CPU 
+and enclave transitions are invoked. Such transitions are several hundreds 
+times slower than user function calls. Moreover, encryption and decryption on 
+data records are invoked during such transitions. Our evaluation on a recent 
+privacy-preserving data analytic system~\cite{opaque:nsdi17} shows that it 
+incurs 3.4k transitions for processing 10k data (for two operations \vv{select} 
+and \vv{groupBy}), which confirms the significance of the challenge.
+
+% In fact, these processing functions can be pipelined and processed in a single
+% enclave function. Our project takes reducing transitions as one of our targets.
 
 
 
@@ -532,22 +526,26 @@ enclave function. Our project takes reducing transitions as one of our targets.
 % optimisation offline.
 % % Figure~\ref{on-time} shows the example. 
 
-To reduce the number of entering/leaving enclaves, we will create a new 
-enclave runtime abstraction called Data-locality-aware Asynchronous Enclave 
-calls (DAE). DAE converts the synchronous enclave calls (similar to Java 
-function calls) to asynchronous, data-locality-aware calls into enclaves. 
-Specifically, DAE will run a number of N processes in an enclave on a local 
-computer. When a process T running in JVM calls a big-data query function, the 
-function call and its parameters are put into a call queue to the DAE's enclave, 
-which will be fetched by a process running in the enclave and to be executed by 
-the process. For each call in the queue, DAE will pick a process that 
-has good data locality (\eg, based on the footprint of prior calls) to execute 
-the call, greatly reducing the costs of data decryption in the enclave. After 
-finishing the execution, the result will be stored in a result queue, and 
-process T's execution will proceed. We expect that DAE will greatly reduce the 
-costs of entering enclaves, data decryptions, and having good locality and 
-parallelism. The DAE abstraction is illustrated in Appendix (c) of this 
-proposal.
+To mitigate this challenge, we will create a new enclave runtime abstraction 
+called Data-locality-aware Asynchronous Enclave calls (DAE). DAE converts the 
+synchronous enclave calls (similar to Java function calls) to asynchronous, 
+data-locality-aware calls into enclaves. Specifically, DAE will run a number of 
+$n$ processes ($E_{1}$ to $E_{n}$) in an enclave on a local computer. When a 
+JVM process $T$ calls a big-data query function, the call and its parameters 
+are appended to a queue to DAE, and DAE arranges a process $E_{i}$ with good 
+data locality (\eg, according to prior arrangements) to execute the call, 
+greatly reducing both enclave transitions and data decryption. The call result 
+is appended to a return queue of the DAE for process $T$. We expect that DAE 
+will achieve resonable performance, data locality, and parallelism.
+
+% For each call in the queue, DAE will pick a process that 
+% has good data locality (\eg, based on the footprint of prior calls) to execute 
+% the call, greatly reducing the costs of data decryption in the enclave. After 
+% finishing the execution, the result will be stored in a result queue, and 
+% process T's execution will proceed. We expect that DAE will greatly reduce the 
+% costs of entering enclaves, data decryptions, and having good locality and 
+% parallelism. The DAE abstraction is illustrated in Appendix (c) of this 
+% proposal.
 % Figure~\ref{asynccall} shows the idea of this technique. 
 
 % These two technique can be applied simultaneously, the compiler can run the
