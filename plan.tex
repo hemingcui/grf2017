@@ -516,38 +516,45 @@ In fact, these processing functions can be pipelined and processed in a single
 enclave function. Our project takes reducing transitions as one of our targets.
 
 
-We introduce two techniques, Cost-based Compilation and Asynchronous
-Enclave Call, to tackle this challenge.
-Cost-based Compilation can make use of the JVM hotspot features, and analyse
-the hotspot enclave functions. It builds a tree of callers and callee of 
-functions,
-and combines two enclaves if the marginal benefit of combining them is larger 
-than
-the transition cost. Initially, only function b and d
-are running in enclaves, but the compiler finds out that cost of running c in 
-an 
-enclave is less than the transition cost (assume it to be 2), then the whole 
-function a will be compile as an enclave. In another case where running 
-function c takes a high cost, combinations of enclaves will not happen.
-Therefore, transition of enclaves can be reduced. This technique can be applied
-online or offline. In a offline version, it sample the program and finish the
-optimisation offline.
+
+% Cost-based Compilation and Asynchronous
+% Enclave Call, to tackle this challenge.
+% Cost-based Compilation can make use of the JVM hotspot features, and analyse
+% the hotspot enclave functions. It builds a tree of callers and callee of 
+% functions,
+% and combines two enclaves if the marginal benefit of combining them is larger 
+% than
+% the transition cost. Initially, only function b and d
+% are running in enclaves, but the compiler finds out that cost of running c in 
+% an 
+% enclave is less than the transition cost (assume it to be 2), then the whole 
+% function a will be compile as an enclave. In another case where running 
+% function c takes a high cost, combinations of enclaves will not happen.
+% Therefore, transition of enclaves can be reduced. This technique can be applied
+% online or offline. In a offline version, it sample the program and finish the
+% optimisation offline.
 % % Figure~\ref{on-time} shows the example. 
 
-Asynchronous Enclave Call convert the synchronous enclave calls to asynchronous
-enclave calls. In specific, when a secure function is called,
-the function call and its parameters are put into a QUEUE which will be fetch by
-the enclave can be executed. After finishing execution, the result will be 
-stored
-in QUEUE\_R and the current execution will resume and continue. 
-This technique makes use of the multi-core
-hardware architecture and enclaves and the main program are running in separate
-threads.
+To reduce the number of entering/leaving enclaves, we will create a new 
+enclave runtime abstraction called Data-locality-aware Asynchronous Enclave 
+calls (DAE). DAE converts the synchronous enclave calls (similar to Java 
+function calls) to asynchronous, data-locality-aware calls into enclaves. 
+Specifically, DAE will run a number of N processes in an enclave on a local 
+computer. When a process T running in JVM calls a big-data query function, the 
+function call and its parameters are put into a call queue to the DAE's enclave, 
+which will be fetched by a process running in the enclave and to be executed by 
+the process. For each call in the queue, DAE will pick a process that 
+has good data locality (\eg, based on the footprint of prior calls) to execute 
+the call, greatly reducing the costs of data decryption in the enclave. After 
+finishing the execution, the result will be stored in a result queue, and 
+process T's execution will proceed. We expect that DAE will greatly reduce the 
+costs of entering enclaves, data decryptions, and having good locality and 
+parallelism.
 % Figure~\ref{asynccall} shows the idea of this technique. 
 
-These two technique can be applied simultaneously, the compiler can run the
-sample and optimisation offline. After that, the compiler run a enclave and the 
-program in separate threads to avoid transition of enclaves.
+% These two technique can be applied simultaneously, the compiler can run the
+% sample and optimisation offline. After that, the compiler run a enclave and the 
+% program in separate threads to avoid transition of enclaves.
 
 \para{Future work}. TBD.
 
