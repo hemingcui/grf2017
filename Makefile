@@ -7,6 +7,7 @@ proposal: *.tex bib2/biblio.bib figures/*.eps code/*.tex
 	dvipdf proposal.dvi
 	dvips -o proposal.ps -t letter proposal.dvi
 	pdflatex reference.tex
+	pdflatex appendix.tex
 	#	test -e p.pdf || ln -s $(SRC).pdf p.pdf
 
 bbl:
