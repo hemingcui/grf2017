@@ -2,6 +2,13 @@
 \documentclass[9pt,a4]{article}
 \usepackage[9pt,inchmargins]{sigmin}
 
+\usepackage{graphics}
+\usepackage{epsfig}
+\usepackage{xspace}
+\usepackage[nolineno,noindent,norules]{lgrind}
+\usepackage{subfig,graphics,graphicx,color}
+\DeclareGraphicsExtensions{.eps}
+
 %% Reference stuff.
 \usepackage[square,comma,numbers,sort]{natbib}
 \usepackage{hypernat}
@@ -21,7 +28,26 @@
 % \renewcommand*{\bibfont}{\scriptsize}
 \begin{document}
 
-TBD
+\begin{figure}
+   \center
+\includegraphics[width=0.5\textwidth]{figures/reference}
+\caption{The Reference Propagation technique with the given code.}
+\label{fig:reference}
+\end{figure}
+
+\begin{figure}
+   \center
+\includegraphics[width=0.5\textwidth]{figures/tagcache}
+\caption{The Tag Sharing technique between fields in each record.}
+\label{fig:tagcache}
+\end{figure}
+
+\begin{figure}[tbh]
+   \center
+   \includegraphics[width=0.5\textwidth]{figures/async_call}
+ \caption{The Data-locality-aware Asynchronous Enclave (DAE) call abstraction.}
+   \label{fig:async-call}
+ \end{figure}
 
 % \bibliographystyle{abbrvnat}
 % \bibliography{bib/biblio}

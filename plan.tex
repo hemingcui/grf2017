@@ -71,7 +71,8 @@ tag. Leveraging this insight, we present two new techniques, \lazyp and
 reduces memory usage by sharing tags among multiple fields in each record. To 
 tackle the completeness challenge, \kakute completely captures dataflows in 
 shuffles by intercepting the , and it efficiently reduces the amount of 
-transferred IFT tags using \tagcache.
+transferred IFT tags using \tagcache. Both techniques are illustrated in 
+Appendix (c) of this proposal.
 
 Figure~\ref{fig:falcon-arch} defines \kakute's threat 
 model. Figure~\ref{fig:falcon-protocol} shows \kakute's architecture 
@@ -549,7 +550,8 @@ the call, greatly reducing the costs of data decryption in the enclave. After
 finishing the execution, the result will be stored in a result queue, and 
 process T's execution will proceed. We expect that DAE will greatly reduce the 
 costs of entering enclaves, data decryptions, and having good locality and 
-parallelism.
+parallelism. The DAE abstraction is illustrated in Appendix (c) of this 
+proposal.
 % Figure~\ref{asynccall} shows the idea of this technique. 
 
 % These two technique can be applied simultaneously, the compiler can run the
