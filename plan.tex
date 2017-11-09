@@ -533,10 +533,9 @@ data-locality-aware calls into enclaves. Specifically, DAE will run a number of
 $n$ processes ($E_{1}$ to $E_{n}$) in an enclave on a local computer. When a 
 JVM process $T$ calls a big-data query function, the call and its parameters 
 are appended to a queue to DAE, and DAE arranges a process $E_{i}$ with good 
-data locality (\eg, according to prior arrangements) to execute the call, 
-greatly reducing both enclave transitions and data decryption. The call result 
-is appended to a return queue of the DAE for process $T$. We expect that DAE 
-will achieve resonable performance, data locality, and parallelism.
+data locality (\eg, according to prior arrangements) to execute the call. The 
+call result is appended to a return queue of the DAE for process $T$. We expect 
+that DAE will achieve resonable performance, data locality, and parallelism.
 
 % For each call in the queue, DAE will pick a process that 
 % has good data locality (\eg, based on the footprint of prior calls) to execute 
