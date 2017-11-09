@@ -380,8 +380,96 @@ $(\varepsilon, \delta)$-differentially~\cite{differntialprivacy:tcc06}
 private model (TBD: add an intuitive explanation).
 
 
-\vspace{-.15in}\subsection{Objective 3: building a 
-secure just-in-time compiler}\label{sec:obj3}\vspace{-.075in}
+\vspace{-.15in}\subsection{Objective 3: creating a prvicy-preserving compiler 
+for big-data queries in public clouds}\label{sec:obj3}\vspace{-.075in}
+
+In order to reduce maintainance costs, more and more sensitive data are stored 
+and processed in public clouds (\eg, Amazon EC2 and Dropbox). Although data can 
+be securely encrypted while in rest, recent real-world privacy breaches have 
+shown that data are often leaked while being processed. The reason is that 
+homomophic encryption is still pre-mature (a notable analytic database 
+CryptoDB~\cite{cryptdb:sosp11} reports a 1000X overhead compared with
+the unencrypted execution), and most data is being processed in plaintext. 
+
+Recently, Trusted Execution Environment (TEE) becomes a promising technique to
+protect computation on public clouds even if the cloud's operating system is
+compromised. For example, Intel-SGX~\cite{intel-sgx} runs programs
+in a enclave, so code and data are protected and can not be seen by the 
+attackers. Meanwhile, SGX is good fit for big-data queries because these queries 
+are data-intensive in userspace and they hardly invoke system calls (the 
+monolithic kernel space can easily break SGX's security guarantee). A latest 
+big-data analytic system opaque~\cite{opaque:nsdi17} reports only 30\% overhead, 
+which makes it a practical system for production employment.
+
+\vspace{-.15in}
+\subsubsection{Challenges: existing SGX-based systems require rewriting 
+queries and have too-large TCB} 
+\label{sec:ift-problem}\vspace{-.075in}
+
+Despite recent systems (Opaque, VC3, SGX-BigMatrix) on building SGX-based 
+systems for big-data queries, two major challenges still remain. First,
+running programs in a enclave needs completely rewriting the readily pervasive 
+Jaba big-data queries into C++, an extreme time-consuming and error-prone 
+process. Second, to easy implementation, existing systems typically run the 
+entire language runtime (\eg, JVM or Python runtime) within SGX, causing the 
+Trusted Computing Base (TCB) to be too large and potentially unsecure, a major 
+source of privacy breaches. For instance, JVM contains millions of lines of 
+code from many different parties/companies, which is extremely hard to verify 
+the security and easy to breach via conflicinting interests or insider 
+attacks~\cite{top-threats}.
+% SGX-BigMatrix~\cite{bigmatrix:ccs17} proposes a secure and oblivious 
+% vectorization
+% abstraction for Python, but it needs to rewrite programs with its abstraction.
+
+\vspace{-.15in}
+\subsubsection{\maat: a just-in-time (JIT), privcy-preserving Java compiler for 
+big-data queries} 
+\label{sec:ift-problem}\vspace{-.075in}
+
+\begin{figure}[h]
+    \centering
+    \begin{minipage}{.48\textwidth}    
+          \vspace{-.1in}
+        \includegraphics[width=0.95\textwidth]{figures/threat_public.ps}
+%          \vspace{-.1in}         
+        \caption{Threat model of \maat. Data records with blue color are 
+encrypted, and white color are plantext. Shaded (grey) components may leak 
+data, and \maat is designed to defend against them.}
+        \label{fig:maat-threat}
+    \end{minipage}
+    \centering
+    \begin{minipage}{0.48\textwidth}
+         \vspace{-.1in}
+        \includegraphics[width=0.95\textwidth]{figures/jit_arch.ps}
+         \vspace{-.1in}
+        \caption{\maat JIT compiler architecture. Key components are 
+shaded (and in blue).}
+        \label{fig:maat-arch}
+    \end{minipage}
+\end{figure}
+
+We propose \maat, the first compiler that runs unmodified Java big-data queries 
+in SGX enclaves securely with minimal TCB (\ie, we only need to trust SGX). 
+The purpose of \maat is to keep confidentiality of data processed in enclaves, 
+while other attacks such as changing of execution path and Denies of Services 
+(DoS) are not our concerns, because we tend to defend against a public, 
+malicous cloud proficer. There is an orthogonal approach that hardens the 
+security of JVM itself~\cite{jitguard:ccs17}. \maat works as a SGX-aware java 
+JIT compiler which automatically compiles self-defined big-data functions 
+(\eg, \func{map}/\func{reduce}) into enclave-compatible assembly code. 
+Therefore, the JVM itself does not need to be trusted, and people can run 
+unmodified big-data Java algorithms in \maat with a strong privacy protection.
+
+
+
+
+
+
+
+
+
+
+
 
 
 In the project, we plan to tackle the problem above. We are proposing to
@@ -395,16 +483,7 @@ that is running in the enclaved are trusted. In specific, the JIT compiler and
 the secure functions should be trusted.
 All other components, including operating system,
 hypervisor are trusted. Figure~\ref{fig:threat_public} shows the model (TODO).
-\begin{figure}[!h]
-  \center
-  \footnotesize
-  \includegraphics[width=0.5\textwidth]{figures/threat_public.ps}
-  \caption{\footnotesize{Threat model in public cloud. All grey boxes are not 
-trusted and red lines
-  represent potential leakages or attacks. Data is encrypted outside enclave and 
-is in blue.}}
-  \label{fig:threat_public}
-\end{figure}
+
 
 Figure \ref{arch} shows the architecture
 of the system. Programmers annotate some functions as secure, so code of the 
@@ -414,17 +493,6 @@ The annotated secure functions are compiled and executed inside
 enclaves so that data and code will not be leaked.
 The Java byte-codes of these function are compiled to native enclave
 codes, and are executed inside enclaves upon function calls.
-
-\begin{figure}[tbh]
-  \center
-  \includegraphics[width=0.75\textwidth]{figures/jit_arch.ps}
-  \caption{Architecture of Running Java with SGX. Some of the functions are
-  annotated as secured function and they are compiled by a JIT in a enclave.
-  The compiler compiles the functions into enclave code, so that the program 
-will
-  call into a enclave when calling into this function.}
-  \label{arch}
-\end{figure}
 
 There are two challenges that we need to address in our design:
 running unmodified Java programs with minimum TCB and
