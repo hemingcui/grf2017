@@ -177,12 +177,12 @@ Differential Privacy (FDP) technique}\label{sec:obj2}\vspace{-.075in}
 \kakute (\textbf{Objective 1}) stricly prevents
 sensitive data flowing to IO functions or query results, but in some scenarios 
 it is still desirable to let computational providers acquire aggregation 
-results (\eg, the sum of citizens who have got brain cancer in a country) 
+results (\eg, the sum of citizens who have got cancer in a country) 
 on sensitive fields as long as individual information is not leaked. 
-complementary to DFT, differential privacy~\cite{Dwork2006Differential, 
+Differential privacy~\cite{Dwork2006Differential, 
 Dwork2008Differential, Dwork2011a} can enforce statistical bounds on 
-aggregation results and prevent individual information leakage, so it has 
-attracted much attention from academia and industry recently.
+aggregation results and prevent individual information leakage, so it is 
+complementary to DFT and has attracted much attention recently.
 
 % Differential privacy is a robust privacy standard proposed by Dwork et
 % al.
@@ -206,13 +206,12 @@ either on input data records or output query results. However, due to the lack
 of precisely tracking how inputs are computed and propagated to outpus, to 
 enforce statistical guarantee on outputs, differential privacy often 
 conservatively, universally add the same noise to all fields of a data record 
-and to all records, causing too much noise to be added and too inaccurate 
-query results. For instance, A recent
+and to all records, causing inaccurate query results. For instance, A recent
 work~\cite{differentialresult:vldb15} reported more than 30\% losses of accuracy 
 when the security guarantee is high (the probability of leakages is low). In 
 such case, a simple KMeans program will return centroids far from the accurate 
-ones, and the accuracy loss rate is much larger than the training error rate 
-which is several percents in practice.
+ones. Such accuracy loss rate is useless as it is much larger than the KMeans 
+training error rate (a few percents).
 
 \vspace{-.15in}
 \subsubsection{FDP and its new algorithm} 
@@ -269,27 +268,20 @@ level k,
 Our key insight is that DFT and differential privacy can complement each other, 
 getting the best of the both worlds. Considering each data racord, DFT can 
 precisely track how sensitive data fields flow to which query result, so 
-differential privacy needs only add noise to the sensitive part, not all query 
+differential privacy needs only add noise to the sensitive input fields or 
 results. Considering all data records, DFT can also distinguish which records 
 are more important, so differential privacy can add more noise to the more 
-important records than the others. This insight spurs FDP, a novel differential 
-privacy technique that can achieve same statistical bounds as prior 
-differential privacy techniques, while preverving reasonable accuracy for query 
-results.
+important records than the others.
 
-
-The threat model of FDP is the same as \kakute's 
-(Figure~\ref{fig:falcon-arch}), because FDP aims to defend against malicious 
-computational providers in private clouds. 
-
-FDP provides a fine-grained privacy control on data. Each record
-belongs to a user who assigns a security tag to all its data records.
+This insight nurtures Fine-grained Differential Privacy (FDP). In FDP, each 
+record belongs to a user who assigns a security tag to all its data records.
 A security tag that is related to the privacy budget $\varepsilon$ (or accuracy 
-level).
-When the privacy budget is high, the probability of leakages is high.
+level). When the privacy budget is high, the probability of leakages is high.
 We adopts the Personalised Differential Privacy (PDP) model in recent
 work~\cite{pdp:icde15}. $\Phi(x)$ return the $\varepsilon$ of a particular 
-record x.
+record x. The threat model of FDP is the same as \kakute's 
+(Figure~\ref{fig:falcon-arch}), because FDP aims to defend against malicious 
+computational providers in private clouds. 
 
 \begin{definition}{Differential Privacy}
 For two neighbor dataset $D$ and $D'$ differing at record x,
@@ -306,28 +298,24 @@ personalised model, the probability is different for records belonging to
 different users, so that different users have various levels of protections.
 
 To start with, we need to determine the relation of the privacy budget and the 
-security
-level (a getLevel function).
-We adopt a deterministic model, and there are 6 security levels: insecure, 
-$dp_1$,
-$dp_2$, $dp_3$, $dp_4$ and non-released. Insecure records can be release 
-directly,
-while non-released can not be used in
-any computation to the final result. $dp_1$ to $dp_4$ varies in terms of their
-privacy budgets for differential privacy.
-We may also consider the $(\delta, \varepsilon)$-differential privacy model.
+security level (a \vv{getLevel} function). We adopt a deterministic model, and 
+there are 6 security levels: insecure, $dp_1$, $dp_2$, $dp_3$, $dp_4$ and 
+non-released. Insecure records can be release directly, while non-released can 
+not be used in any computation to the final result. $dp_1$ to $dp_4$ varies in 
+terms of their privacy budgets for differential privacy.
+% We may also consider the $(\delta, \varepsilon)$-differential privacy model.
 
-We extend the differential privacy model developed in previous
-work~\cite{differentialdp:stoc11}. We introduce two noise calibration model
-that make use the fact that different record may have
-different security level (protection level).
+% We extend the differential privacy model developed in previous
+% work~\cite{differentialdp:stoc11}. We introduce two noise calibration model
+% that make use the fact that different record may have
+% different security level (protection level).
 
 
-\begin{theorem}{Laplace Mechanism~\cite{laplace}}
+\begin{theorem}{Laplace Mechanism~\cite{Dwork2006Differential}}
   Adding noise with Laplace distribution $Laplace(\dfrac{\Delta 
 f}{\varepsilon})$ enforces
   Differential Privacy, and global sensitivity $\Delta f$ is defined as
-
+  \vspace{-.1in}
   \begin{align}
     \Delta f = max || f(D) - f(D') ||_1
   \end{align}
@@ -337,20 +325,13 @@ f}{\varepsilon})$ enforces
 To calibrate out to enforce differential privacy,
 a simple approach is to use the $\varepsilon$ inferred by the highest security
 level of each dimension, then add noise to the output directly, but this 
-approach
-is too naive for diversity of security levels.
-
-We adopt the sample-and-aggregate framework proposed in previous 
-work~\cite{differentialdp:stoc11}.
-In this model, data is partitioned into multiple parts (size of each part is 
-$m$).
-Each partition may consists
+approach is too naive for diversity of security levels. Instead, we adopt the 
+sample-and-aggregate framework proposed in previous 
+work~\cite{differentialdp:stoc11}. In this model, data is partitioned into 
+multiple parts (size of each part is $m$). Each partition may consists
 different level. The noise aggregator adds noise to final result of each 
-partition
-according to the security level of each partition.
-
-Formally, data is partitioned into multiple parts denoted as $p_1$, $p_2$, ..., 
-$p_n$.
+partition according to the security level of each partition. Formally, data is 
+partitioned into multiple parts denoted as $p_1$, $p_2$, ..., $p_n$.
 The security level and its corresponding $\varepsilon$ are $\varepsilon_1$,
 $\varepsilon_2$, ..., $\varepsilon_n$.
 
@@ -462,7 +443,7 @@ JVM itself does not run in \maat's enclaves.
 The goal of \maat is to preserve the confidentiality of data while being 
 processed in public clouds. Other attacks such as changing execution paths 
 (\ie, integrity) have been well defended in prior work~\cite{jitguard:ccs17}, 
-which \maat can directly use.
+and \maat can directly use it.
 
 Figure~\ref{fig:maat-threat} shows \maat's threat model: both SGX and 
 computation providers are trusted, and cloud providers are malicious. Figure 
