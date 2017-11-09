@@ -458,10 +458,10 @@ automatically compiles self-defined big-data functions (\eg,
 \func{map}/\func{reduce}) into enclave-compatible assembly code. Therefore, the 
 JVM itself does not run in \maat's enclaves.
 
-The motivation of \maat is to keep the confidentiality of data processed in 
-enclaves. Other attacks such as changing of execution path (\ie, integrity) have 
-been well defended in prior work~\cite{jitguard:ccs17}, which \maat can directly 
-leverage.
+The goal of \maat is to preserve the confidentiality of data while being 
+processed in public clouds. Other attacks such as changing execution paths 
+(\ie, integrity) have been well defended in prior work~\cite{jitguard:ccs17}, 
+which \maat can directly use.
 
 Figure~\ref{fig:maat-threat} shows \maat's threat model: both SGX and 
 computation providers are trusted, and cloud providers are malicious. Figure 
@@ -498,10 +498,10 @@ performance overhead compared to native executions. When calling into and
 out of a function in enclaves, an ECALL and OCALL will be invoked in the CPU 
 and enclave transitions are invoked. Such transitions are several hundreds 
 times slower than user function calls. Moreover, encryption and decryption on 
-data records are invoked during such transitions. Our evaluation on a recent 
-privacy-preserving data analytic system~\cite{opaque:nsdi17} shows that it 
-incurs 3.4k transitions for processing 10k data (for two operations \vv{select} 
-and \vv{groupBy}), which confirms the significance of the challenge.
+data records are invoked during such transitions. Our study on a SGX-based 
+big-data system Opaque~\cite{opaque:nsdi17} shows that it incurs 3.4k enclave
+transitions for processing 10k data (with two queries \vv{select} and 
+\vv{groupBy}), which confirms the challenge.
 
 % In fact, these processing functions can be pipelined and processed in a single
 % enclave function. Our project takes reducing transitions as one of our targets.
