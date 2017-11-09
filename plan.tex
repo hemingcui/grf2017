@@ -48,6 +48,7 @@ leaking channels. Shaded (grey) components may leak data, and \kakute is
 designed to defend against them.}
         \label{fig:falcon-arch}
     \end{minipage}
+    \hspace{.1in}
     \centering
     \begin{minipage}{0.48\textwidth}
          \vspace{-.1in}
@@ -438,6 +439,7 @@ encrypted, and white color are plantext. Shaded (grey) components may leak
 data, and \maat is designed to defend against them.}
         \label{fig:maat-threat}
     \end{minipage}
+    \hspace{.2in} 
     \centering
     \begin{minipage}{0.4\textwidth}
          \vspace{-.1in}
@@ -451,40 +453,34 @@ shaded (and in blue).}
 
 We propose \maat, the first compiler that runs unmodified Java big-data queries 
 in SGX enclaves securely with minimal TCB (\ie, we only need to trust SGX). 
-The purpose of \maat is to keep confidentiality of data processed in enclaves, 
-while other attacks such as changing of execution path and Denies of Services 
-(DoS) are not our concerns, because we tend to defend against a public, 
-malicous cloud proficer. There is an orthogonal approach that hardens the 
-security of JVM itself~\cite{jitguard:ccs17}. \maat works as a SGX-aware java 
-JIT compiler which automatically compiles self-defined big-data functions 
-(\eg, \func{map}/\func{reduce}) into enclave-compatible assembly code. 
-Therefore, the JVM itself does not need to be trusted, and people can run 
-unmodified big-data Java algorithms in \maat with a strong privacy protection.
+\maat works as a SGX-aware java JIT compiler which automatically compiles 
+self-defined big-data functions (\eg, \func{map}/\func{reduce}) into 
+enclave-compatible assembly code. Therefore, the JVM itself does not need to be 
+trusted, and people can run unmodified big-data Java algorithms in \maat with a 
+strong privacy protection.
 
+The motivation of \maat is to keep confidentiality of data processed in 
+enclaves, while other attacks such as changing of execution path and Denies of 
+Services (DoS) are not our concerns, because we tend to defend against a 
+public, malicous cloud proficer. There is an orthogonal approach that hardens 
+the security of JVM itself~\cite{jitguard:ccs17}.
 
-Figure~\ref{fig:maat-threat} shows the threat model of \maat. All grey 
-boxes are not trusted and red lines represent potential leakages or attacks. 
-Data is encrypted outside enclave and is in blue. Self-defined big-data query 
-functions are treated as secured functions by \maat and they are compiled by a 
-JIT translator in a enclave, which can ensures the integrity of the big-data 
-query code. The compiler compiles the functions into enclave code, so that the 
-program will call into a enclave when calling 
-into this function. The actual executions of these self-defined functions
-
-Figure \ref{fig:maat-arch} shows the architecture of \maat. Self-defined 
-functions and data processed by these functions should be kept as secrets.
-The secure functions are compiled and executed inside enclaves so that data and 
-code will not be leaked. The Java byte-codes of these function are compiled to 
-native enclave codes, and are executed inside enclaves using a standard enclave 
-ECALL upon function calls of the running program.
-
+Figure~\ref{fig:maat-threat} shows the threat model of \maat. Specifically, the 
+public cloud could be malicious. Figure \ref{fig:maat-arch} shows the 
+architecture of \maat. Self-defined functions and data processed by these 
+functions should be kept as secrets. The secure functions are compiled and 
+executed inside enclaves so that data and code will not be leaked. The Java 
+byte-codes of these function are compiled to native enclave codes, and are 
+executed inside enclaves using a standard enclave ECALL upon function calls of 
+the running program.
 
 Our \maat architecture contains two software components: our JIT translator 
 and our own management library. The JIT translator is a thin layer which 
 translate each Java bytecode instruction into a number of SGX-compatible 
-assembly code. The management is for our own use of encryption/decription on 
-data records and maintaining SGX memory for the queries at runtime. SGX is for 
-protecting data and code running in enclaves, but code inside 
+assembly code (\eg, Figure~\ref{sec:jit-arch}). The management is for our own 
+use of encryption/decription on data records and maintaining SGX memory for the 
+queries at runtime. SGX is for protecting data and code running in enclaves, but 
+code inside 
 enclaves also have accesses to the regular memory region. Therefore, code in 
 the enclaves can write sensitive data to unprotected memory regions when the 
 code is compromised. The OpenJDK implementation of JVM contains up to millions 
