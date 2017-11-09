@@ -461,92 +461,51 @@ Therefore, the JVM itself does not need to be trusted, and people can run
 unmodified big-data Java algorithms in \maat with a strong privacy protection.
 
 
+Figure~\ref{fig:maat-threat} shows the threat model of \maat. All grey 
+boxes are not trusted and red lines represent potential leakages or attacks. 
+Data is encrypted outside enclave and is in blue. Self-defined big-data query 
+functions are treated as secured functions by \maat and they are compiled by a 
+JIT translator in a enclave, which can ensures the integrity of the big-data 
+query code. The compiler compiles the functions into enclave code, so that the 
+program will call into a enclave when calling 
+into this function. The actual executions of these self-defined functions
+
+Figure \ref{fig:maat-arch} shows the architecture of \maat. Self-defined 
+functions and data processed by these functions should be kept as secrets.
+The secure functions are compiled and executed inside enclaves so that data and 
+code will not be leaked. The Java byte-codes of these function are compiled to 
+native enclave codes, and are executed inside enclaves using a standard enclave 
+ECALL upon function calls of the running program.
 
 
+Our \maat architecture contains two software components: our JIT translator 
+and our own management library. The JIT translator is a thin layer which 
+translate each Java bytecode instruction into a number of SGX-compatible 
+assembly code. The management is for our own use of encryption/decription on 
+data records and maintaining SGX memory for the queries at runtime. SGX is for 
+protecting data and code running in enclaves, but code inside 
+enclaves also have accesses to the regular memory region. Therefore, code in 
+the enclaves can write sensitive data to unprotected memory regions when the 
+code is compromised. The OpenJDK implementation of JVM contains up to millions 
+lines of code, which is impractical for formal verifications as it is 
+time-consuming with current verification methods (\chref{sec:others-work}).
 
+We plan to proactively 
+implementation the JIT translator and mem library to be easy to verify, and we 
+plan to use state-of-the-art verification techniques to verify both of them, so 
+that we do not need to include them into \maat's TCB. Specifically, we plan to 
+implement the two components without recursions and with as few as loops. By 
+realizing this goal, our \maat compiler will achieve a minimum TCB: only the SGX 
+hardware, nothing else.
 
-
-
-
-
-
-
-
-In the project, we plan to tackle the problem above. We are proposing to
-run unmodified Java program in enclaves to protect computation in public
-clouds or untrusted servers. We will design a Just-In-Time compiler for JVM
-and run secured functions in enclaves.\\
-\textbf{Thread Model} We evaluate the program setup in public clouds.
-In a public cloud, only data provider, and a portion of code
-in the analytic platform
-that is running in the enclaved are trusted. In specific, the JIT compiler and
-the secure functions should be trusted.
-All other components, including operating system,
-hypervisor are trusted. Figure~\ref{fig:threat_public} shows the model (TODO).
-
-
-Figure \ref{arch} shows the architecture
-of the system. Programmers annotate some functions as secure, so code of the 
-functions
-and data processed by these functions should be kept as secrets.
-The annotated secure functions are compiled and executed inside
-enclaves so that data and code will not be leaked.
-The Java byte-codes of these function are compiled to native enclave
-codes, and are executed inside enclaves upon function calls.
-
-There are two challenges that we need to address in our design:
-running unmodified Java programs with minimum TCB and
-reducing excessive enclave transitions.
-
-% \subsubsection{Running Unmodified Java Programs with Minimum TCB}
-A straightforward approach to run unmodified Java programs in enclaves for
-code and data protections is to run the whole JVM in enclaves.
-However, as argued in a previous work~\cite{securekeeper},
-it will blow up the TCB and cause a high overhead by running the whole JVM in 
-enclaves.
-
-% TCB
-SGX is for protecting data and code running in enclaves, but code inside 
-enclaves
-also have accesses to the regular memory region. Therefore, code in the enclaves
-can write sensitive data to unprotected memory regions when the code is 
-compromised.
-The OpenJDK implementation of JVM contains up to millions lines of code, which
-is unpractical for formal verifications as it is time-consuming with
-current verification methods (\chref{sec:others-work}).
-
-% Memory size
-Intel SGX contains a protected memory region call Enclave Page Cache (EPC), and 
-evictions
-from this cache cause expensive encryption costs.
-Although next generation of SGX~\cite{intel-sgx2} may support a larger EPC,
-current generation of SGX only has an EPC up to 128MB. In practice, only around
-90 MB can be allocated. Therefore, running programs with large memory 
-consumption
-will cause much higher overhead. A recent work~\cite{opaque:nsdi17} shows that
-running program below this limit incur an only 7.46\% overhead, while slightly
-exceeding this limit causes 50\% to 60\% overhead.
-Therefore, we have to reduce the TCB size for running unmodified Java programs
-in enclaves.
-
-To reduce TCB size, we propose to run only some programmer-annotated functions
-in enclave. To this end, we propose a split execution framework.
-Only the Intermediate Representation (IR)
-and Code Generation model are trusted in the system. There will be two instances
-of compilers for compiling Java bytecode, one for secure code compilations and 
-one
-for untrusted code compilations. Therefore, the TCB is greatly reduced, as we
-do not need to trust the JVM runtime (\eg{} Garbage Collection). Also, as only
-some functions should be executed securely, the split execution framework
-should not cause high performance overhead.
-
-When calling into and out of a function in enclaves, an ECALL and OCALL
-will be invoked in the CPU. In specific, the CPU is trapped into a new mode 
-(except from
+One subtle issue for \maat is that it should have reasonable performance 
+overhead compared to native Spark executions. When calling into and out of a 
+function in enclaves, an ECALL and OCALL will be invoked in the CPU. In 
+specific, the CPU is trapped into a new mode (except from
 the User and Privileged mode), and the current frame is encrypted and saved.
 A recent work~\cite{sgxkernel:cf17} shows that enclave transitions are 60X 
-slower
-than system calls and several hundreds times slower than user function calls.
+slower than system calls and several hundreds times slower than user function 
+calls.
 Moreover, encryption and decryption are required for secure function calls,
 which makes enclave transitions even more time-consuming.
 Our evaluation on a recent privacy-preserving data analytic 
@@ -555,7 +514,7 @@ it incurs 3.4k transitions for processing 10k data (for two operations select
 and groupBy).
 In fact, these processing functions can be pipelined and processed in a single
 enclave function. Our project takes reducing transitions as one of our targets.
-% Therefore, system with frequent enclave transitions would have high
+
 
 We introduce two techniques, Cost-based Compilation and Asynchronous
 Enclave Call, to tackle this challenge.
@@ -565,7 +524,8 @@ functions,
 and combines two enclaves if the marginal benefit of combining them is larger 
 than
 the transition cost. Initially, only function b and d
-are running in enclaves, but the compiler finds out that cost of running c in an 
+are running in enclaves, but the compiler finds out that cost of running c in 
+an 
 enclave is less than the transition cost (assume it to be 2), then the whole 
 function a will be compile as an enclave. In another case where running 
 function c takes a high cost, combinations of enclaves will not happen.
@@ -587,8 +547,79 @@ threads.
 
 These two technique can be applied simultaneously, the compiler can run the
 sample and optimisation offline. After that, the compiler run a enclave and the 
-program
-in separate threads to avoid transition of enclaves.
+program in separate threads to avoid transition of enclaves.
+
+\para{Future work}. TBD.
+
+% In the project, we plan to tackle the problem above. We are proposing to
+% run unmodified Java program in enclaves to protect computation in public
+% clouds or untrusted servers. We will design a Just-In-Time compiler for JVM
+% and run secured functions in enclaves.\\
+% \textbf{Thread Model} We evaluate the program setup in public clouds.
+% In a public cloud, only data provider, and a portion of code
+% in the analytic platform
+% that is running in the enclaved are trusted. In specific, the JIT compiler and
+% the secure functions should be trusted.
+% All other components, including operating system,
+% hypervisor are trusted. Figure~\ref{fig:threat_public} shows the model (TODO).
+
+
+% Figure \ref{arch} shows the architecture
+% of the system. Programmers annotate some functions as secure, so code of the 
+% functions
+% and data processed by these functions should be kept as secrets.
+% The annotated secure functions are compiled and executed inside
+% enclaves so that data and code will not be leaked.
+% The Java byte-codes of these function are compiled to native enclave
+% codes, and are executed inside enclaves upon function calls.
+% 
+% There are two challenges that we need to address in our design:
+% running unmodified Java programs with minimum TCB and
+% reducing excessive enclave transitions.
+
+% % \subsubsection{Running Unmodified Java Programs with Minimum TCB}
+% A straightforward approach to run unmodified Java programs in enclaves for
+% code and data protections is to run the whole JVM in enclaves.
+% However, as argued in a previous work~\cite{securekeeper},
+% it will blow up the TCB and cause a high overhead by running the whole JVM in 
+% enclaves.
+
+% TCB
+% SGX is for protecting data and code running in enclaves, but code inside 
+% enclaves
+% also have accesses to the regular memory region. Therefore, code in the enclaves
+% can write sensitive data to unprotected memory regions when the code is 
+% compromised.
+% The OpenJDK implementation of JVM contains up to millions lines of code, which
+% is unpractical for formal verifications as it is time-consuming with
+% current verification methods (\chref{sec:others-work}).
+
+% Memory size
+% Intel SGX contains a protected memory region call Enclave Page Cache (EPC), and 
+% evictions
+% from this cache cause expensive encryption costs.
+% Although next generation of SGX~\cite{intel-sgx2} may support a larger EPC,
+% current generation of SGX only has an EPC up to 128MB. In practice, only around
+% 90 MB can be allocated. Therefore, running programs with large memory 
+% consumption
+% will cause much higher overhead. A recent work~\cite{opaque:nsdi17} shows that
+% running program below this limit incur an only 7.46\% overhead, while slightly
+% exceeding this limit causes 50\% to 60\% overhead.
+% Therefore, we have to reduce the TCB size for running unmodified Java programs
+% in enclaves.
+
+% To reduce TCB size, we propose to run only some programmer-annotated functions
+% in enclave. To this end, we propose a split execution framework.
+% Only the Intermediate Representation (IR)
+% and Code Generation model are trusted in the system. There will be two instances
+% of compilers for compiling Java bytecode, one for secure code compilations and 
+% one
+% for untrusted code compilations. Therefore, the TCB is greatly reduced, as we
+% do not need to trust the JVM runtime (\eg{} Garbage Collection). Also, as only
+% some functions should be executed securely, the split execution framework
+% should not cause high performance overhead.
+
+
 
 % \para{Oblivious Execution}. Our current design does not consider data leakage 
 % through access pattern, but
