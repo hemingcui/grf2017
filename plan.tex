@@ -178,20 +178,21 @@ Differential Privacy (FDP) technique}\label{sec:obj2}\vspace{-.075in}
 sensitive data flowing to IO functions or query results, but in some scenarios 
 it is still desirable to let computational providers acquire aggregation 
 results (\eg, the sum of citizens who have got brain cancer in a country) 
-on sensitive fields as long as individual information is not leaked. Therefore, 
-differential privacy, which enforces statistical
-bounds on aggregation results to prevent individual information leakage, has 
-attracted much attention from academia and industry recently.
+on sensitive fields as long as individual information is not leaked. 
+complementary to DFT, differential privacy~\cite{Dwork2006Differential, 
+Dwork2008Differential, Dwork2011a} enforces statistical bounds on aggregation 
+results to prevent individual information leakage, has attracted much attention 
+from academia and industry recently.
 
-Differential privacy is a robust privacy standard proposed by Dwork et
-al\cite{Dwork2006Differential, Dwork2008Differential, Dwork2011a}.
-His work shows that differential privacy can be achieved by adding
-Laplace distributed noise whose scale is related to the sensitivity of queries.
-This simple algorithm can handle all kinds of queries but inevitably has some
-drawbacks. For instance, the number of query is limited and too much noise will
-be injected to continuous queries. To reduce noise magnitude, a 
-sample-and-aggregation
-framework~\cite{differentialdp:stoc11} is proposed.
+% Differential privacy is a robust privacy standard proposed by Dwork et
+% al.
+% His work shows that differential privacy can be achieved by adding
+% Laplace distributed noise whose scale is related to the sensitivity of queries.
+% This simple algorithm can handle all kinds of queries but inevitably has some
+% drawbacks. For instance, the number of query is limited and too much noise will
+% be injected to continuous queries. To reduce noise magnitude, a 
+% sample-and-aggregation
+% framework~\cite{differentialdp:stoc11} is proposed.
 
 \vspace{-.15in}
 \subsubsection{Challenge: existing differential privacy techniques are 
