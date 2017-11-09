@@ -535,11 +535,13 @@ that DAE will achieve resonable performance, data locality, and parallelism.
 
 \para{Future work}. By realizing a privacy-preserving Java JIT compiler for 
 public clouds, \maat has broad applications in other security areas, and we 
-will further extend it along two directions. First, we will augment the 
-translator to automatically translate the big-data queries with access 
-patterns on particular data into those without (\eg, bblivious executions). 
-Second, we will further enhance DAE to support library operating system calls, 
-so that big-data queries can incorporate system calls securely.
+will further extend it along three directions. First, we will fully implement 
+it and evaluate its efficacy on defending against diverse real-world privacy 
+attacks launched by cloud providers. Second, we will augment the translator to 
+automatically translate the big-data queries with access patterns on particular 
+data into those without (\eg, bblivious executions). Third, we will further 
+enhance DAE to support library operating system calls, so that big-data queries 
+can incorporate system calls securely.
 
 % In the project, we plan to tackle the problem above. We are proposing to
 % run unmodified Java program in enclaves to protect computation in public
@@ -654,7 +656,7 @@ so that big-data queries can incorporate system calls securely.
 % adopt emulations for simple but usually used system calls. We believe this
 % hybrid design can accomplish a fast but secure system handling in Java.
 
-\vspace{-.15in}\subsection{Research timeline} 
+\vspace{-.15in}\subsection{Research plan} 
 \label{sec:timeline}\vspace{-.075in}
 
 This project will require two PhD students S1 and S2 to work for 
@@ -665,7 +667,7 @@ and robustness on various real-world big-data queries (part of
 use \kakute to fully develop the proposed fine-grained privacy model (part of 
 \textbf{Objective~2}), and S2 will implement the two algorithms proposed for 
 this model (part of \textbf{Objective~2}). In the third year, S1 will build the 
-secure big-data compiler \textbf{Objective 3} and S2 will evaluate this 
+secure big-data compiler \textbf{Objective~3} and S2 will evaluate this 
 compiler on diverse real-world big-data queries.
 % Both students will 
 % involve theoretical methods, implement real software systems, and 
