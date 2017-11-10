@@ -76,13 +76,13 @@ transferred DFT tags using \tagcache. Both techniques are illustrated in
 Appendix (c) of this proposal.
 
 Figure~\ref{fig:falcon-arch} defines \kakute's threat 
-model. Figure~\ref{fig:falcon-protocol} shows \kakute's architecture 
-design: the InputTainter component provides easy-to-use APIs for 
-data providers to automatically tag sensitive fields, the DFT component is 
-enabled in self-defined functions, the Local- and Global-Checker components 
-detect and prevent illegal flows of sensitive fields (\eg, credit cards flow to 
-IO functions self-defined functions). Shuffle operations across computers are 
-intercepted and added tags. Therefore, DFT is completely captured across 
+model. Figure~\ref{fig:falcon-protocol} shows \kakute's design. The 
+InputTainter component provides easy-to-use APIs for data providers to 
+automatically tag sensitive fields. The DFT component is enabled in 
+self-defined functions. The Local- and Global-Checker detect and 
+prevent illegal flows of sensitive fields (\eg, credit cards flow to IO 
+functions in self-defined functions). Shuffle operations across computers are 
+intercepted and tags are added. Therefore, DFT is completely captured across 
 computers.
 
 We will implement \kakute and integrate it with Spark. We will leverage 
@@ -164,13 +164,12 @@ preliminary results are published in ACSAC
 
 % ~\cite{pig:vldb08}
 % ~\cite{hadoop}
-\para{Future directions.} We will improve and extend \kakute in 
+\para{Future directions.} We will extend \kakute in 
 three directions. First, we will port \kakute onto more big-data frameworks, 
 including \pig~\cite{pig:vldb08} and \hadoop~\cite{hadoop}. Second, we will 
-extend \kakute to detect broader types of security bugs, including access 
-patterns and timing channels. Third, we will study how well \kakute can augment 
-other complementary privacy techniques, including anonymization techniques and 
-differential privacy (\textbf{Objective 2}). 
+extend \kakute to detect broader types of real-world security bugs. Third, we 
+will apply \kakute to augment other complementary privacy techniques, including 
+anonymization techniques and differential privacy (\textbf{Objective 2}). 
 
 \vspace{-.15in}\subsection{Objective 2: developing the Fine-grained 
 Differential Privacy (FDP) technique}\label{sec:obj2}\vspace{-.075in}
@@ -202,19 +201,18 @@ complementary to DFT and has attracted much attention recently.
 coarse-grained and thus inaccurate} 
 \label{sec:ift-problem}\vspace{-.075in}
 
-Unfortunately, despite much effort, existing differential privacy techniques 
-often suffer from great losses of accuracy. To prevent computational providers 
-revealing individual information, differential privacy typically adds noise 
-either on input data records or output query results. However, due to the lack 
-of precisely tracking how inputs are computed and propagated to outputs, to 
-enforce statistical guarantee on outputs, differential privacy often 
-conservatively, universally add the same noise to all fields of a data record 
-and to all records, causing inaccurate query results. For instance, A recent
-work~\cite{differentialresult:vldb15} reported more than 30\% losses of accuracy 
-when the security guarantee is high (the probability of leakages is low). In 
-such case, a simple KMeans program will return centroids far from the accurate 
-ones. Such accuracy loss rate is useless as it is much larger than the KMeans 
-training error rate (a few percents).
+Existing differential privacy techniques often suffer from low accuracy for 
+query results. To prevent computation providers revealing individual 
+data, differential privacy typically adds noise either on input data 
+records or query results. However, due to the lack of precisely tracking 
+how inputs are computed and propagated to outputs, to enforce statistical 
+guarantee on outputs, differential privacy often conservatively add the same 
+noise to all fields of a data record and to all records, causing inaccurate 
+results. For instance, prior work~\cite{differentialresult:vldb15} reports 
+more than 30\% loss of accuracy when the security guarantee is high (the 
+probability of leakage is low). Therefore, a KMeans program will return 
+centroids far from the accurate ones. This low accuracy makes results useless as 
+it is much larger than the KMeans training error rate (a few percents).
 
 \vspace{-.15in}
 \subsubsection{FDP and its new algorithm} 
@@ -269,18 +267,18 @@ level k,
 \end{figure}
 
 Our key insight is that DFT and differential privacy can complement each other, 
-getting the best of the both worlds. Considering each data record, DFT can 
+getting the best of both worlds. Considering each data record, DFT can 
 precisely track how sensitive data fields flow to which query result, so 
 differential privacy needs only add noise to the sensitive input fields or 
 results. Considering all data records, DFT can also distinguish which records 
-are more important, so differential privacy can add more noise to the more 
-important records than the others.
+are more important, so we can add give important records more noise than the 
+others.
 
 This insight nurtures Fine-grained Differential Privacy (FDP). In FDP, each 
 record belongs to a user who assigns a security tag to all its data records.
 A security tag that is related to the privacy budget $\varepsilon$ (or accuracy 
 level). When the privacy budget is high, the probability of leakages is high.
-We adopts the Personalized Differential Privacy (PDP) model in recent
+We adopt the personalized differential privacy model in recent
 work~\cite{pdp:icde15}. $\Phi(x)$ return the $\varepsilon$ of a particular 
 record x. The threat model of FDP is the same as \kakute's 
 (Figure~\ref{fig:falcon-arch}), because FDP aims to defend against malicious 

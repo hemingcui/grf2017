@@ -12,12 +12,12 @@ motivation (\S\ref{sec:motivation}), and related work
 \vspace{-.15in}\subsection{Big-data computing frameworks} 
 \label{sec:bigdata}\vspace{-.075in}
 
-Big-data frameworks (\eg, Spark~\cite{nsdi12:spark} and MapReduce 
-\cite{mapreduce}) are popular for computations on tremendous amounts of data. 
-These frameworks provide self-defined Java functions (\eg, 
-\func{map}/\func{reduce}) to let computational providers write their 
-algorithms, and they and automatically apply these functions on the data stored 
-across computers in parallel.
+Big-data frameworks (\eg, Spark~\cite{nsdi12:spark} and 
+MapReduce~\cite{mapreduce}) are popular for computations on tremendous amounts 
+of data. These frameworks provide self-defined Java functions (\eg, 
+\func{map}/\func{reduce}) to let computational providers write their algorithms, 
+and they and automatically apply these functions on the data stored across 
+computers in parallel.
 % To exchange results across computers, shuffles 
 % operations are often invoked and sometimes they are performance bottlenecks in 
 % big-data frameworks. For instance, Spark~\cite{nsdi12:spark} has intensive data 
