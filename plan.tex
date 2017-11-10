@@ -162,12 +162,15 @@ preliminary results are published in ACSAC
 % totally subsumes Crane. Falcon also has initial results.
 
 
-
-\para{Future work.} We will further improve and extend \kakute in 
-two directions. First, we will extend \kakute to detect broader types of
-security bugs, including access patterns and timing channels. Second, we will 
-leverage \kakute to improve other complementary privacy techniques, including 
-anonymization techniques and differential privacy (\textbf{Objective 2}). 
+% ~\cite{pig:vldb08}
+% ~\cite{hadoop}
+\para{Future directions.} We will further improve and extend \kakute in 
+three directions. First, we will port \kakute onto more big-data frameworks, 
+including \pig~\cite{pig:vldb08} and \hadoop~\cite{hadoop}. Second, we will 
+extend \kakute to detect broader types of security bugs, including access 
+patterns and timing channels. Third, we will study how well \kakute can augment 
+other complementary privacy techniques, including anonymization techniques and 
+differential privacy (\textbf{Objective 2}). 
 
 \vspace{-.15in}\subsection{Objective 2: developing the Fine-grained 
 Differential Privacy (FDP) technique}\label{sec:obj2}\vspace{-.075in}
@@ -450,7 +453,7 @@ computation providers are trusted, and cloud providers are malicious. Figure
 \ref{fig:maat-arch} shows the architecture of \maat. In \maat, both the 
 translation of self-defined code and the execution of the code are protected by 
 enclaves, so that even if the cloud's OS compromised, it can not see the 
-executions of big-data queries or inject malicious code to the queries during 
+executions of big-data queries or inject malicious code into the queries during 
 \maat's translation.
 % Self-defined functions and data processed by these 
 % functions are protected by \maat . The Java byte-codes of these functions are 
@@ -464,9 +467,8 @@ use of encryption/decryption on data records and maintaining SGX memory for the
 queries at runtime. We will proactively implement the JIT translator and 
 management library to be easy to verify, and we plan to use state-of-the-art 
 verification techniques~\cite{xi:sosp17} to verify both of them, 
-so 
-that we do not need to include them into \maat's TCB. Specifically, we plan to 
-implement the two components without recursions and with as few as loops.
+so that we do not need to include them into \maat's TCB. Specifically, we plan 
+to implement the two components without recursions and with as few as loops.
 
 
 % We don't plan to use OpenJDK as our management library 
@@ -513,12 +515,13 @@ To mitigate this challenge, we will create a new enclave runtime abstraction
 called Data-locality-aware Asynchronous Enclave calls (DAE). DAE converts the 
 synchronous enclave calls (similar to Java function calls) to asynchronous, 
 data-locality-aware calls into enclaves. Specifically, DAE will run a number of 
-$n$ processes ($E_{1}$ to $E_{n}$) in an enclave on a local computer. When a 
-JVM process $T$ calls a big-data query function, the call and its parameters 
+$n$ processes ($E_{1}$ to $E_{n}$) in an enclave on each computer. When a 
+JVM process $P$ calls a big-data query function, the call and its parameters 
 are appended to a queue to DAE, and DAE arranges a process $E_{i}$ with good 
-data locality (\eg, according to prior arrangements) to execute the call. The 
-call result is appended to a return queue of the DAE for process $T$. We expect 
-that DAE will achieve reasonable performance, data locality, and parallelism.
+data locality (\eg, according to prior arrangements and the decrypted data 
+held by $E_{i}$) to execute the call. The call result is appended to a return 
+queue of the DAE for process $P$. We expect that DAE will achieve reasonable 
+performance, data locality, and parallelism.
 
 % For each call in the queue, DAE will pick a process that 
 % has good data locality (\eg, based on the footprint of prior calls) to execute 
@@ -534,8 +537,8 @@ that DAE will achieve reasonable performance, data locality, and parallelism.
 % sample and optimisation offline. After that, the compiler run a enclave and the 
 % program in separate threads to avoid transition of enclaves.
 
-\para{Future work}. By realizing a privacy-preserving Java JIT compiler for 
-public clouds, \maat has broad applications in other security areas, and we 
+\para{Future directions}. By realizing a privacy-preserving Java JIT compiler 
+for public clouds, \maat has broad applications in other security areas, and we 
 will further extend it along three directions. First, we will fully implement 
 it and evaluate its efficacy on defending against diverse real-world privacy 
 attacks launched by cloud providers. Second, we will augment the translator to 
