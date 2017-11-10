@@ -3,13 +3,13 @@
 
 
 This section presents the background of big-data 
-frameworks (\S\ref{sec:bigdata}), sofware-based privacy techniques  
+frameworks (\S\ref{sec:bigdata}), software-based privacy techniques  
 (\S\ref{sec:dft}), hardware-based privacy techniques (\S\ref{sec:sgx}), 
 motivation (\S\ref{sec:motivation}), and related work 
 (\S\ref{sec:others-work} and \S\ref{sec:my-work}).
 
 
-\vspace{-.15in}\subsection{Big-data Computing Frameworks} 
+\vspace{-.15in}\subsection{Big-data computing frameworks} 
 \label{sec:bigdata}\vspace{-.075in}
 
 Big-data frameworks (\eg, Spark~\cite{nsdi12:spark} and MapReduce 
@@ -45,12 +45,12 @@ operations trigger transformations along lineages, so unnecessary
 computations are avoided. \textbf{Objective 1} will leverage lazy 
 transformation to create a fast DFT technique called \lazyp (\S\ref{sec:obj1}).
 
-\vspace{-.15in}\subsection{Software-based Privacy Techniques}
+\vspace{-.15in}\subsection{Software-based privacy techniques}
 \label{sec:dft}\vspace{-.075in}
 
 Data Flow Tracking (DFT) is a mandatory access control technique for preventing 
 sensitive information leakage~\cite{dawn05:taint}. DFT attaches a tag to a 
-variable (or object), and this tag will propagate throughou computations on the 
+variable (or object), and this tag will propagate during computations on the 
 variable at runtime. DFT has been applied to various areas, such as preventing 
 sensitive information (\eg GPS data and contacts) leakage in 
 cellphone~\cite{taintdroid:osdi10,cleanos:osdi12}, web 
@@ -73,7 +73,7 @@ the best of our knowledge, no DFT system exists for big-data computing.
 Complimentary to DFT, statistical techniques, including \func{k}-anonymization 
 methods~\cite{kanonymity,icde06:ldiversity} and
 differential privacy~\cite{gupt:sigmod12, pinq:sigmod09,airavat:nsdi10}, allow 
-the aggregration of sensitive data while adding random noise to preserve 
+the aggregation of sensitive data while adding random noise to preserve 
 individual privacy. However, these statistical techniques are either not secure 
 (\func{k}-anonymization) or suffering from great losses of accuracy 
 (differential privacy). A recent work~\cite{differentialresult:vldb15} reports 
@@ -115,7 +115,7 @@ differential privacy.
 
 
 
-\vspace{-.15in}\subsection{Hardware-based Privacy Techniques}
+\vspace{-.15in}\subsection{Hardware-based privacy techniques}
 \label{sec:sgx}\vspace{-.075in}
 
 Trusted Execution Environment (TEE) is a promising technique for
@@ -123,13 +123,13 @@ protecting computation in a public cloud even if the cloud's operating systems
 or hypervisors are compromised. For instance, Intel-SGX~\cite{intel-sgx}, a 
 popular commercial TEE product, runs a program in a hardware-protected 
 \emph{enclave}, so code and data are protected from outside. Compared with the 
-approach of computating on encrypted data (\S\ref{sec:others-work}), TEE is much 
+approach of computing on encrypted data (\S\ref{sec:others-work}), TEE is much 
 safer and 100X to 1000X faster. For instance, a SGX-based system 
 Opaque~\cite{opaque:nsdi17} incurs a moderate performance overhead of 30\% 
 compared to native big-data queries.
 
 However, to practically run Java big-data queries with SGX, two open challenges 
-remain. First, existing SGX-based systems~\cite{opaque:nsdi17}requres 
+remain. First, existing SGX-based systems~\cite{opaque:nsdi17} require 
 computational providers to manually rewrite the readily pervasive Java 
 queries into SGX-compatible C++, a time-consuming and error-prone process.
 Second, existing SGX-based systems for big-data have too large Trusted 
@@ -137,7 +137,7 @@ Computing Base (TCB). Existing systems
 (\eg, SGX-BigMatrix~\cite{bigmatrix:ccs17}) run a whole language interpreter 
 (\eg, JVM and Python runtime) in enclaves, causing a too large (and too 
 dangerous) TCB: JVM code comes from many different parties/vendors and 
-extremely hard to verified. \textbf{Objective 3} (\chref{sec:obj3}) takles
+extremely hard to verified. \textbf{Objective 3} (\chref{sec:obj3}) tackles
 these two open challenges by building a new just-in-time compiler.
 
 \vspace{-.15in}\subsection{Motivation of objectives} 
@@ -167,7 +167,7 @@ will be effectively preserved.
 
 \para{Computing on encrypted data}. Homomorphic 
 encryption~\cite{fullmomo:stoc09,paillier,elgamal} is a
-technique for performing computations on encryted data in untrusted 
+technique for performing computations on encrypted data in untrusted 
 environments. Homomorphic encryption contain two kinds: Fully 
 homomorphic encryption (FHE) and partial 
 homomorphic encryption.
@@ -188,7 +188,7 @@ to provide privacy-preserving analytic in public clouds. Compared with
 software-based solutions, hardware-based solutions incurs much lower overhead. 
 TrustedDB~\cite{trusteddb:sigmod11} is a hardware-based secure database.
 VC3~\cite{vc3:sp15} proposes a secure distributed analytic platform
-with read-write validations on Mapreduce~\cite{mapreduce}. 
+with read-write validations on MapReduce~\cite{mapreduce}. 
 Opaque~\cite{opaque:nsdi17} supports secure and oblivious SQL operators on 
 SparkSQL~\cite{sparksql:sigmod15}. However, all these systems have limited 
 expressiveness (\eg SQL operators), and VC3 even needs to rewrite the program 
@@ -210,7 +210,7 @@ emerging threat~\cite{top-threats-nine, kazim2015survey} as more and more user
 sensitive data is stored and processed in clouds. 
 Airavat\cite{airavat:nsdi10}, PINQ~\cite{pinq:sigmod09} and 
 GUPT~\cite{gupt:sigmod12} propose to apply differential 
-privacy~\cite{noise:tcc06,differential:focs07} in Mapreduce,
+privacy~\cite{noise:tcc06,differential:focs07} in MapReduce,
 to prevent leakage from user query, but differential privacy can result in 
 incorrect results. Sedic~\cite{sedic:cloud13} proposes to offload sensitive 
 computations to private clouds. MrLazy~\cite{hotcloud14:mrlazy}

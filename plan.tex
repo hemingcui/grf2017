@@ -28,13 +28,13 @@ with a WordCount algorithm on a small dataset of merely 200MB, and we observed
 execution~\cite{kakute:acsac17}. The second challenge is completeness: 
 big-data frameworks usually contain \emph{shuffle} operations, which 
 redistribute data and results across computers. However, most existing DFT 
-systems ignore dataflows across computers. For the 
-few~\cite{cloudfence:raid13} who support cross-host dataflows, transferring all 
-tags in shuffles consumes excessive network bandwidth.
+systems ignore data flows across computers. For the 
+few~\cite{cloudfence:raid13} who support cross-host data flows, transferring 
+all tags in shuffles consumes excessive network bandwidth.
 % Therefore, efficient 
 % cross-host tag propagation is crucial but missing in DISC.
 
-\vspace{-.15in}\subsubsection{\kakute: a fast, precise IFT system for big-data} 
+\vspace{-.15in}\subsubsection{\kakute: a fast, precise DFT system for big-data} 
 \label{sec:kakute}\vspace{-.075in}
 
 \begin{figure}[h]
@@ -70,15 +70,15 @@ tag. Leveraging this insight, we present two new techniques, \lazyp and
 \tagcache. \lazyp avoids unnecessary tag combinations by only keeping the 
 \textit{lineage of tags} in the same self-defined queries, while \tagcache 
 reduces memory usage by sharing tags among multiple fields in each record. To 
-tackle the completeness challenge, \kakute completely captures dataflows in 
+tackle the completeness challenge, \kakute completely captures data flows in 
 shuffles by intercepting the , and it efficiently reduces the amount of 
-transferred IFT tags using \tagcache. Both techniques are illustrated in 
+transferred DFT tags using \tagcache. Both techniques are illustrated in 
 Appendix (c) of this proposal.
 
 Figure~\ref{fig:falcon-arch} defines \kakute's threat 
 model. Figure~\ref{fig:falcon-protocol} shows \kakute's architecture 
 design: the InputTainter component provides easy-to-use APIs for 
-data providoers to automatically tag sensitive fields, the DFT component is 
+data providers to automatically tag sensitive fields, the DFT component is 
 enabled in self-defined functions, the Local- and Global-Checker components 
 detect and prevent illegal flows of sensitive fields (\eg, credit cards flow to 
 IO functions self-defined functions). Shuffle operations across computers are 
@@ -88,7 +88,7 @@ computers.
 We will implement \kakute and integrate it with Spark. We will leverage 
 Phosphor~\cite{oo14:phosphor}, an efficient DFT system working in the Java 
 byte-code level. \kakute instruments computations of a Spark worker process
-to capture dataflow inside self-defined-functions. \kakute provides different 
+to capture data flows inside self-defined-functions. \kakute provides different 
 granularities of tracking with two types of tags: \func{Integer}
 and \func{Object} tags. \func{Integer} provides 32 distinct tags for 
 identifying 32 sensitivity levels, suitable for detecting data leakage and 
@@ -110,7 +110,7 @@ means no overhead.}
   \label{fig:scalability}
 \end{wrapfigure}
 
-\para{Preliminary results.} We have implemented a \kakute propotype 
+\para{Preliminary results.} We have implemented a \kakute prototype 
 and evaluated it on \appeval popular big-data algorithms, including three text 
 processing algorithms WordCount~\cite{spark:example}, 
 WordGrep~\cite{newt:socc13} and TwitterHot~\cite{spark:example}, two graph 
@@ -174,7 +174,7 @@ Differential Privacy (FDP) technique}\label{sec:obj2}\vspace{-.075in}
 
 
 
-\kakute (\textbf{Objective 1}) stricly prevents
+\kakute (\textbf{Objective 1}) strictly prevents
 sensitive data flowing to IO functions or query results, but in some scenarios 
 it is still desirable to let computational providers acquire aggregation 
 results (\eg, the sum of citizens who have got cancer in a country) 
@@ -199,11 +199,11 @@ complementary to DFT and has attracted much attention recently.
 coarse-grained and thus inaccurate} 
 \label{sec:ift-problem}\vspace{-.075in}
 
-Unfortunately, despite much effort, existing differential privacy technqiues 
+Unfortunately, despite much effort, existing differential privacy techniques 
 often suffer from great losses of accuracy. To prevent computational providers 
 revealing individual information, differential privacy typically adds noise 
 either on input data records or output query results. However, due to the lack 
-of precisely tracking how inputs are computed and propagated to outpus, to 
+of precisely tracking how inputs are computed and propagated to outputs, to 
 enforce statistical guarantee on outputs, differential privacy often 
 conservatively, universally add the same noise to all fields of a data record 
 and to all records, causing inaccurate query results. For instance, A recent
@@ -266,7 +266,7 @@ level k,
 \end{figure}
 
 Our key insight is that DFT and differential privacy can complement each other, 
-getting the best of the both worlds. Considering each data racord, DFT can 
+getting the best of the both worlds. Considering each data record, DFT can 
 precisely track how sensitive data fields flow to which query result, so 
 differential privacy needs only add noise to the sensitive input fields or 
 results. Considering all data records, DFT can also distinguish which records 
@@ -277,7 +277,7 @@ This insight nurtures Fine-grained Differential Privacy (FDP). In FDP, each
 record belongs to a user who assigns a security tag to all its data records.
 A security tag that is related to the privacy budget $\varepsilon$ (or accuracy 
 level). When the privacy budget is high, the probability of leakages is high.
-We adopts the Personalised Differential Privacy (PDP) model in recent
+We adopts the Personalized Differential Privacy (PDP) model in recent
 work~\cite{pdp:icde15}. $\Phi(x)$ return the $\varepsilon$ of a particular 
 record x. The threat model of FDP is the same as \kakute's 
 (Figure~\ref{fig:falcon-arch}), because FDP aims to defend against malicious 
@@ -293,8 +293,8 @@ Pr[{\cal M}(D) \in O] \leq e^{\Phi(x)} \times Pr[{\cal M}(D') \in O]
 \end{definition}
 
 Intuitively, Differential Privacy guarantees that the probability of
-producing different result with neighbouring dataset is low. For the 
-personalised model, the probability is different for records belonging to 
+producing different result with neighboring dataset is low. For the 
+personalized model, the probability is different for records belonging to 
 different users, so that different users have various levels of protections.
 
 To start with, we need to determine the relation of the privacy budget and the 
@@ -351,20 +351,20 @@ dp:book17}, the whole output dataset
 The error of the final result incurs in this aggregator comes from two parts:
 the Laps noise error and the partition error. It is crucial to reduce the final
 error incurs by this aggregator while keeping the differential security 
-guarantee. We can adopt a hill-climbing approach for optimisation.
+guarantee. We can adopt a hill-climbing approach for optimization.
 
 \para{Future directions}. We will fully develop this FDP technique by going 
 along two directions. First, we will do an extensive study on real-world 
-big-data queries and quantify the improvments on result accuracy. Second, 
+big-data queries and quantify the improvements on result accuracy. Second, 
 currently we propose a end-to-end differentially private computation
-system. It adopts a personalised differential privacy model~\cite{pdp:icde15},
+system. It adopts a personalized differential privacy model~\cite{pdp:icde15},
 which improves usability without reducing the security guarantee. As for future 
 direction, we can consider a 
 $(\varepsilon, \delta)$-differentially~\cite{differntialprivacy:tcc06}
-private model (TBD: add an intuitive explanation).
+private model.
 
 
-\vspace{-.15in}\subsection{Objective 3: creating a prvicy-preserving compiler 
+\vspace{-.15in}\subsection{Objective 3: creating a privacy-preserving compiler 
 for big-data queries in public clouds}\label{sec:obj3}\vspace{-.075in}
 
 % In order to reduce maintainance costs, more and more sensitive data are stored 
@@ -377,7 +377,7 @@ for big-data queries in public clouds}\label{sec:obj3}\vspace{-.075in}
 
 More and more sensitive data are stored and processed in public clouds (\eg, 
 Amazon EC2 and Dropbox), and recent real-world privacy breaches have shown that 
-data are often leaked while being processed by pubilc cloud providers. Trusted 
+data are often leaked while being processed by public cloud providers. Trusted 
 Execution Environment (TEE) is a promising technique to protect computation on 
 public clouds even if the cloud's operating system is compromised. For example, 
 Intel-SGX~\cite{intel-sgx} runs programs in a enclave, so code and data are 
@@ -385,7 +385,7 @@ protected and can not be seen by the attackers. Meanwhile, SGX is good fit for
 big-data queries because these queries are data-intensive in userspace and they 
 hardly invoke system calls (OS kernel can easily break SGX's security on 
 memory). A latest big-data analytic system Opaque~\cite{opaque:nsdi17} reports 
-only 30\% overhead compared to native, unsecure executions.
+only 30\% overhead compared to native, insecure executions.
 
 \vspace{-.15in}
 \subsubsection{Challenges: existing SGX-based systems require rewriting 
@@ -394,20 +394,20 @@ queries and have too-large TCB}
 
 Despite recent advances (Opaque, VC3, Coco, and SGX-BigMatrix) on building 
 SGX-based systems for big-data queries, two major challenges still remain. 
-First, enclaves require completely rewriting the readily pervasive Jaba 
+First, enclaves require completely rewriting the readily pervasive Java 
 big-data queries into C++, an time-consuming and error-prone process. 
 Second, to easy implementation, existing systems typically run the entire 
 language runtime (\eg, JVM or Python runtime) within SGX, causing the Trusted 
 Computing Base (TCB) to be too large and vulnerable (\eg, JVM has millions of 
-lines of code from many companies and is vulnerabile to insider 
+lines of code from many companies and is vulnerable to insider 
 attacks~\cite{top-threats}).
 % SGX-BigMatrix~\cite{bigmatrix:ccs17} proposes a secure and oblivious 
 % vectorization
 % abstraction for Python, but it needs to rewrite programs with its abstraction.
 
 \vspace{-.15in}
-\subsubsection{\maat: a just-in-time (JIT), privcy-preserving Java compiler for 
-big-data queries} 
+\subsubsection{\maat: a just-in-time (JIT), privacy-preserving Java compiler 
+for big-data queries} 
 \label{sec:ift-problem}\vspace{-.075in}
 
 \begin{figure}[h]
@@ -417,7 +417,7 @@ big-data queries}
         \includegraphics[width=0.95\textwidth]{figures/threat_public.ps}
 %          \vspace{-.1in}         
         \caption{Threat model of \maat. Data records with blue color are 
-encrypted, and white color are plantext. Shaded (grey) components may leak 
+encrypted, and white color are plaintext. Shaded (grey) components may leak 
 data, and \maat is designed to defend against them.}
         \label{fig:maat-threat}
     \end{minipage}
@@ -460,8 +460,8 @@ Our \maat architecture contains two software components: our JIT translator
 and our own management library. The JIT translator is a thin layer which 
 translate each Java bytecode instruction into a number of SGX-compatible 
 assembly code (\eg, Figure~\ref{fig:maat-arch}). The management is for our own 
-use of encryption/decription on data records and maintaining SGX memory for the 
-queries at runtime. We will proactively implementat the JIT translator and 
+use of encryption/decryption on data records and maintaining SGX memory for the 
+queries at runtime. We will proactively implement the JIT translator and 
 management library to be easy to verify, and we plan to use state-of-the-art 
 verification techniques~\cite{xi:sosp17} to verify both of them, 
 so 
@@ -483,7 +483,7 @@ and enclave transitions are invoked. Such transitions are several hundreds
 times slower than user function calls. Moreover, encryption and decryption on 
 data records are invoked during such transitions. Our study on a SGX-based 
 big-data system Opaque~\cite{opaque:nsdi17} shows that it incurs 3.4k enclave
-transitions for processing 10k data (with two queries \vv{select} and 
+transitions for processing only 10k data (with two queries \vv{select} and 
 \vv{groupBy}), which confirms the challenge.
 
 % In fact, these processing functions can be pipelined and processed in a single
@@ -518,7 +518,7 @@ JVM process $T$ calls a big-data query function, the call and its parameters
 are appended to a queue to DAE, and DAE arranges a process $E_{i}$ with good 
 data locality (\eg, according to prior arrangements) to execute the call. The 
 call result is appended to a return queue of the DAE for process $T$. We expect 
-that DAE will achieve resonable performance, data locality, and parallelism.
+that DAE will achieve reasonable performance, data locality, and parallelism.
 
 % For each call in the queue, DAE will pick a process that 
 % has good data locality (\eg, based on the footprint of prior calls) to execute 
@@ -540,7 +540,7 @@ will further extend it along three directions. First, we will fully implement
 it and evaluate its efficacy on defending against diverse real-world privacy 
 attacks launched by cloud providers. Second, we will augment the translator to 
 automatically translate the big-data queries with access patterns on particular 
-data into those without (\eg, bblivious executions). Third, we will further 
+data into those without (\eg, oblivious executions). Third, we will further 
 enhance DAE to support well isolated, secured operating system calls (\eg, 
 library operating system calls), so that \maat will not only benefit big-data 
 queries, but other distributed computing paradigms (\eg, key-value stores and 
