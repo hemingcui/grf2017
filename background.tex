@@ -1,11 +1,11 @@
 \vspace{-.15in}\section{Research Background} 
 \label{sec:background}\vspace{-.075in}
 
-
-This section presents the background of big-data 
-frameworks (\S\ref{sec:bigdata}), software-based privacy techniques  
-(\S\ref{sec:dft}), hardware-based privacy techniques (\S\ref{sec:sgx}), 
-motivation (\S\ref{sec:motivation}), and related work 
+This proposal involves three main entities: data providers 
+(\eg, Uber or individual computer users), computation providers, and cloud 
+providers (\eg, Amazon EC2). This section presents three most 
+relevant techniques (\S\ref{sec:bigdata}, \S\ref{sec:dft}, and \S\ref{sec:sgx}), 
+and then introduces motivation (\S\ref{sec:motivation}) and related work 
 (\S\ref{sec:others-work} and \S\ref{sec:my-work}).
 
 
@@ -15,7 +15,7 @@ motivation (\S\ref{sec:motivation}), and related work
 Big-data frameworks (\eg, Spark~\cite{nsdi12:spark} and 
 MapReduce~\cite{mapreduce}) are popular for computations on tremendous amounts 
 of data. These frameworks provide self-defined Java functions (\eg, 
-\func{map}/\func{reduce}) to let computational providers write their algorithms, 
+\func{map}/\func{reduce}) to let computation providers write their algorithms, 
 and they and automatically apply these functions on the data stored across 
 computers in parallel.
 % To exchange results across computers, shuffles 
@@ -130,7 +130,7 @@ compared to native big-data queries.
 
 However, to practically run Java big-data queries with SGX, two open challenges 
 remain. First, existing SGX-based systems~\cite{opaque:nsdi17} require 
-computational providers to manually rewrite the readily pervasive Java 
+computation providers to manually rewrite the readily pervasive Java 
 queries into SGX-compatible C++, a time-consuming and error-prone process.
 Second, existing SGX-based systems for big-data have too large Trusted 
 Computing Base (TCB). Existing systems 
@@ -147,27 +147,27 @@ these two open challenges by building a new just-in-time compiler.
 % more pronounced due to more and more data providers, including application 
 % vendors individual computer users, are putting their important data on clouds
 
-Data leakage (or breach) is a top threat~\cite{top-threats,kazim2015survey} in 
-cloud computing. In a data provider's perspective, both computation providers 
-(\eg, the 2017 iCloud account leakage caused 
-by third-parties~\cite{icloud-breach}) and cloud providers (\eg, the 2013 Yahoo 
-Cloud compromise~\cite{yahoo-dropbox-breach}) have caused severe data leakage 
-and huge financial loss. This proposal aims to preserve the data provider's 
-privacy by going two directions. First, we will propose two novel complimentary 
-techniques in \textbf{Objective 1} (\kakute) and \textbf{Objective 2} 
-(fine-grained differential privacy) to protect privacy against the computational 
-providers in private clouds. Second, we will propose \textbf{Objective 3} (a 
-new privacy-preserving compiler) to protect privacy against the (public) cloud 
-providers. By integrating the outcomes from all three objectives, data privacy 
-will be effectively preserved.
+Data leakage (or breach), defined as the leakage of sensitive customer or 
+organization data to unauthorized users~\cite{kazim2015survey}, is a top 
+threat~\cite{top-threats,privacy:bigdata:rand} in cloud computing. In a data 
+provider's perspective, both computation providers (\eg, the 2017 iCloud account 
+leakage caused by third-parties~\cite{icloud-breach}) and cloud providers (\eg, 
+the 2013 Yahoo Cloud compromise~\cite{yahoo-dropbox-breach}) have caused severe 
+data leakage and huge financial loss. This proposal aims to preserve the data 
+provider's privacy by going two directions. First, we will propose two novel 
+complimentary techniques in \textbf{Objective 1} (\kakute) and \textbf{Objective 
+2} (fine-grained differential privacy) to protect privacy against the 
+computation providers in private clouds. Second, we will propose 
+\textbf{Objective 3} (a new privacy-preserving compiler) to protect privacy 
+against the (public) cloud providers. By integrating the outcomes from all three 
+objectives, data privacy will be effectively preserved.
 
-
-\subsection{Related work by others} 
+\vspace{-.15in}\subsection{Related work by others} 
 \label{sec:others-work}\vspace{-.075in}
 
 \para{Computing on encrypted data}. Homomorphic 
 encryption~\cite{fullmomo:stoc09,paillier,elgamal} is a
-technique for performing computations on encrypted data in untrusted 
+technique for computating on encrypted data in untrusted 
 environments. Homomorphic encryption contain two kinds: Fully 
 homomorphic encryption (FHE) and partial 
 homomorphic encryption.
@@ -179,9 +179,10 @@ Systems that adopts PHE (\eg{} Monomi~\cite{monomi:vldb13},
 Crypsis~\cite{crypsis:hotcloud14}, CryptDB~\cite{cryptdb:sosp11},
 MrCrypt~\cite{mrcrypt:oospsla14})
 reports a much better overhead, but it has limited expressiveness
-(\eg, SQL operators) and requires extra trusted servers for computations.
-Seabed~\cite{seabed:osdi16} proposes asymmetric encryption schemes and reduces 
-performance overhead incur by AHE, but it still has limited expressiveness.
+(\eg, SQL operators) and requires extra trusted 
+servers. Seabed~\cite{seabed:osdi16} proposes asymmetric encryption schemes and 
+reduces the performance overhead of AHE, but its expressiveness is still quite
+limited.
 
 \para{SGX-based systems}. Intel SGX is a promising technique 
 to provide privacy-preserving analytic in public clouds. Compared with 

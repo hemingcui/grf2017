@@ -9,7 +9,7 @@
 % The first two objectives include preliminary results. 
 
 \vspace{-.15in}\subsection{Objective 1: 
-preventing big-data computational leakage with \kakute}\label{sec:obj1}
+preventing big-data computation leakage with \kakute}\label{sec:obj1}
 \vspace{-.075in}
 % % 
 This section presents major challenges in existing DFT systems 
@@ -178,7 +178,7 @@ Differential Privacy (FDP) technique}\label{sec:obj2}\vspace{-.075in}
 
 \kakute (\textbf{Objective 1}) strictly prevents
 sensitive data flowing to IO functions or query results, but in some scenarios 
-it is still desirable to let computational providers acquire aggregation 
+it is still desirable to let computation providers acquire aggregation 
 results (\eg, the sum of citizens who have got cancer in a country) 
 on sensitive fields as long as individual information is not leaked. 
 Differential privacy~\cite{Dwork2006Differential, 
@@ -282,7 +282,7 @@ We adopt the personalized differential privacy model in recent
 work~\cite{pdp:icde15}. $\Phi(x)$ return the $\varepsilon$ of a particular 
 record x. The threat model of FDP is the same as \kakute's 
 (Figure~\ref{fig:falcon-arch}), because FDP aims to defend against malicious 
-computational providers in private clouds. 
+computation providers in private clouds. 
 
 \begin{definition}{Differential Privacy}
 For two neighbor dataset $D$ and $D'$ differing at record x,
