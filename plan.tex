@@ -474,13 +474,17 @@ executions of big-data queries or inject malicious code into the queries during
 Our \maat architecture contains two software components: our JIT translator 
 and our own management library. The JIT translator is a thin layer which 
 translate each Java bytecode instruction into a number of SGX-compatible 
-assembly code (\eg, Figure~\ref{fig:maat-arch}). The management is for our own 
-use of encryption/decryption on data records and maintaining SGX memory for the 
-queries at runtime. We will proactively implement the JIT translator and 
-management library to be easy to verify, and we plan to use state-of-the-art 
-verification techniques~\cite{xi:sosp17} to verify both of them, 
-so that we do not need to include them into \maat's TCB. Specifically, we plan 
-to implement the two components without recursions and with as few as loops.
+assembly code (\eg, in Figure~\ref{fig:maat-arch}, an \func{fdiv} Java 
+bytecode translates to two \func{mov} and one \func{div} assembly code). The 
+memory management library is for our own use of encryption/decryption on data 
+records and maintaining SGX memory for the queries at runtime. We will 
+proactively implement these two components to be easy to verify (use as few as 
+function recursive calls and loops) as in other verification 
+practice~\cite{xi:sosp17}, and we plan to use state-of-the-art verification 
+techniques~\cite{xi:sosp17} to verify both of them. Then, we do not need 
+to include them into \maat's TCB, greatly reducing \maat's TCB.
+% Specifically, we plan to implement the two 
+% components .
 
 
 % We don't plan to use OpenJDK as our management library 
@@ -680,13 +684,15 @@ SQL queries).
 This project will require two PhD students S1 and S2 to work for 
 three years. In the first year, S1 will design and fully implement the \kakute 
 system (part of \textbf{Objective~1}), and S2 will evaluate its performance 
-and robustness on various real-world big-data queries (part of 
+and security strength on various real-world big-data queries (part of 
 \textbf{Objective~1}). In the second year, S1 will 
-use \kakute to fully develop the proposed fine-grained privacy model (part of 
-\textbf{Objective~2}), and S2 will implement the two algorithms proposed for 
-this model (part of \textbf{Objective~2}). In the third year, S1 will build the 
-secure big-data compiler \textbf{Objective~3} and S2 will evaluate this 
-compiler on diverse real-world big-data queries.
+use \kakute to fully develop the proposed Fine-grained Differential Privacy 
+technique (part of \textbf{Objective~2}), and S2 will implement the 
+algorithm proposed for this technique (part of \textbf{Objective~2}). In the 
+third year, S1 will build the secure big-data compiler 
+(part of \textbf{Objective~3}), and S2 will extensively study the privacy 
+guarantee and performance of this compiler on real-world big-data 
+frameworks (part of \textbf{Objective~3}).
 % Both students will 
 % involve theoretical methods, implement real software systems, and 
 % perform real-world study.
