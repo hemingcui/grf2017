@@ -451,7 +451,8 @@ We propose \maat, the first compiler that runs unmodified Java big-data queries
 in SGX enclaves securely with minimal TCB (\ie, the TCB contains only SGX and 
 self-defined code itself). \maat works as a Java JIT compiler which 
 automatically compiles self-defined big-data functions (\eg, 
-\func{map}/\func{reduce}) into enclave-compatible assembly code. Therefore, the 
+\func{map}/\func{reduce}) into SGX-compatible assembly instructions. 
+Therefore, the 
 JVM itself does not run in \maat's enclaves.
 
 The goal of \maat is to preserve the confidentiality of data while being 
@@ -472,16 +473,16 @@ executions of big-data queries or inject malicious code into the queries during
 
 Our \maat architecture contains two software components: our JIT translator 
 and our own management library. The JIT translator is a thin layer which 
-translate each Java bytecode instruction into a number of SGX-compatible 
-assembly code (\eg, in Figure~\ref{fig:maat-arch}, an \func{fdiv} Java 
-bytecode translates to two \func{mov} and one \func{div} assembly code). The 
-memory management library is for our own use of encryption/decryption on data 
-records and maintaining SGX memory for the queries at runtime. We will 
-proactively implement these two components to be easy to verify (use as few as 
-function recursive calls and loops) as in other verification 
-practice~\cite{xi:sosp17}, and we plan to use state-of-the-art verification 
-techniques~\cite{xi:sosp17} to verify both of them. Then, we do not need 
-to include them into \maat's TCB, greatly reducing \maat's TCB.
+translate a Java bytecode instruction into a number of SGX-compatible 
+assembly instructions. For instance, in Figure~\ref{fig:maat-arch}, an 
+\func{fdiv} Java bytecode instruction translates to two \func{mov} and one 
+\func{div} assembly instructions). The memory management library is for our own 
+use of encryption/decryption on data records and maintaining SGX memory for the 
+queries at runtime. We will proactively implement these two components to be 
+easy to verify (use as few as function recursive calls and loops) as in other 
+verification practice~\cite{xi:sosp17}, and we plan to use state-of-the-art 
+verification techniques~\cite{xi:sosp17} to verify both of them. Then, we do not 
+need to include them in \maat's TCB, greatly reducing its TCB.
 % Specifically, we plan to implement the two 
 % components .
 
