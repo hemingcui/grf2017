@@ -245,7 +245,7 @@ level k,
     if $O_i$ $<$ min, $O_i$ $\leftarrow$ min
  }
  \For{dimension $j$ of the output $O$}{
-    k $\leftarrow$ $getLevel(O_{j})$\;
+    k $\leftarrow$ $getTagLevel(O_{j})$\;
     $O_j$ $\leftarrow$ $\dfrac{1}{n}\sum\limits_{i=1}^n O_{ij} + Lap(\dfrac{max 
 - min}{n\varepsilon_{k}})$
   }
@@ -299,8 +299,8 @@ personalized model, the probability is different for records belonging to
 different users, so that different users have various levels of protections.
 
 To start with, we need to determine the relation of the privacy budget and the 
-security level (a \vv{getLevel} function). We adopt a deterministic model, and 
-there are 6 security levels: insecure, $dp_1$, $dp_2$, $dp_3$, $dp_4$ and 
+security level (a \vv{getTagLevel} function). We adopt a deterministic model, 
+and there are 6 security levels: insecure, $dp_1$, $dp_2$, $dp_3$, $dp_4$ and 
 non-released. Insecure records can be release directly, while non-released can 
 not be used in any computation to the final result. $dp_1$ to $dp_4$ varies in 
 terms of their privacy budgets for differential privacy.
