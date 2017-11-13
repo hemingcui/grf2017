@@ -376,11 +376,12 @@ for big-data queries in public clouds}\label{sec:obj3}\vspace{-.075in}
 % CryptoDB~\cite{cryptdb:sosp11} reports a 1000X overhead compared with
 % the unencrypted execution), and most data is being processed in plaintext. 
 
-More and more sensitive data are stored and processed in public clouds (\eg, 
-Amazon EC2 and Dropbox), and recent real-world privacy breaches have shown that 
-data are often leaked while being processed by public cloud providers. Trusted 
-Execution Environment (TEE) is a promising technique to protect computation on 
-public clouds even if the cloud's operating system is compromised. For example, 
+Recent real-world privacy breaches have shown that sensitive data are often 
+leaked while being processed in public clouds, including clouds compromises on 
+external attacks~\cite{icloud-breach} and 
+insider attacks~\cite{top-threats}. Trusted Execution Environment 
+(TEE) is a promising technique to protect computation on public clouds even if 
+the cloud's operating system is compromised. For example, 
 Intel-SGX~\cite{intel-sgx} runs programs in a enclave, so code and data are 
 protected and can not be seen by the attackers. Meanwhile, SGX is good fit for 
 big-data queries because these queries are data-intensive in userspace and they 
@@ -393,15 +394,17 @@ only 30\% overhead compared to native, insecure executions.
 queries and have too-large TCB} 
 \label{sec:ift-problem}\vspace{-.075in}
 
-Despite recent advances (Opaque, VC3, Coco, and SGX-BigMatrix) on building 
-SGX-based systems for big-data queries, two major challenges still remain. 
-First, enclaves require completely rewriting the readily pervasive Java 
-big-data queries into C++, an time-consuming and error-prone process. 
+Despite recent advances (Opaque~\cite{opaque:nsdi17}, VC3~\cite{vc3:sp15}, 
+Azure/Coco~\cite{azure:coco}, and SGX-BigMatrix~\cite{bigmatrix:ccs17}) on 
+building SGX-based systems for big-data queries, two major challenges still 
+remain. First, enclaves require completely rewriting the readily pervasive Java 
+big-data queries into C++~\cite{opaque:nsdi17,vc3:sp15,azure:coco}, an 
+time-consuming and error-prone process. 
 Second, to easy implementation, existing systems typically run the entire 
-language runtime (\eg, JVM or Python runtime) within SGX, causing the Trusted 
-Computing Base (TCB) to be too large and vulnerable (\eg, JVM has millions of 
-lines of code from many companies and is vulnerable to insider 
-attacks~\cite{top-threats}).
+language runtime (\eg, JVM or Python runtime~\cite{bigmatrix:ccs17}) within SGX, 
+causing the Trusted Computing Base (TCB) to be too large and vulnerable (\eg, 
+JVM has millions of lines of code from many companies and is vulnerable to 
+insider attacks~\cite{top-threats}).
 % SGX-BigMatrix~\cite{bigmatrix:ccs17} proposes a secure and oblivious 
 % vectorization
 % abstraction for Python, but it needs to rewrite programs with its abstraction.
