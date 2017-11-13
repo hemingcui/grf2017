@@ -320,7 +320,6 @@ f}{\varepsilon})$ enforces
   \begin{align}
     \Delta f = max || f(D) - f(D') ||_1
   \end{align}
-
 \end{theorem}
 
 To calibrate out to enforce differential privacy,
@@ -338,21 +337,32 @@ $\varepsilon_2$, ..., $\varepsilon_n$.
 
 \begin{theorem}
   For any output record in $O$, the
-  estimator is $max(\varepsilon_k)$-differentially private.
+  estimator is $max_{i \le k}(\varepsilon_i)$-differentially private.
 \end{theorem}
 \begin{proof}
-  For each dimension, we can divide the output dataset as k parts
-  according to their security levels. Then we apply the Laplace Mechanism
-  to each subset of data using their privacy budget $\varepsilon_k$. According
-  to the composition theorem~\cite{dp:recommender:kdd09, dp:dwork:stoc09}, the 
-whole output dataset
-  is $max(\varepsilon_k)$-differentially private.
+  For each dimension, we can divide the output dataset $D$ as k disjoin parts 
+$D_1$, $D_2$,
+  ..., $D_k$ according to their security levels. According to 
+\cite{pointestimation:smith08},
+  each $f(D_i)(i \le k)$ is $\varepsilon_k$-differentially private.
+  For each $D_i$, we have $Pr[f(D_i) \in S] \le e^{\varepsilon_i}Pr[f(D'_i) \in 
+S]$, suppose $\varepsilon_{max} = max_{i \le k}(\varepsilon_i)$, \\
+  \vspace{-0.1in}
+  \begin{equation} \label{eq1}
+  \begin{split}
+  Pr[f(D)] & = Pr[f(D_1 + D_2 + \ldots + D_k)] \\
+   & = e^{\varepsilon_1}Pr[f(D'_1)] + \ldots + e^{\varepsilon_k}Pr[f(D'_k)] \\
+   & \le  e^{\varepsilon_{max}}(Pr[f(D'_1) + \ldots + Pr[f(D'_k)]]) \\
+   & = e^{\varepsilon_{max}}Pr[f(D')]
+  \end{split}
+  \end{equation}
+  Therefore, $f(D)$ is $max_{i \le k}(\varepsilon_i)$-differentially private.
 \end{proof}
 
 The error of the final result incurs in this aggregator comes from two parts:
-the Laps noise error and the partition error. It is crucial to reduce the final
-error incurs by this aggregator while keeping the differential security 
-guarantee. We can adopt a hill-climbing approach for optimization.
+the Laplace noise error and the partition error. It is crucial to reduce the 
+final error incurs by this aggregator while keeping the differential security 
+guarantee. We can adopt a hill-climbing approach for optimisation.
 
 \para{Future directions}. We will fully develop this FDP technique by going 
 along two directions. First, we will do an extensive study on real-world 
