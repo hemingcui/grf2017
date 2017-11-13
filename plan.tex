@@ -182,7 +182,7 @@ it is still desirable to let computation providers acquire aggregation
 results (\eg, the sum of citizens who have got cancer in a country) 
 on sensitive fields as long as individual information is not leaked. 
 Differential privacy~\cite{Dwork2006Differential, 
-Dwork2008Differential, Dwork2011a} can enforce statistical bounds on 
+Dwork2011a} can enforce statistical bounds on 
 aggregation results and prevent individual information leakage, so it is 
 complementary to DFT and has attracted much attention recently.
 
@@ -561,9 +561,9 @@ attacks launched by cloud providers. Second, we will augment the translator to
 automatically translate the big-data queries with access patterns on particular 
 data into those without (\eg, oblivious executions). Third, we will further 
 enhance DAE to support well isolated, secured operating system calls (\eg, 
-library operating system calls~\cite{unikernel}), so that \maat will not only 
-benefit big-data queries, but other distributed computing paradigms (\eg, 
-graph queries).
+library operating system calls~\cite{graphene:atc17}), so that \maat will not 
+only benefit big-data queries, but other distributed computing paradigms (\eg, 
+graph queries~\cite{sigmod10:pregel}).
 
 % In the project, we plan to tackle the problem above. We are proposing to
 % run unmodified Java program in enclaves to protect computation in public
