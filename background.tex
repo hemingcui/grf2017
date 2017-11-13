@@ -53,9 +53,9 @@ sensitive information leakage~\cite{dawn05:taint}. DFT attaches a tag to a
 variable (or object), and this tag will propagate during computations on the 
 variable at runtime. DFT has been applied to various areas, such as preventing 
 sensitive information (\eg GPS data and contacts) leakage in 
-cellphone~\cite{taintdroid:osdi10,cleanos:osdi12}, web 
-services~\cite{cloudfence:raid13}, and server programs~\cite{libdft:vee12}. To 
-the best of our knowledge, no DFT system exists for big-data computing.
+cellphone~\cite{taintdroid:osdi10}, web services~\cite{cloudfence:raid13}, and 
+server programs~\cite{libdft:vee12}. To the best of our knowledge, no DFT 
+system exists for big-data computing.
  
 % Different granularities of computation may incur different levels of 
 % computation overhead. Lower level (\eg byte-level) tracking will consume a lot 
@@ -72,7 +72,7 @@ the best of our knowledge, no DFT system exists for big-data computing.
 
 Complimentary to DFT, statistical techniques, including \func{k}-anonymization 
 methods~\cite{kanonymity,icde06:ldiversity} and
-differential privacy~\cite{gupt:sigmod12, pinq:sigmod09,airavat:nsdi10}, allow 
+differential privacy~\cite{gupt:sigmod12,pinq:sigmod09,airavat:nsdi10}, allow 
 the aggregation of sensitive data while adding random noise to preserve 
 individual privacy. However, these statistical techniques are either not secure 
 (\func{k}-anonymization) or suffering from great losses of accuracy 
@@ -166,7 +166,7 @@ objectives, data privacy will be effectively preserved.
 \label{sec:others-work}\vspace{-.075in}
 
 \para{Computing on encrypted data}. Homomorphic 
-encryption~\cite{fullmomo:stoc09,paillier,elgamal} is a
+encryption~\cite{fullmomo:stoc09} is a
 technique for computating on encrypted data in untrusted 
 environments. Homomorphic encryption contain two kinds: Fully 
 homomorphic encryption (FHE) and partial 
@@ -175,7 +175,7 @@ Partial homomorphic encryption (\eg{} Additive Homomorphic
 Encryption~\cite{paillier})
 incurs a much lower overhead compared with FHE. A evaluation~\cite{homo:eval} on
 FHE shows a $10e9$ slowdown, which is acceptable in practice.
-Systems that adopts PHE (\eg{} Monomi~\cite{monomi:vldb13},
+Systems that adopts PHE (\eg, Monomi~\cite{monomi:vldb13},
 Crypsis~\cite{crypsis:hotcloud14}, CryptDB~\cite{cryptdb:sosp11},
 MrCrypt~\cite{mrcrypt:oospsla14})
 reports a much better overhead, but it has limited expressiveness
@@ -212,7 +212,7 @@ emerging threat~\cite{top-threats-nine, kazim2015survey} as more and more user
 sensitive data is stored and processed in clouds. 
 Airavat\cite{airavat:nsdi10}, PINQ~\cite{pinq:sigmod09} and 
 GUPT~\cite{gupt:sigmod12} propose to apply differential 
-privacy~\cite{noise:tcc06,differential:focs07} in MapReduce,
+privacy~\cite{noise:tcc06} in MapReduce,
 to prevent leakage from user query, but differential privacy can result in 
 incorrect results. Sedic~\cite{sedic:cloud13} proposes to offload sensitive 
 computations to private clouds. MrLazy~\cite{hotcloud14:mrlazy}
