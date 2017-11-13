@@ -115,8 +115,8 @@ and evaluated it on \appeval popular big-data algorithms, including three text
 processing algorithms WordCount~\cite{spark:example}, 
 WordGrep~\cite{newt:socc13} and TwitterHot~\cite{spark:example}, two graph 
 algorithms TentativeClosure~\cite{spark:example}
-and ConnectComponent~\cite{spark:example}, and two medical analysis programs 
-MedicalSort~\cite{pigmix} and MedicalGroup~\cite{pigmix}.
+and ConnectComponent~\cite{spark:example}, and one analysis program 
+MedicalGroup~\cite{pigmix}.
 We evaluated these algorithms with 
 real-world datasets that are comparable with related 
 systems~\cite{vldb16:output, icse16:bigdebug, vldb15:titian}.
@@ -124,10 +124,9 @@ Our evaluation shows that: (1) \kakute
 incurred merely \timeavg overhead (Figure~\ref{fig:scalability}) with 
 \func{Integer} tag, about two orders of magnitudes faster than a recent DFT 
 system Phorspor~\cite{oo14:phosphor}; and (2) \kakute effectively 
-detected 13 real-world security and reliability bugs presented in other 
+detected 13 real-world security and performance bugs presented in other 
 papers~\cite{arthur:dave2013,icse16:bigdebug,airavat:nsdi10}. These promising 
-preliminary results are published in ACSAC 
-'17 and TPDS '17.
+preliminary results have been presented in ACSAC '17 and TPDS '17.
 
 % In \xxx, all replicas directly write to destination
 % replicas' memory and poll messages from local memory to receive messages, and 
