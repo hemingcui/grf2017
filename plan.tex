@@ -219,8 +219,8 @@ it is much larger than the KMeans training error rate (a few percents).
 \label{sec:ift-problem}\vspace{-.075in}
 
 \begin{figure}[!htb]
-    \begin{minipage}{0.45\textwidth}
-        \vspace{-.1in}
+    \begin{minipage}{0.44\textwidth}
+%         \vspace{-.1in}
         \includegraphics[width=0.3\textheight]{figures/selective_arch.ps}
         \vspace{-.1in}
         \caption{The workflow of FDP with five steps.}
@@ -322,18 +322,17 @@ f}{\varepsilon})$ enforces
   \end{align}
 \end{theorem}
 
-To calibrate out to enforce differential privacy,
-a simple approach is to use the $\varepsilon$ inferred by the highest security
-level of each dimension, then add noise to the output directly, but this 
-approach is too naive for diversity of security levels. Instead, we adopt the 
-sample-and-aggregate framework proposed in previous 
-work~\cite{differentialdp:stoc11}. In this model, data is partitioned into 
-multiple parts (size of each part is $m$). Each partition may consists
-different level. The noise aggregator adds noise to final result of each 
-partition according to the security level of each partition. Formally, data is 
-partitioned into multiple parts denoted as $p_1$, $p_2$, ..., $p_n$.
+To enforce differential privacy, one approach is to use the $\varepsilon$ 
+inferred by the highest security level of each dimension and to add noise to 
+the output directly, but this approach is too naive for the diversity of 
+security levels. Instead, we adopt the sample-and-aggregate approach in 
+previous work~\cite{differentialdp:stoc11}. In this approach, data is 
+partitioned into multiple parts (each part has a size of $m$). Each partition 
+can have different sensitivity levels. The aggregator adds noise to the 
+result of each partition according to its security level. Data 
+is partitioned into multiple parts denoted as $p_1$, ..., $p_n$.
 The security level and its corresponding $\varepsilon$ are $\varepsilon_1$,
-$\varepsilon_2$, ..., $\varepsilon_n$.
+..., $\varepsilon_n$.
 
 \begin{theorem}
   For any output record in $O$, the
@@ -359,18 +358,20 @@ S]$, suppose $\varepsilon_{max} = max_{i \le k}(\varepsilon_i)$, \\
   Therefore, $f(D)$ is $max_{i \le k}(\varepsilon_i)$-differentially private.
 \end{proof}
 
-The error of the final result incurs in this aggregator comes from two parts:
-the Laplace noise error and the partition error. It is crucial to reduce the 
-final error incurs by this aggregator while keeping the differential security 
-guarantee. We can adopt a hill-climbing approach for optimisation.
+In the above aggregation algorithm, the error of the final result comes from 
+two parts: the Laplace noise error and the partition error. It is crucial to 
+reduce the final error incurred by this algorithm while keeping the 
+differential security guarantee. We can adopt a hill-climbing approach (future 
+work).
 
 \para{Future directions}. We will fully develop this FDP technique by going 
-along two directions. First, we will do an extensive study on real-world 
-big-data queries and quantify the improvements on result accuracy. Second, 
-currently we propose a end-to-end differentially private computation
-system. It adopts a personalized differential privacy model~\cite{pdp:icde15},
-which improves usability without reducing the security guarantee. As for future 
-direction, we can consider a 
+along three directions. First, we will continue to optimize the algorithm and 
+reduce its final error rate. Second, we will do an extensive study on 
+real-world big-data queries and quantify the improvements on result accuracy. 
+Third, currently we propose a end-to-end differentially private computation
+system, which adopts a personalized differential privacy 
+model~\cite{pdp:icde15} and improves usability without reducing the security 
+guarantee. In future explorations, we can consider an even more fine-grained 
 $(\varepsilon, \delta)$-differentially~\cite{differntialprivacy:tcc06}
 private model.
 
@@ -406,7 +407,7 @@ queries and have too-large TCB}
 
 Despite recent advances (Opaque~\cite{opaque:nsdi17}, VC3~\cite{vc3:sp15}, 
 Azure/Coco~\cite{azure:coco}, and SGX-BigMatrix~\cite{bigmatrix:ccs17}) on 
-building SGX-based systems for big-data queries, two major challenges still 
+building SGX-based systems for big-data, two major challenges 
 remain. First, enclaves require completely rewriting the readily pervasive Java 
 big-data queries into C++~\cite{opaque:nsdi17,vc3:sp15,azure:coco}, an 
 time-consuming and error-prone process. 
