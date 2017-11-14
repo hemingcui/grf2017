@@ -13,7 +13,7 @@ related work (\S\ref{sec:others-work} and \S\ref{sec:my-work}).
 \label{sec:bigdata}\vspace{-.075in}
 
 Big-data frameworks (\eg, Spark~\cite{nsdi12:spark} and 
-MapReduce~\cite{mapreduce}) are popular for computations on tremendous amounts 
+MapReduce~\cite{hadoop}) are popular for computations on tremendous amounts 
 of data records. These frameworks provide self-defined Java functions (\eg, 
 \vv{map}/\vv{reduce}) to let computation providers write their algorithms, 
 and the frameworks automatically apply these functions on the data stored 
@@ -35,7 +35,7 @@ across computers in parallel.
 
 
 To avoid excessive computation, big-data frameworks adopt a \emph{lazy 
-transformation} approach~\cite{pig:vldb08,nsdi12:spark,osdi08:dryad}. Spark 
+transformation} approach~\cite{pig:vldb08,nsdi12:spark}. Spark 
 often uses lazy transformations (\eg, \vv{map}), and calls to 
 these transformations only create a data structure called \func{RDD} with 
 \emph{lineage} (the sequence of transformations on data records).
@@ -50,10 +50,10 @@ transformation to create a fast data flow tracking technique: \lazyp
 \label{sec:dft}\vspace{-.075in}
 
 Data Flow Tracking (DFT) is a powerful mandatory access control technique for 
-preventing sensitive information leakage~\cite{dawn05:taint}. DFT attaches a 
-tag to a variable (or object), and this tag will propagate during computations 
-on the variable at runtime. DFT is used in various areas, including 
-preventing sensitive data (\eg contacts) leakage in cellphones 
+preventing sensitive information leakage~\cite{taintdroid:osdi10}. DFT attaches 
+a tag to a variable (or object), and this tag will propagate during 
+computations on the variable at runtime. DFT is used in various areas, 
+including preventing sensitive data (\eg contacts) leakage in cellphones 
 (TaintDroid~\cite{taintdroid:osdi10}), web services~\cite{cloudfence:raid13}, 
 and server programs~\cite{libdft:vee12}. No DFT system exists for big-data 
 computing, so \textbf{Objective 1} (\chref{sec:obj1}) will create the 
@@ -211,18 +211,17 @@ entire Python runtime).
 % below), thus running unmodified big-data queries with SGX is highly desirable.
 
 \para{Big-data privacy systems}. Leakage of sensitive data is a top security 
-threat~\cite{top-threats-nine, kazim2015survey} in clouds because various user 
-sensitive data is stored and processed in clouds. 
+threat~\cite{top-threats-nine, kazim2015survey} in public clouds. 
 Airavat\cite{airavat:nsdi10}, PINQ~\cite{pinq:sigmod09} and 
 GUPT~\cite{gupt:sigmod12} propose to apply differential 
 privacy~\cite{noise:tcc06} in MapReduce in order to prevent leakage from 
 malicous queries, but existing differential privacy techniques often produce
 inaccurate results. Sedic~\cite{sedic:cloud13} proposes to offload sensitive 
-computations to private clouds. MrLazy~\cite{hotcloud14:mrlazy}
+computations to private clouds. MrLazy~\cite{hotcloud14:mrlazy} 
 proposes a framework of combining data provenance and static DFT analysis for 
 self-defined queries, to provide fine-grained information flow for security. 
-However, static DFT is not precise and may suffer from false positives. 
-In contrast, our proposed \kakute system provides fine-grained DFT and precise
+However, static DFT is not precise and may suffer from false positives. In 
+contrast, our proposed \kakute system provides fine-grained DFT and precise 
 mandatory access control on sensitive data at runtime.
 
 % \para{Data provenance}. Given an output record, the data provenance technique 
