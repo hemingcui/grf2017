@@ -404,17 +404,17 @@ only 30\% overhead compared to native, insecure executions.
 queries and have too-large TCB} 
 \label{sec:ift-problem}\vspace{-.075in}
 
-Despite recent advances (Opaque~\cite{opaque:nsdi17}, VC3~\cite{vc3:sp15}, 
-Azure/Coco~\cite{azure:coco}, and SGX-BigMatrix~\cite{bigmatrix:ccs17}) on 
-building SGX-based systems for big-data, two major challenges 
-remain. First, enclaves require completely rewriting the readily pervasive Java 
-big-data queries into C++~\cite{opaque:nsdi17,vc3:sp15,azure:coco}, a 
-time-consuming and error-prone process. 
-Second, to easy implementation, existing systems typically run the entire 
-language runtime (\eg, JVM or Python runtime~\cite{bigmatrix:ccs17}) within SGX, 
-causing the Trusted Computing Base (TCB) to be too large and vulnerable (\eg, 
-JVM has millions of lines of code from many companies and is vulnerable to 
-insider attacks~\cite{top-threats}).
+Despite recent SGX-based systems (Opaque~\cite{opaque:nsdi17}, 
+VC3~\cite{vc3:sp15}, Azure/Coco~\cite{azure:coco}, and 
+SGX-BigMatrix~\cite{bigmatrix:ccs17}) for big-data are promising, two major 
+challenges remain. First, these systems require completely rewriting the 
+readily pervasive and familiar Java big-data queries 
+into C++~\cite{opaque:nsdi17,vc3:sp15,azure:coco}, a time-consuming and 
+error-prone process. Second, to easy implementation, existing systems often 
+run an entire language runtime (\eg, JVM or Python 
+runtime~\cite{bigmatrix:ccs17}) within SGX, causing the Trusted Computing Base 
+(TCB) to be too large (\eg, JVM has millions of lines of code 
+from many companies and is vulnerable to insider attacks~\cite{top-threats}).
 % SGX-BigMatrix~\cite{bigmatrix:ccs17} proposes a secure and oblivious 
 % vectorization
 % abstraction for Python, but it needs to rewrite programs with its abstraction.
@@ -466,7 +466,8 @@ computation providers are trusted, and cloud providers are malicious. Figure
 translation of self-defined code and the execution of the code are protected by 
 enclaves, so that even if the cloud's OS compromised, it can not see the 
 executions of big-data queries or inject malicious code into the queries during 
-\maat's translation.
+\maat's translation. Translated functions are put in \maat's code cache for 
+future reuse.
 % Self-defined functions and data processed by these 
 % functions are protected by \maat . The Java byte-codes of these functions are 
 % compiled to enclave-comptabile assembly code.
