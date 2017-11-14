@@ -63,8 +63,8 @@ designed to defend against them.}
 We present \kakute, the first precise and complete DFT system for big-data 
 frameworks. Our key insight to address the DFT performance challenge is that 
 multiple fields of a record often have the same tags with the same sensitivity 
-level. For example, in an Taobao order record $\langle$\v{time}, 
-\v{userId}, \v{productID}$\rangle$, only the \v{userId} field is 
+level. For example, in an Taobao order record $\langle$\vv{time}, 
+\vv{userId}, \vv{productID}$\rangle$, only the \vv{userId} field is 
 sensitive, while the other fields are insensitive and they can share the same 
 tag. Leveraging this insight, we present two new techniques, \lazyp and 
 \tagcache. \lazyp avoids unnecessary tag combinations by only keeping the 

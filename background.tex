@@ -1,11 +1,11 @@
 \vspace{-.15in}\section{Research Background} 
 \label{sec:background}\vspace{-.075in}
 
-This proposal involves three main entities: data providers, computation 
-providers, and cloud providers. In private clouds, data providers are cloud 
-providers; in public clouds, they are different. This section presents 
-three most relevant techniques (\S\ref{sec:bigdata}, \S\ref{sec:dft}, and 
-\S\ref{sec:sgx}), motivation (\S\ref{sec:motivation}), and 
+This proposal has three entities: data providers, cloud 
+providers, and computation providers (who write big-data queries). In 
+private clouds, data providers are cloud providers; in public clouds, 
+they differ. This section shows relevant techniques (\S\ref{sec:bigdata}, 
+\S\ref{sec:dft}, and \S\ref{sec:sgx}), motivation (\S\ref{sec:motivation}), and 
 related work (\S\ref{sec:others-work} and \S\ref{sec:my-work}).
 
 
@@ -14,10 +14,10 @@ related work (\S\ref{sec:others-work} and \S\ref{sec:my-work}).
 
 Big-data frameworks (\eg, Spark~\cite{nsdi12:spark} and 
 MapReduce~\cite{mapreduce}) are popular for computations on tremendous amounts 
-of data. These frameworks provide self-defined Java functions (\eg, 
+of data records. These frameworks provide self-defined Java functions (\eg, 
 \vv{map}/\vv{reduce}) to let computation providers write their algorithms, 
-and they and automatically apply these functions on the data stored across 
-computers in parallel.
+and the frameworks automatically apply these functions on the data stored 
+across computers in parallel.
 % To exchange results across computers, shuffles 
 % operations are often invoked and sometimes they are performance bottlenecks in 
 % big-data frameworks. For instance, Spark~\cite{nsdi12:spark} has intensive data 
@@ -34,28 +34,30 @@ computers in parallel.
 % irrelevant input records that generate other output records.
 
 
-To avoid excessive computation, big-data frameworks adopt a lazy 
-transformation approach~\cite{pig:vldb08,nsdi12:spark,osdi08:dryad}. Spark 
+To avoid excessive computation, big-data frameworks adopt a \emph{lazy 
+transformation} approach~\cite{pig:vldb08,nsdi12:spark,osdi08:dryad}. Spark 
 often uses lazy transformations (\eg, \vv{map}), and calls to 
-these transformations only create a new data structure called \func{RDD} with 
-\emph{lineage} (the sequence of transformations for a data record).
-The actual transformations are only triggered when collecting 
-operations (\eg, \vv{collect}, \vv{count}) are called. These collecting 
-operations trigger transformations along lineages, so unnecessary 
+these transformations only create a data structure called \func{RDD} with 
+\emph{lineage} (the sequence of transformations on data records).
+Actual transformations are only triggered when collecting 
+operations (\eg, \vv{collect}/\vv{count}) are called. Collecting 
+operations trigger transformations only along lineages, so unnecessary 
 computations are avoided. \textbf{Objective 1} will leverage lazy 
-transformation to create a fast DFT technique called \lazyp (\S\ref{sec:obj1}).
+transformation to create a fast data flow tracking technique called \lazyp 
+(\S\ref{sec:obj1}).
 
 \vspace{-.15in}\subsection{Software-based privacy techniques}
 \label{sec:dft}\vspace{-.075in}
 
-Data Flow Tracking (DFT) is a mandatory access control technique for preventing 
-sensitive information leakage~\cite{dawn05:taint}. DFT attaches a tag to a 
-variable (or object), and this tag will propagate during computations on the 
-variable at runtime. DFT has been applied to various areas, such as preventing 
-sensitive information (\eg GPS data and contacts) leakage in 
-cellphone~\cite{taintdroid:osdi10}, web services~\cite{cloudfence:raid13}, and 
-server programs~\cite{libdft:vee12}. To the best of our knowledge, no DFT 
-system exists for big-data computing.
+Data Flow Tracking (DFT) is a powerful mandatory access control technique for 
+preventing sensitive information leakage~\cite{dawn05:taint}. DFT attaches a 
+tag to a variable (or object), and this tag will propagate during computations 
+on the variable at runtime. DFT is used in various areas, including 
+preventing sensitive data (\eg contacts) leakage in cellphones 
+(TaintDroid~\cite{taintdroid:osdi10}), web services~\cite{cloudfence:raid13}, 
+and server programs~\cite{libdft:vee12}. No DFT system exists for big-data 
+computing, so \textbf{Objective 1} (\chref{sec:obj1}) will create the 
+first DFT system for big-data.
  
 % Different granularities of computation may incur different levels of 
 % computation overhead. Lower level (\eg byte-level) tracking will consume a lot 
@@ -73,21 +75,22 @@ system exists for big-data computing.
 Complimentary to DFT, statistical techniques, including \func{k}-anonymization 
 methods~\cite{kanonymity,icde06:ldiversity} and
 differential privacy~\cite{gupt:sigmod12,pinq:sigmod09,airavat:nsdi10}, allow 
-the aggregation of sensitive data while adding random noise to preserve 
-individual privacy. However, these statistical techniques are either not secure 
-(\func{k}-anonymization) or suffering from great losses of accuracy 
-(differential privacy). A recent work~\cite{differentialresult:vldb15} reports 
-more than 30\% losses of accuracy. For a query results, low accuracy means 
-bad utility: a simple KMeans program will return centroids far from the 
-accurate ones, and the accuracy loss rate is much larger than the training error 
-rate which is several percents in practice.
+the aggregation of sensitive data while adding random noise on inputs or 
+query results to preserve individual privacy. However, statistical techniques 
+are either not secure (\func{k}-anonymization) or suffering from great losses 
+of accuracy (differential privacy). Recent 
+work~\cite{differentialresult:vldb15} reports more than 30\% loss of accuracy. 
+For a query results, low accuracy means bad utility. For instance, a 
+KMeans program will return centroids far from the actual ones, because the 
+accuracy loss rate is much larger than the training error rate (several 
+percents in practice).
 
 A key reason for this bad utility problem is that differential privacy can not 
 track how sensitive data fields flow to query results, so they have to take a 
-coarse-grained approach, which conservatively adds noise to all fields and 
-records. \textbf{Objective 2} (\chref{sec:obj2}) proposes a novel fine-grained 
-differential privacy technique, which combines  the strengths of DFT and 
-differential privacy.
+coarse-grained approach, which conservatively adds noise to all data fields 
+or all query results. \textbf{Objective 2} (\chref{sec:obj2}) will propose a 
+novel fine-grained differential privacy technique, which combines the strengths 
+of DFT and differential privacy.
 % These 
 % statistical techniques  which 
 % enforce statistical bounds to prevent individual information leakage.
@@ -120,13 +123,13 @@ differential privacy.
 
 Trusted Execution Environment (TEE) is a promising technique for
 protecting computation in a public cloud even if the cloud's operating systems 
-or hypervisors are compromised. For instance, Intel-SGX~\cite{intel-sgx}, a 
+and hypervisors compromise. For instance, Intel-SGX~\cite{intel-sgx}, a 
 popular commercial TEE product, runs a program in a hardware-protected 
 \emph{enclave}, so code and data are protected from outside. Compared with the 
-approach of computing on encrypted data (\S\ref{sec:others-work}), TEE is much 
-safer and 100X to 1000X faster. For instance, a SGX-based system 
-Opaque~\cite{opaque:nsdi17} incurs a moderate performance overhead of 30\% 
-compared to native big-data queries.
+approach of computing on encrypted data (\S\ref{sec:others-work}), TEE is 100X 
+to 1000X faster. For instance, a SGX-based system Opaque~\cite{opaque:nsdi17} 
+incurs a moderate performance overhead of 30\% compared to native, insecure 
+big-data queries.
 
 However, to practically run Java big-data queries with SGX, two open challenges 
 remain. First, existing SGX-based systems~\cite{opaque:nsdi17} require 
