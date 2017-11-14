@@ -39,11 +39,11 @@ transformation} approach~\cite{pig:vldb08,nsdi12:spark,osdi08:dryad}. Spark
 often uses lazy transformations (\eg, \vv{map}), and calls to 
 these transformations only create a data structure called \func{RDD} with 
 \emph{lineage} (the sequence of transformations on data records).
-Actual transformations are only triggered when collecting 
+Actual transformations are only triggered when materialization 
 operations (\eg, \vv{collect}/\vv{count}) are called. Collecting 
 operations trigger transformations only along lineages, so unnecessary 
 computations are avoided. \textbf{Objective 1} will leverage lazy 
-transformation to create a fast data flow tracking technique called \lazyp 
+transformation to create a fast data flow tracking technique: \lazyp 
 (\S\ref{sec:obj1}).
 
 \vspace{-.15in}\subsection{Software-based privacy techniques}
@@ -176,13 +176,14 @@ homomorphic encryption (FHE) and partial
 homomorphic encryption.
 Partial homomorphic encryption (\eg{} Additive Homomorphic 
 Encryption~\cite{paillier})
-incurs a much lower overhead compared with FHE. A evaluation~\cite{homo:eval} on
-FHE shows a $10e9$ slowdown, which is acceptable in practice.
+incurs a much lower overhead compared with FHE. An evaluation~\cite{homo:eval} 
+on
+FHE shows a $10^9$X slowdown, unacceptable in practice.
 Systems that adopts PHE (\eg, Monomi~\cite{monomi:vldb13},
 Crypsis~\cite{crypsis:hotcloud14}, CryptDB~\cite{cryptdb:sosp11},
 MrCrypt~\cite{mrcrypt:oospsla14})
-reports a much better overhead, but it has limited expressiveness
-(\eg, SQL operators) and requires extra trusted 
+reports a much lower overhead, but it has limited expressiveness
+(\eg, SQL operators) or requires extra trusted 
 servers. Seabed~\cite{seabed:osdi16} proposes asymmetric encryption schemes and 
 reduces the performance overhead of AHE, but its expressiveness is still quite
 limited.
@@ -192,38 +193,37 @@ to provide privacy-preserving analytic in public clouds. Compared with
 software-based solutions, hardware-based solutions incurs much lower overhead. 
 TrustedDB~\cite{trusteddb:sigmod11} is a hardware-based secure database.
 VC3~\cite{vc3:sp15} proposes a secure distributed analytic platform
-with read-write validations on MapReduce~\cite{mapreduce}. 
+with SGX protection on MapReduce~\cite{mapreduce}. 
 Opaque~\cite{opaque:nsdi17} supports secure and oblivious SQL operators on 
 SparkSQL~\cite{sparksql:sigmod15}. However, all these systems have limited 
 expressiveness (\eg SQL operators), and VC3 even needs to rewrite the program 
-with C++. A recent work~\cite{oblivious:security16} proposes a oblivious 
+with C++. A recent work~\cite{oblivious:security16} proposes an oblivious 
 machine leaning framework on trusted processors. 
 SGX-BigMatrix~\cite{bigmatrix:ccs17} proposes an oblivious and secure 
-vectorization
-abstraction on python, but it has limited expressiveness and it needs to
-rewrite the original program with this new abstraction. Although BigMatrix 
-provides guideline for writing a oblivious program, but it would be a 
-time-consuming and error-prone process.
+vectorization abstraction on python, but its trusted components are too big (an 
+entire Python runtime).
+% Although BigMatrix provides guideline for writing a oblivious 
+% program, but it would be a time-consuming and error-prone process.
 
 % Recent work~\cite{securekeeper,opaque:nsdi17} run Zookeeper and SparkSQL in 
 % enclaves, and both of them rewrote codes running in enclaves using C++. In the 
 % long run, SGX tends not to support Java (partially due to minimizing TCB, see 
 % below), thus running unmodified big-data queries with SGX is highly desirable.
 
-\para{Big-data privacy systems}. Big-data privacy has been a top 
-emerging threat~\cite{top-threats-nine, kazim2015survey} as more and more user 
+\para{Big-data privacy systems}. Leakage of sensitive data is a top security 
+threat~\cite{top-threats-nine, kazim2015survey} in clouds because various user 
 sensitive data is stored and processed in clouds. 
 Airavat\cite{airavat:nsdi10}, PINQ~\cite{pinq:sigmod09} and 
 GUPT~\cite{gupt:sigmod12} propose to apply differential 
-privacy~\cite{noise:tcc06} in MapReduce,
-to prevent leakage from user query, but differential privacy can result in 
-incorrect results. Sedic~\cite{sedic:cloud13} proposes to offload sensitive 
+privacy~\cite{noise:tcc06} in MapReduce in order to prevent leakage from 
+malicous queries, but existing differential privacy techniques often produce
+inaccurate results. Sedic~\cite{sedic:cloud13} proposes to offload sensitive 
 computations to private clouds. MrLazy~\cite{hotcloud14:mrlazy}
 proposes a framework of combining data provenance and static DFT analysis for 
 self-defined queries, to provide fine-grained information flow for security. 
-However, static DFT is not precise and may suffer from false positive. \kakute 
-provides fine-grained information control of sensitive data, with no need to 
-modify the original program.
+However, static DFT is not precise and may suffer from false positives. 
+In contrast, our proposed \kakute system provides fine-grained DFT and precise
+mandatory access control on sensitive data at runtime.
 
 % \para{Data provenance}. Given an output record, the data provenance technique 
 % can identify inputs that produce this output, so it has shown wide range of 
