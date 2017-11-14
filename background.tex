@@ -141,7 +141,7 @@ Computing Base (TCB). Existing systems
 (\eg, JVM and Python runtime) in enclaves, causing a too large (and too 
 dangerous) TCB: JVM code comes from many different parties/vendors and 
 extremely hard to verified. \textbf{Objective 3} (\chref{sec:obj3}) tackles
-these two open challenges by building a new just-in-time compiler.
+these two challenges by building a new just-in-time compiler.
 
 \vspace{-.15in}\subsection{Motivation of objectives} 
 \label{sec:motivation}\vspace{-.075in}
@@ -209,19 +209,29 @@ entire Python runtime).
 % long run, SGX tends not to support Java (partially due to minimizing TCB, see 
 % below), thus running unmodified big-data queries with SGX is highly desirable.
 
-\para{Big-data privacy systems}. Leakage of sensitive data is a top security 
-threat~\cite{top-threats-nine, kazim2015survey} in public clouds. 
-Airavat\cite{airavat:nsdi10}, PINQ~\cite{pinq:sigmod09} and 
+\para{Big-data privacy systems}.  
+Airavat\cite{airavat:nsdi10}, PINQ~\cite{pinq:sigmod09}, and 
 GUPT~\cite{gupt:sigmod12} propose to apply differential 
 privacy~\cite{noise:tcc06} in MapReduce in order to prevent leakage from 
 malicous queries, but existing differential privacy techniques often produce
-inaccurate results. Sedic~\cite{sedic:cloud13} proposes to offload sensitive 
-computations to private clouds. MrLazy~\cite{hotcloud14:mrlazy} 
-proposes a framework of combining data provenance and static DFT analysis for 
-self-defined queries, to provide fine-grained information flow for security. 
-However, static DFT is not precise and may suffer from false positives. In 
-contrast, our proposed \kakute system provides fine-grained DFT and precise 
-mandatory access control on sensitive data at runtime.
+inaccurate results. MrLazy~\cite{hotcloud14:mrlazy} preserves the privacy of 
+bog-data queries with static DFT. Compared to dynamic DFT (\S\ref{sec:dft}), 
+static DFT is imprecise and may suffer from false positives.
+% Sedic~\cite{sedic:cloud13} proposes to offload sensitive 
+% computations to private clouds. 
+
+\para{Data provenance}. Given an output record, the data 
+provenance technique~\cite{icse16:bigdebug,newt:socc13,vldb15:titian}
+identifies which input records produce this output by tracking the 
+transformation lineage (\S\ref{sec:bigdata}) at a record level.
+Compared to dynamic DFT (\eg, our proposed \kakute system), data provenance 
+has much lower precision on tracking data flows because it can not track the 
+flows of record fields.
+
+
+% RAMP~\cite{ramp:cidr11}, Newt~\cite{newt:socc13}, 
+% Pig~\cite{pig:dataflow:pvldb12} and Titian~\cite{vldb15:titian}
+% adopt a record-level tracking approach for data provenance in DISC frameworks.. 
 
 % \para{Data provenance}. Given an output record, the data provenance technique 
 % can identify inputs that produce this output, so it has shown wide range of 
