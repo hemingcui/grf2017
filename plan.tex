@@ -70,8 +70,8 @@ tag. Leveraging this insight, we present two new techniques, \lazyp and
 \tagcache. \lazyp avoids unnecessary tag combinations by only keeping the 
 \textit{lineage of tags} in the same self-defined queries, while \tagcache 
 reduces memory usage by sharing tags among multiple fields in each record. To 
-tackle the completeness challenge, \kakute completely captures data flows in 
-shuffles by intercepting the , and it efficiently reduces the amount of 
+tackle the completeness challenge, \kakute completely captures inter-computer 
+data flows (shuffles), and it efficiently reduces the amount of 
 transferred DFT tags using \tagcache. Both techniques are illustrated in 
 Appendix (c) of this proposal.
 
