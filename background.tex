@@ -15,7 +15,7 @@ related work (\S\ref{sec:others-work} and \S\ref{sec:my-work}).
 Big-data frameworks (\eg, Spark~\cite{nsdi12:spark} and 
 MapReduce~\cite{mapreduce}) are popular for computations on tremendous amounts 
 of data. These frameworks provide self-defined Java functions (\eg, 
-\func{map}/\func{reduce}) to let computation providers write their algorithms, 
+\vv{map}/\vv{reduce}) to let computation providers write their algorithms, 
 and they and automatically apply these functions on the data stored across 
 computers in parallel.
 % To exchange results across computers, shuffles 
@@ -36,11 +36,11 @@ computers in parallel.
 
 To avoid excessive computation, big-data frameworks adopt a lazy 
 transformation approach~\cite{pig:vldb08,nsdi12:spark,osdi08:dryad}. Spark 
-often uses lazy transformations (\eg, \func{map}), and calls to 
+often uses lazy transformations (\eg, \vv{map}), and calls to 
 these transformations only create a new data structure called \func{RDD} with 
 \emph{lineage} (the sequence of transformations for a data record).
 The actual transformations are only triggered when collecting 
-operations (\eg, \func{collect}, \func{count}) are called. These collecting 
+operations (\eg, \vv{collect}, \vv{count}) are called. These collecting 
 operations trigger transformations along lineages, so unnecessary 
 computations are avoided. \textbf{Objective 1} will leverage lazy 
 transformation to create a fast DFT technique called \lazyp (\S\ref{sec:obj1}).
