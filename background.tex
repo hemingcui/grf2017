@@ -50,10 +50,10 @@ transformation to create a fast data flow tracking technique: \lazyp
 \label{sec:dft}\vspace{-.075in}
 
 Data Flow Tracking (DFT) is a powerful mandatory access control technique for 
-preventing sensitive information leakage~\cite{taintdroid:osdi10}. DFT attaches 
+preventing sensitive data leakage~\cite{taintdroid:osdi10}. DFT attaches 
 a tag to a variable (or object), and this tag will propagate during 
 computations on the variable at runtime. DFT is used in various areas, 
-including preventing sensitive data (\eg contacts) leakage in cellphones 
+including preventing sensitive data (\eg contacts) leakage in smart phones 
 (TaintDroid~\cite{taintdroid:osdi10}), web services~\cite{cloudfence:raid13}, 
 and server programs~\cite{libdft:vee12}. No DFT system exists for big-data 
 computing, so \textbf{Objective 1} (\chref{sec:obj1}) will create the 
@@ -80,12 +80,13 @@ query results to preserve individual privacy. However, statistical techniques
 are either not secure (\func{k}-anonymization) or suffering from great losses 
 of accuracy (differential privacy). Recent 
 work~\cite{differentialresult:vldb15} reports more than 30\% loss of accuracy. 
-For a query results, low accuracy means bad utility. For instance, a KMeans 
-program will return centroids far from the actual ones, because the accuracy 
-loss rate is much larger than the training error rate (less than 10\% 
+For query results, low accuracy means bad utility. For instance, a 
+K-Means program will return centroids far from the actual ones, because 
+the accuracy loss rate is much larger than the training error rate (less than 
+10\% 
 percents in practice).
 
-A key reason for this bad utility problem is that differential privacy can not 
+A key reason for this bad utility problem is that differential privacy cannot 
 track how sensitive data fields flow to query results, so they have to take a 
 coarse-grained approach, which conservatively adds noise to all data fields 
 or all query results. \textbf{Objective 2} (\chref{sec:obj2}) will propose a 
@@ -170,26 +171,22 @@ objectives, data privacy will be effectively preserved.
 
 \para{Computing on encrypted data}. Homomorphic 
 encryption~\cite{fullmomo:stoc09} is a
-technique for computating on encrypted data in untrusted 
-environments. Homomorphic encryption contain two kinds: Fully 
-homomorphic encryption (FHE) and partial 
-homomorphic encryption.
-Partial homomorphic encryption (\eg{} Additive Homomorphic 
-Encryption~\cite{paillier})
-incurs a much lower overhead compared with FHE. An evaluation~\cite{homo:eval} 
-on
-FHE shows a $10^9$ times slowdown, unacceptable in practice.
-Systems that adopts PHE (\eg, 
-Monomi~\cite{monomi:vldb13} and CryptDB~\cite{cryptdb:sosp11})
-reports a much lower overhead, but it has limited expressiveness
-(\eg, SQL operators) or requires extra trusted 
-servers. Seabed~\cite{seabed:osdi16} proposes asymmetric encryption schemes and 
-reduces the performance overhead of AHE, but its expressiveness is still quite
-limited.
+technique for computing on encrypted data in untrusted 
+environments. There are two kinds of homomorphic encryption methods: 
+Fully homomorphic encryption (FHE) and Partially 
+Homomorphic Encryption (PHE). An evaluation~\cite{homo:eval} on FHE shows a 
+slowdown of orders of magnitudes, unacceptable in practice. Systems that adopts 
+PHE (\eg, Monomi~\cite{monomi:vldb13} and CryptDB~\cite{cryptdb:sosp11})
+report reasonable overhead, but PHE has limited 
+expressiveness (\eg, supports only a small subset of arithmetic instructions) 
+or requires extra trusted servers. Seabed~\cite{seabed:osdi16} uses asymmetric 
+encryption schemes to reduce the performance overhead of AHE, but its 
+expressiveness is still quite limited. Therefore, in commercial clouds, most 
+data is processed in plaintext.
 
 \para{SGX-based systems}. Intel SGX is a promising technique 
 to provide privacy-preserving analytic in public clouds. Compared with 
-software-based solutions, hardware-based solutions incurs much lower overhead. 
+software-based solutions, hardware-based solutions incur much lower overhead. 
 TrustedDB~\cite{trusteddb:sigmod11} is a hardware-based secure database.
 VC3~\cite{vc3:sp15} proposes a secure distributed analytic platform
 with SGX protection on MapReduce~\cite{mapreduce}. 
@@ -225,7 +222,7 @@ provenance technique~\cite{icse16:bigdebug,newt:socc13,vldb15:titian}
 identifies which input records produce this output by tracking inputs records'
 transformation lineage (\S\ref{sec:bigdata}) at a record level.
 Compared to dynamic DFT (\eg, our proposed \kakute system), data provenance 
-has much lower precision on tracking data flows because it can not track the 
+has much lower precision on tracking data flows because it cannot track the 
 flows of record fields.
 
 

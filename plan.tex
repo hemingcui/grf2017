@@ -63,7 +63,7 @@ designed to defend against them.}
 We present \kakute, the first precise and complete DFT system for big-data 
 frameworks. Our key insight to address the DFT performance challenge is that 
 multiple fields of a record often have the same tags with the same sensitivity 
-level. For example, in an Taobao order record $\langle$\vv{time}, 
+level. For example, in a Taobao order record $\langle$\vv{time}, 
 \vv{userId}, \vv{productID}$\rangle$, only the \vv{userId} field is 
 sensitive, while the other fields are insensitive and they can share the same 
 tag. Leveraging this insight, we present two new techniques, \lazyp and 
@@ -300,8 +300,9 @@ different users, so that different users have various levels of protections.
 To start with, we need to determine the relation of the privacy budget and the 
 security level (a \vv{getTagLevel} function). We adopt a deterministic model, 
 and there are 6 security levels: insecure, $dp_1$, $dp_2$, $dp_3$, $dp_4$ and 
-non-released. Insecure records can be release directly, while non-released can 
-not be used in any computation to the final result. $dp_1$ to $dp_4$ varies in 
+non-released. Insecure records can be release directly, while non-released 
+cannot be used in any computation to the final result. $dp_1$ to $dp_4$ vary 
+in 
 terms of their privacy budgets for differential privacy.
 % We may also consider the $(\delta, \varepsilon)$-differential privacy model.
 
@@ -330,7 +331,7 @@ partitioned into multiple parts (each part has a size of $m$). Each partition
 can have different sensitivity levels. The aggregator adds noise to the 
 result of each partition according to its security level. Data 
 is partitioned into multiple parts denoted as $p_1$, ..., $p_n$.
-The security level and its corresponding $\varepsilon$ are $\varepsilon_1$,
+The security levels of $\varepsilon$ are given by $\varepsilon_1$,
 ..., $\varepsilon_n$.
 
 \begin{theorem}
@@ -367,7 +368,7 @@ work).
 along three directions. First, we will continue to optimize the algorithm and 
 reduce its final error rate. Second, we will do an extensive study on 
 real-world big-data queries and quantify the improvements on result accuracy. 
-Third, currently we propose a end-to-end differentially private computation
+Third, currently we propose an end-to-end differentially private computation
 system, which adopts a personalized differential privacy 
 model~\cite{pdp:icde15} and improves usability without reducing the security 
 guarantee. In future explorations, we can consider an even more fine-grained 
@@ -392,8 +393,8 @@ compromises on external attacks~\cite{icloud-breach} and
 insider attacks~\cite{top-threats}. Trusted Execution Environment 
 (TEE) is a promising technique to protect computation on public clouds even if 
 the cloud's operating system is compromised. For example, 
-Intel-SGX~\cite{intel-sgx} runs programs in a enclave, so code and data are 
-protected and can not be seen by the attackers. Meanwhile, SGX is good fit for 
+Intel-SGX~\cite{intel-sgx} runs programs in an enclave, so code and data are 
+protected and cannot be seen by the attackers. Meanwhile, SGX is good fit for 
 big-data queries because these queries are data-intensive in userspace and they 
 hardly invoke system calls (OS kernel can easily break SGX's security on 
 memory). A latest big-data analytic system Opaque~\cite{opaque:nsdi17} reports 
@@ -464,7 +465,7 @@ Figure~\ref{fig:maat-threat} shows \maat's threat model: both SGX and
 computation providers are trusted, and cloud providers are malicious. Figure 
 \ref{fig:maat-arch} shows the architecture of \maat. In \maat, both the 
 translation of self-defined code and the execution of the code are protected by 
-enclaves, so that even if the cloud's OS compromised, it can not see the 
+enclaves, so that even if the cloud's OS compromised, it cannot see the 
 executions of big-data queries or inject malicious code into the queries during 
 \maat's translation. Translated functions are put in \maat's code cache for 
 future reuse.
@@ -474,7 +475,7 @@ future reuse.
 
 Two \maat software components run in SGX: our JIT translator 
 and our own management library. The JIT translator is a thin layer which 
-translate a Java bytecode instruction into a number of SGX-compatible 
+translates a Java bytecode instruction into a number of SGX-compatible 
 assembly instructions. For instance, in Figure~\ref{fig:maat-arch}, an 
 \func{fdiv} Java bytecode instruction translates to two \func{mov} and one 
 \func{div} assembly instructions). The memory management library is for our own 
@@ -498,7 +499,7 @@ need to include them in \maat's TCB, greatly reducing its TCB.
 One subtle performance challenge for \maat is that it should have reasonable 
 performance overhead compared to native executions. When calling into and 
 out of a function in enclaves, an ECALL and OCALL will be invoked in the CPU 
-and enclave transitions are invoked. Such transitions are several hundreds 
+and enclave transitions are invoked. Such transitions are several hundred 
 times slower than user function calls. Moreover, encryption and decryption on 
 data records are invoked during such transitions. Our study on a SGX-based 
 big-data system Opaque~\cite{opaque:nsdi17} shows that it incurs 3.4k enclave
