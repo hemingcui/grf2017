@@ -355,24 +355,25 @@ S]$, suppose $\varepsilon_{max} = max_{i \le k}(\varepsilon_i)$, \\
    & = e^{\varepsilon_{max}}Pr[{\cal M}(D')]
   \end{split}
   \end{equation}
-  Therefore, ${\cal M}(D)$ is $max_{i \le k}(\varepsilon_i)$-differentially private.
+  Therefore, ${\cal M}(D)$ (\ie, \textbf{Algorithm 1}) is $max_{i \le 
+k}(\varepsilon_i)$-differentially private.
 \end{proof}
 
-In the above aggregation algorithm, the error of the final result comes from 
-two parts: the Laplace noise error and the partition error. It is crucial to 
-reduce the final error incurred by this algorithm while keeping the 
-differential security guarantee. The error can be reduced by optimizing
-the number of partitions with hill-climbing or simulated annealing algorithm.
-
-\para{Future directions}. We will fully develop this FDP technique by going 
-along three directions. First, we will continue to optimize the algorithm and 
-reduce its final error rate. Second, we will do an extensive study on 
-real-world big-data queries and quantify the improvements on result accuracy. 
-Third, currently we propose an end-to-end differentially private computation
-system, which adopts non-unified $\epsilon$  
-and improves usability without reducing the security 
-guarantee for each record. In future explorations, we can adopt the 
-$(\varepsilon, \delta)$-differentially~\cite{differntialprivacy:tcc06}
+\para{Future directions}. We will enrich our FDP technique by going 
+along three directions. First, we will further optimize the algorithm and 
+reduce its error (inaccuracy). In \textbf{Algorithm 1}, the error of FDP's
+results comes from two parts: the Laplace noise error and the 
+partition error. It is crucial to reduce the final error incurred by this 
+algorithm while keeping the differential security guarantee. The error can be 
+reduced by by proposing other new algorithms (\eg, algorithms with 
+hill-climbing or simulated annealing styles) to compute an optimal number of 
+partitions. Second, we will do an extensive study on real-world big-data 
+queries and quantify the accuracy improvements of FDP compared to existing 
+differential privacy techniques (\eg, GUPT~\cite{gupt:sigmod12}). Third, 
+currently we propose an end-to-end differentially private computation
+system, which adopts non-unified $\epsilon$  and improves usability without 
+reducing the security guarantee for each record. In the future, we can 
+adopt the $(\varepsilon, \delta)$-differentially~\cite{differntialprivacy:tcc06}
 private model and consider a non-unified $\delta$.
 
 
@@ -436,14 +437,14 @@ encrypted, and white color are plaintext. Shaded (grey) components may leak
 data, and \maat is designed to defend against them.}
         \label{fig:maat-threat}
     \end{minipage}
-    \hspace{.2in} 
+    \hspace{.3in} 
     \centering
-    \begin{minipage}{0.4\textwidth}
+    \begin{minipage}{0.37\textwidth}
          \vspace{-.1in}
         \includegraphics[width=0.95\textwidth]{figures/jit_arch.pdf}
          \vspace{-.1in}
-        \caption{\maat JIT compiler architecture. Key components are 
-shaded (and in blue).}
+        \caption{\maat compiler architecture. Key components are 
+shaded (and blue).}
         \label{fig:maat-arch}
     \end{minipage}
 \end{figure}
