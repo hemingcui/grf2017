@@ -332,10 +332,9 @@ inferred by the highest security level of each dimension and to add noise to
 the output directly, but this approach is too naive for the diversity of 
 security levels. Instead, we adopt the sample-and-aggregate approach in 
 previous work~\cite{differentialdp:stoc11}. In this approach, data is 
-partitioned into multiple parts (each part has a size of $m$). Each partition 
-can have different sensitivity levels. Data is partitioned into multiple parts 
-denoted as $D_1$, ..., $D_n$, while each $D_i$ has a security level of 
-$\varepsilon_i$. \textbf{Algorithm 1} adds noise to the query results $O_i$ of 
+partitioned into multiple parts (each part has a size of $m$) to reduce $\Delta 
+f$. Each record $x$ has a security level of $\varepsilon_x$.
+\textbf{Algorithm 1} adds noise to the query results $O_i$ of 
 each partition $D_i$ according to the $D_i$'s security level. 
 
 \begin{theorem}
@@ -350,14 +349,17 @@ $D_1$, $D_2$,
 prior work\cite{pointestimation:smith08},
   each ${\cal M}(D_i)(i \le k)$ is $\varepsilon_k$-differentially private.
   For each $D_i$, we have $Pr[{\cal M}(D_i) \in S] \le e^{\varepsilon_i}Pr[{\cal M}(D'_i) \in 
-S]$, suppose $\varepsilon_{max} = max_{i \le k}(\varepsilon_i)$, \\
+S]$, suppose $\varepsilon_{max} = max_{i \le k}(\varepsilon_i)$ and the 
+differing record x of $D$ and $D'$ is in partition $D_x$, \\
   \vspace{-0.1in}
   \begin{equation} \label{eq1}
   \begin{split}
   Pr[{\cal M}(D)] & = Pr[{\cal M}(D_1 + D_2 + \ldots + D_k)] \\
    & = Pr[{\cal M}(D_1)] + Pr[{\cal M}(D_2)] + \ldots + Pr[{\cal M}(D_k)] \\
-   & \le e^{\varepsilon_1}Pr[{\cal M}(D'_1)] + \ldots + e^{\varepsilon_k}Pr[{\cal M}(D'_k)] \\
-   & \le  e^{\varepsilon_{max}}(Pr[{\cal M}(D'_1)] + \ldots + Pr[{\cal M}(D'_k)]) \\
+   & \le Pr[{\cal M}(D_1)] + \ldots + e^{\varepsilon_x}Pr[{\cal M}(D'_x)] + 
+\dots + Pr[{\cal M}(D_k)] \\
+   & \le  e^{\varepsilon_{max}}(Pr[{\cal M}(D_1)] + \ldots + Pr[{\cal 
+M}(D'_x)] + \ldots + Pr[{\cal M}(D_k)]) \\
    & = e^{\varepsilon_{max}}Pr[{\cal M}(D')]
   \end{split}
   \end{equation}
