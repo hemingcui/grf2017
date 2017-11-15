@@ -13,12 +13,12 @@ preventing big-data computation leakage with \kakute}\label{sec:obj1}
 \vspace{-.075in}
 % % 
 This section presents major challenges in existing DFT systems 
-(\S\ref{sec:ift-problem}) and \kakute (\S\ref{sec:kakute}).
+(\S\ref{sec:obj1-problem}) and \kakute (\S\ref{sec:kakute}).
 
 \vspace{-.15in}
 \subsubsection{Challenges: existing DFT systems are too slow and incomplete for 
 big-data} 
-\label{sec:ift-problem}\vspace{-.075in}
+\label{sec:obj1-problem}\vspace{-.075in}
 
 Although DFT is a powerful access control technique, existing DFT systems incur 
 high performance overhead, especially for data-intensive computations. For 
@@ -201,7 +201,7 @@ complementary to DFT and has attracted much attention recently.
 \vspace{-.15in}
 \subsubsection{Challenge: existing differential privacy techniques are 
 coarse-grained and thus inaccurate} 
-\label{sec:ift-problem}\vspace{-.075in}
+\label{sec:obj2-problem}\vspace{-.075in}
 
 Existing differential privacy techniques often suffer from low accuracy for 
 query results. To prevent computation providers revealing individual 
@@ -218,7 +218,7 @@ it is much larger than the KMeans training error rate (a few percents).
 
 \vspace{-.15in}
 \subsubsection{FDP and its new aggregation algorithm} 
-\label{sec:ift-problem}\vspace{-.075in}
+\label{sec:fdp}\vspace{-.075in}
 
 \begin{figure}[!htb]
     \begin{minipage}{0.44\textwidth}
@@ -418,7 +418,7 @@ only 30\% overhead compared to native, insecure executions.
 \vspace{-.15in}
 \subsubsection{Challenges: existing SGX-based systems require rewriting 
 queries and have too-large TCB} 
-\label{sec:ift-problem}\vspace{-.075in}
+\label{sec:obj3-problem}\vspace{-.075in}
 
 Despite recent SGX-based systems (Opaque~\cite{opaque:nsdi17}, 
 VC3~\cite{vc3:sp15}, Azure/Coco~\cite{azure:coco}, and 
@@ -439,7 +439,7 @@ attacks~\cite{top-threats}).
 \vspace{-.15in}
 \subsubsection{\maat: a just-in-time (JIT), privacy-preserving Java compiler 
 for big-data queries} 
-\label{sec:ift-problem}\vspace{-.075in}
+\label{sec:jit-arch}\vspace{-.075in}
 
 \begin{figure}[h]
     \centering
