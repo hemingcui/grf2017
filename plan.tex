@@ -478,13 +478,14 @@ IntegrityMR~\cite{wang2013integritymr} and JITGuard~\cite{jitguard:ccs17}), and
 \maat can directly use these techniques.
 
 Figure~\ref{fig:maat-threat} shows \maat's threat model: both SGX and 
-computation providers are trusted, and cloud providers are malicious. Figure 
-\ref{fig:maat-arch} shows the architecture of \maat. In \maat, both the 
-translation of self-defined code and the execution of the code are protected by 
-enclaves, so that even if the cloud's OS compromised, it cannot see the 
-executions of big-data queries or inject malicious code into the queries during 
-\maat's translation. Translated functions are put in \maat's code cache for 
-future reuse.
+computation providers are trusted, and cloud providers are malicious. By 
+integrating the outcomes from \textbf{Objective 1 or 2} into \maat, computation 
+providers do not need to be trusted. Figure \ref{fig:maat-arch} shows the 
+architecture of \maat, in which both the translation of self-defined code and 
+the execution of code are protected by enclaves. Even if a cloud's 
+OS compromised, the OS can neither observe the data being queried nor inject 
+malicious code into the queries during \maat's translation. \maat's code cache 
+is for reusing translated code.
 % Self-defined functions and data processed by these 
 % functions are protected by \maat . The Java byte-codes of these functions are 
 % compiled to enclave-comptabile assembly code.
@@ -703,17 +704,16 @@ algorithms on oblivious executions.
 \vspace{-.15in}\subsection{Research plan} 
 \label{sec:timeline}\vspace{-.075in}
 
-This project will require two PhD students S1 and S2 to work for 
-three years. In the first year, S1 will design and fully implement the \kakute 
+This project will need two PhD students S1 and S2 to work for 
+three years. In the first year, S1 will fully implement the \kakute 
 system (part of \textbf{Objective~1}), and S2 will evaluate its performance 
-and security strength on various real-world big-data queries (part of 
-\textbf{Objective~1}). In the second year, S1 will 
-use \kakute to fully develop the proposed Fine-grained Differential Privacy 
-technique (part of \textbf{Objective~2}), and S2 will implement the 
-algorithm proposed for this technique (part of \textbf{Objective~2}). In the 
-third year, S1 will build the secure big-data compiler 
+and security strengths (part of \textbf{Objective~1}). In the second year, S1 
+will 
+use \kakute to develop the proposed FDP technique (part of 
+\textbf{Objective~2}), and S2 will develop the proposed aggregation algorithm 
+for FDP (part of \textbf{Objective~2}). In the third year, S1 will build \maat 
 (part of \textbf{Objective~3}), and S2 will extensively study the privacy 
-guarantee and performance of this compiler on real-world big-data 
+guarantee and performance of \maat on real-world big-data 
 frameworks (part of \textbf{Objective~3}).
 % Both students will 
 % involve theoretical methods, implement real software systems, and 
