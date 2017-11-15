@@ -216,13 +216,27 @@ static DFT is imprecise and may suffer from false positives.
 % Sedic~\cite{sedic:cloud13} proposes to offload sensitive 
 % computations to private clouds. 
 
-\para{Data provenance}. Given an output record, the data 
-provenance technique~\cite{icse16:bigdebug,newt:socc13,vldb15:titian}
-identifies which input records produce this output by tracking inputs records'
-transformation lineage (\S\ref{sec:bigdata}) at a record level.
-Compared to dynamic DFT (\eg, our proposed \kakute system), data provenance 
-has much lower precision on tracking data flows because it cannot track the 
-flows of record fields.
+% \para{Data provenance}. Given an output record, the data 
+% provenance technique~\cite{icse16:bigdebug,newt:socc13,vldb15:titian}
+% identifies which input records produce this output by tracking inputs records'
+% transformation lineage (\S\ref{sec:bigdata}) at a record level.
+% Compared to dynamic DFT (\eg, our proposed \kakute system), data provenance 
+% has much lower precision on tracking data flows because it cannot track the 
+% flows of record fields.
+
+\para{Data and software integrity}. This proposal focuses on preserving the 
+privacy of data, while integrity is an orthogonal area and not the focus 
+of this proposal. Prior work is effective on preserving the integrity of 
+data~\cite{wang2015panda}, big-data frameworks 
+(\eg, IntegrityMR~\cite{wang2013integritymr}), and compilers 
+(\eg, JITGuard~\cite{jitguard:ccs17}). These orthogonal integrity-preserving 
+techniques can be directly used in our proposed systems.
+
+
+% integrity~\cite{wang2015panda}Other attacks such as changing the execution paths 
+% (\ie, integrity) of 
+% big-data frameworks or language runtimes have been well defended , and 
+% \maat can directly use these techniques.
 
 
 % RAMP~\cite{ramp:cidr11}, Newt~\cite{newt:socc13}, 

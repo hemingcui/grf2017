@@ -93,7 +93,8 @@ granularities of tracking with two types of tags: \func{Integer}
 and \func{Object} tags. \func{Integer} provides 32 distinct tags for 
 identifying 32 sensitivity levels, suitable for detecting data leakage and 
 performance bugs. \func{Object} provides an arbitrary number of tags, which is 
-suitable for data provenance and programming debugging.
+suitable for data provenance~\cite{vldb15:titian} and 
+debugging big-data queries~\cite{icse16:bigdebug}.
 % \kakute provides a 
 % unified API to tackle diverse problems.
 % Based on this unified API, we 
@@ -468,13 +469,13 @@ in SGX enclaves securely with minimal TCB (\ie, the TCB contains only SGX and
 self-defined code itself). \maat works as a Java JIT compiler which 
 automatically compiles self-defined big-data functions (\eg, 
 \vv{map}/\vv{reduce}) into SGX-compatible assembly instructions. 
-Therefore, the 
-JVM itself does not run in \maat's enclaves.
+Therefore, the JVM itself does not run in \maat's enclaves.
 
-The goal of \maat is to preserve the confidentiality of data while being 
-processed in public clouds. Other attacks such as changing execution paths 
-(\ie, integrity) have been well defended in prior work~\cite{jitguard:ccs17}, 
-and \maat can directly use it.
+\maat's goal is to preserve the privacy (confidentiality) of data in public 
+clouds. Other attacks such as changing the execution paths (\ie, integrity) of 
+big-data frameworks or language runtimes have been well defended (\eg, 
+IntegrityMR~\cite{wang2013integritymr} and JITGuard~\cite{jitguard:ccs17}), and 
+\maat can directly use these techniques.
 
 Figure~\ref{fig:maat-threat} shows \maat's threat model: both SGX and 
 computation providers are trusted, and cloud providers are malicious. Figure 
