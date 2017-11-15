@@ -85,7 +85,7 @@ functions in self-defined functions). Shuffle operations across computers are
 intercepted and tags are added. Therefore, DFT is completely captured across 
 computers.
 
-We will implement \kakute and integrate it with Spark. We will leverage 
+We plan to implement \kakute and integrate it with Spark. We will leverage 
 Phosphor~\cite{oo14:phosphor}, an efficient DFT system working in the Java 
 byte-code level. \kakute instruments computations of a Spark worker process
 to capture data flows inside self-defined-functions. \kakute provides different 
@@ -214,7 +214,7 @@ centroids far from the accurate ones. This low accuracy makes results useless as
 it is much larger than the KMeans training error rate (a few percents).
 
 \vspace{-.15in}
-\subsubsection{FDP and its new algorithm} 
+\subsubsection{FDP and its new aggregation algorithm} 
 \label{sec:ift-problem}\vspace{-.075in}
 
 \begin{figure}[!htb]
