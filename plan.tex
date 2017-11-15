@@ -231,17 +231,16 @@ it is much larger than the KMeans training error rate (a few percents).
 
       
       
-      \begin{algorithm}[H]
+      \begin{algorithm}[H] \label{algo:fdp}
 \SetAlgoLined
-\KwIn{Dataset T, dataset size N, privacy budget $\varepsilon_k$ for security 
-level k,
-  output range (min, max)}
+\KwIn{D: Dataset, N: dataset size, $\varepsilon_k$: privacy budget for level k,
+  (min, max): output range}
   n = a suitable partition
 
  \For{$i\leftarrow 1$ \KwTo $n$}{
-    $O_i$ $\leftarrow$ $f(T_i)$\;
-    if $O_i$ $>$ max, $O_i$ $\leftarrow$ max
-    if $O_i$ $<$ min, $O_i$ $\leftarrow$ min
+    $O_i$ $\leftarrow$ $f(D_i)$\;
+    if $O_i$ $>$ max, $O_i$ $\leftarrow$ max\\
+    if $O_i$ $<$ min, $O_i$ $\leftarrow$ min\\
  }
  \For{dimension $j$ of the output $O$}{
     k $\leftarrow$ $getTagLevel(O_{j})$\;
@@ -276,8 +275,9 @@ This insight nurtures Fine-grained Differential Privacy (FDP). In FDP, each
 record belongs to a user who assigns a security tag to all its data records.
 A security tag that is related to the privacy budget $\varepsilon$ (or accuracy 
 level). When the privacy budget is high, the probability of leakages is high.
-We adopt the personalized differential privacy model in recent
-work~\cite{pdp:icde15}. $\Phi(x)$ return the $\varepsilon$ of a particular 
+% We adopt the personalized differential privacy model in recent
+% work~\cite{pdp:icde15}. 
+$\Phi(x)$ returns the $\varepsilon$ of a particular 
 record x. The threat model of FDP is the same as \kakute's 
 (Figure~\ref{fig:falcon-arch}), because FDP aims to defend against malicious 
 computation providers in private clouds. Figure~\ref{fig:vm-tree} shows the 
@@ -297,13 +297,12 @@ producing different result with neighboring dataset is low. For the
 personalized model, the probability is different for records belonging to 
 different users, so that different users have various levels of protections.
 
-To start with, we need to determine the relation of the privacy budget and the 
-security level (a \vv{getTagLevel} function). We adopt a deterministic model, 
-and there are 6 security levels: insecure, $dp_1$, $dp_2$, $dp_3$, $dp_4$ and 
-non-released. Insecure records can be release directly, while non-released 
-cannot be used in any computation to the final result. $dp_1$ to $dp_4$ vary 
-in 
-terms of their privacy budgets for differential privacy.
+To realize a differential privacy technique, FDP first needs to determine 
+privacy budgets and security levels (\vv{getTagLevel} in \textbf{Algorithm 1}). 
+We use a common differential privacy model with 6 security levels: insecure, 
+$dp_1$, $dp_2$, $dp_3$, $dp_4$ and non-released. Insecure records can be 
+released in query results directly, while non-released must not. $dp_1$ to 
+$dp_4$ vary in terms of their privacy budgets for differential privacy.
 % We may also consider the $(\delta, \varepsilon)$-differential privacy model.
 
 % We extend the differential privacy model developed in previous
@@ -328,52 +327,53 @@ the output directly, but this approach is too naive for the diversity of
 security levels. Instead, we adopt the sample-and-aggregate approach in 
 previous work~\cite{differentialdp:stoc11}. In this approach, data is 
 partitioned into multiple parts (each part has a size of $m$). Each partition 
-can have different sensitivity levels. The aggregator adds noise to the 
-result of each partition according to its security level. Data 
+can have different sensitivity levels. \textbf{Algorithm 1} adds noise to the 
+results of each partition according to the partition's security level. Data 
 is partitioned into multiple parts denoted as $p_1$, ..., $p_n$.
 The security levels of $\varepsilon$ are given by $\varepsilon_1$,
 ..., $\varepsilon_n$.
 
 \begin{theorem}
-  For any output record in $O$, the
-  estimator is $max_{i \le k}(\varepsilon_i)$-differentially private.
+  For any output record $O$, the
+  mechanism of \textbf{Algorithm 1} is $max_{i \le 
+k}(\varepsilon_i)$-differentially private.
 \end{theorem}
 \begin{proof}
-  For each dimension, we can divide the output dataset $D$ as k disjoin parts 
+  For each dimension, we can divide the output dataset $D$ as k disjoin partitions 
 $D_1$, $D_2$,
   ..., $D_k$ according to their security levels. According to 
 prior work\cite{pointestimation:smith08},
-  each $f(D_i)(i \le k)$ is $\varepsilon_k$-differentially private.
-  For each $D_i$, we have $Pr[f(D_i) \in S] \le e^{\varepsilon_i}Pr[f(D'_i) \in 
+  each ${\cal M}(D_i)(i \le k)$ is $\varepsilon_k$-differentially private.
+  For each $D_i$, we have $Pr[{\cal M}(D_i) \in S] \le e^{\varepsilon_i}Pr[{\cal M}(D'_i) \in 
 S]$, suppose $\varepsilon_{max} = max_{i \le k}(\varepsilon_i)$, \\
   \vspace{-0.1in}
   \begin{equation} \label{eq1}
   \begin{split}
-  Pr[f(D)] & = Pr[f(D_1 + D_2 + \ldots + D_k)] \\
-   & = e^{\varepsilon_1}Pr[f(D'_1)] + \ldots + e^{\varepsilon_k}Pr[f(D'_k)] \\
-   & \le  e^{\varepsilon_{max}}(Pr[f(D'_1) + \ldots + Pr[f(D'_k)]]) \\
-   & = e^{\varepsilon_{max}}Pr[f(D')]
+  Pr[{\cal M}(D)] & = Pr[{\cal M}(D_1 + D_2 + \ldots + D_k)] \\
+   & \le e^{\varepsilon_1}Pr[{\cal M}(D'_1)] + \ldots + e^{\varepsilon_k}Pr[{\cal M}(D'_k)] \\
+   & \le  e^{\varepsilon_{max}}(Pr[{\cal M}(D'_1) + \ldots + Pr[{\cal M}(D'_k)]]) \\
+   & = e^{\varepsilon_{max}}Pr[{\cal M}(D')]
   \end{split}
   \end{equation}
-  Therefore, $f(D)$ is $max_{i \le k}(\varepsilon_i)$-differentially private.
+  Therefore, ${\cal M}(D)$ is $max_{i \le k}(\varepsilon_i)$-differentially private.
 \end{proof}
 
 In the above aggregation algorithm, the error of the final result comes from 
 two parts: the Laplace noise error and the partition error. It is crucial to 
 reduce the final error incurred by this algorithm while keeping the 
-differential security guarantee. We can adopt a hill-climbing approach (future 
-work).
+differential security guarantee. The error can be reduced by optimizing
+the number of partitions with hill-climbing or simulated annealing algorithm.
 
 \para{Future directions}. We will fully develop this FDP technique by going 
 along three directions. First, we will continue to optimize the algorithm and 
 reduce its final error rate. Second, we will do an extensive study on 
 real-world big-data queries and quantify the improvements on result accuracy. 
 Third, currently we propose an end-to-end differentially private computation
-system, which adopts a personalized differential privacy 
-model~\cite{pdp:icde15} and improves usability without reducing the security 
-guarantee. In future explorations, we can consider an even more fine-grained 
+system, which adopts non-unified $\epsilon$  
+and improves usability without reducing the security 
+guarantee for each record. In future explorations, we can adopt the 
 $(\varepsilon, \delta)$-differentially~\cite{differntialprivacy:tcc06}
-private model.
+private model and consider a non-unified $\delta$.
 
 
 \vspace{-.15in}\subsection{Objective 3: creating a privacy-preserving compiler 
