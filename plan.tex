@@ -481,11 +481,11 @@ Figure~\ref{fig:maat-threat} shows \maat's threat model: both SGX and
 computation providers are trusted, and cloud providers are malicious. By 
 integrating the outcomes from \textbf{Objective 1 or 2} into \maat, computation 
 providers no longer need to be trusted. Figure \ref{fig:maat-arch} shows the 
-architecture of \maat, in which both the translation of self-defined code and 
+architecture of \maat: both the translation of self-defined code and 
 the execution of code are protected by enclaves. Even if a cloud's 
-OS compromised, the OS can neither observe the data being queried nor inject 
+OS compromises, the OS can neither observe the data being queried nor inject 
 malicious code into the queries during \maat's translation. \maat's code cache 
-is for reusing translated code.
+is for reusing translated code at runtime.
 % Self-defined functions and data processed by these 
 % functions are protected by \maat . The Java byte-codes of these functions are 
 % compiled to enclave-comptabile assembly code.
