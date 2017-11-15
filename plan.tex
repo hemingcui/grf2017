@@ -498,7 +498,9 @@ use of encryption/decryption on data records and maintaining SGX memory for the
 queries at runtime. We will proactively implement these two components to be 
 easy to verify (use as few as function recursive calls and loops) as in other 
 verification practice~\cite{xi:sosp17}, and we plan to use state-of-the-art 
-verification techniques~\cite{xi:sosp17} to verify both of them. Then, we do not 
+verification techniques~\cite{xi:sosp17} to assure that they both are 
+functionally correct (\ie, free of bugs~\cite{xi:sosp17} and 
+malicious code~\cite{adelstein2002malicious}). Then, we do not 
 need to include them in \maat's TCB, greatly reducing its TCB.
 % Specifically, we plan to implement the two 
 % components .
@@ -511,15 +513,15 @@ need to include them in \maat's TCB, greatly reducing its TCB.
 
 
 
-One subtle performance challenge for \maat is that it should have reasonable 
-performance overhead compared to native executions. When calling into and 
-out of a function in enclaves, an ECALL and OCALL will be invoked in the CPU 
-and enclave transitions are invoked. Such transitions are several hundred 
-times slower than user function calls. Moreover, encryption and decryption on 
-data records are invoked during such transitions. Our study on a SGX-based 
-big-data system Opaque~\cite{opaque:nsdi17} shows that it incurs 3.4k enclave
-transitions for processing only 10k data (with two queries \vv{select} and 
-\vv{groupBy}), which confirms the challenge.
+A subtle performance challenge for \maat is that it should have reasonable 
+performance overhead compared to native executions. When a program calls into 
+(\ie, ECALL) and gets out of (\ie, OCALL) a function in enclaves, enclave 
+transitions are invoked. Such transitions are several hundred times slower than 
+user function calls. Moreover, encryption and decryption on data records are 
+invoked during such transitions. Our study on a SGX-based system 
+Opaque~\cite{opaque:nsdi17} shows that it incurs 3.4k enclave transitions for 
+processing only 10k data (with two queries \vv{select} and \vv{groupBy}), which 
+confirms the challenge.
 
 % In fact, these processing functions can be pipelined and processed in a single
 % enclave function. Our project takes reducing transitions as one of our targets.
