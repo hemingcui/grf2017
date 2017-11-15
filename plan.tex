@@ -116,7 +116,7 @@ and evaluated it on \appeval popular big-data queries, including three text
 processing queries WordCount~\cite{spark:example}, 
 WordGrep~\cite{newt:socc13} and TwitterHot~\cite{spark:example}, two graph 
 queries TentativeClosure~\cite{spark:example}
-and ConnectComponent~\cite{spark:example}, and one meical query
+and ConnectComponent~\cite{spark:example}, and one medical query
 MedicalGroup~\cite{pigmix}.
 We ran them with large, realistic datasets~\cite{vldb16:output, 
 icse16:bigdebug, vldb15:titian}.
@@ -516,10 +516,10 @@ need to include them in \maat's TCB, greatly reducing its TCB.
 
 A subtle performance challenge for \maat is that it should have reasonable 
 performance overhead compared to native executions. When a program calls into 
-(\ie, ECALL) and gets out of (\ie, OCALL) a function in enclaves, enclave 
-transitions are invoked. Such transitions are several hundred times slower than 
-user function calls. Moreover, encryption and decryption on data records are 
-invoked during such transitions. Our study on a SGX-based system 
+(\ie, \func{ecall}) and gets out of (\ie, \func{ocall}) a function in enclaves, 
+enclave transitions are invoked. Such transitions are several hundred times 
+slower than user function calls. Moreover, encryption and decryption on data 
+records are invoked during such transitions. Our study on a SGX-based system 
 Opaque~\cite{opaque:nsdi17} shows that it incurs 3.4k enclave transitions for 
 processing only 10k data (with two queries \vv{select} and \vv{groupBy}), which 
 confirms the challenge.

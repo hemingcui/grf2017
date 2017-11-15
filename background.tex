@@ -206,10 +206,10 @@ entire Python runtime).
 % below), thus running unmodified big-data queries with SGX is highly desirable.
 
 \para{Big-data privacy systems}.  
-Airavat\cite{airavat:nsdi10}, PINQ~\cite{pinq:sigmod09}, and 
+Airavat~\cite{airavat:nsdi10}, PINQ~\cite{pinq:sigmod09}, and 
 GUPT~\cite{gupt:sigmod12} propose to apply differential 
 privacy~\cite{noise:tcc06} in MapReduce in order to prevent leakage from 
-malicous queries, but existing differential privacy techniques often produce
+malicious queries, but existing differential privacy techniques often produce
 inaccurate results. MrLazy~\cite{hotcloud14:mrlazy} preserves the privacy of 
 bog-data queries with static DFT. Compared to dynamic DFT (\S\ref{sec:dft}), 
 static DFT is imprecise and may suffer from false positives.
@@ -224,12 +224,12 @@ static DFT is imprecise and may suffer from false positives.
 % has much lower precision on tracking data flows because it cannot track the 
 % flows of record fields.
 
-\para{Data and software integrity}. This proposal focuses on preserving the 
-privacy of data, while integrity is an orthogonal area and not the focus 
-of this proposal. Prior work is effective on preserving the integrity of 
-data~\cite{wang2015panda}, big-data frameworks 
-(\eg, IntegrityMR~\cite{wang2013integritymr}), and compilers 
-(\eg, JITGuard~\cite{jitguard:ccs17}). These orthogonal integrity-preserving 
+\para{Data and software integrity (orthogonal)}. This proposal focuses on data 
+privacy; integrity is an orthogonal area and not the focus of this proposal. 
+Prior work is effective on preserving the integrity of 
+data~\cite{wang2015panda}, big-data frameworks (\eg, 
+IntegrityMR~\cite{wang2013integritymr}), and compilers (\eg, 
+JITGuard~\cite{jitguard:ccs17}). These orthogonal integrity-preserving 
 techniques can be directly used in our proposed systems.
 
 
