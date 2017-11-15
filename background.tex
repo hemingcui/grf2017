@@ -82,9 +82,8 @@ of accuracy (differential privacy). Recent
 work~\cite{differentialresult:vldb15} reports more than 30\% loss of accuracy. 
 For query results, low accuracy means bad utility. For instance, a 
 K-Means program will return centroids far from the actual ones, because 
-the accuracy loss rate is much larger than the training error rate (less than 
-10\% 
-percents in practice).
+the accuracy loss rate is much larger than the training error rate (usually 
+less than 10\% in practice).
 
 A key reason for this bad utility problem is that differential privacy cannot 
 track how sensitive data fields flow to query results, so they have to take a 
