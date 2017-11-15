@@ -376,12 +376,11 @@ increases, the Laplace per partition decreases (each partition is smaller), but
 the sum increases. This brings an interesting optimization problem on 
 minimizing added noise, and we plan to create other algorithms (\eg, 
 algorithms with hill-climbing or simulated-annealing styles) to compute the 
-optimal number of partitions for minimizing added noise. Second, we will 
-study FDP's improvements compared to existing 
-differential privacy techniques (\eg, GUPT~\cite{gupt:sigmod12}). Specifically, 
+optimal number of partitions for minimizing added noise. Second, 
 we will conduct an extensive study on diverse real-world big-data queries and 
-quantify the accuracy improvements of FDP and its new algorithms on realistic 
-datasets, including both sensitive and insensitive ones.
+realistic datasets in order to quantify the accuracy improvements of FDP and 
+its new algorithms compared to existing differential privacy techniques (\eg, 
+GUPT~\cite{gupt:sigmod12}).
 
 % Third, 
 % currently we propose an end-to-end differentially private computation
@@ -443,10 +442,10 @@ for big-data queries}
 
 \begin{figure}[h]
     \centering
-    \begin{minipage}{.4\textwidth}    
+    \begin{minipage}{.5\textwidth}    
           \vspace{-.1in}
         \includegraphics[width=0.95\textwidth]{figures/threat_public.pdf}
-%          \vspace{-.1in}         
+          \vspace{-.1in}         
         \caption{Threat model of \maat. Data records with blue color are 
 encrypted, and white color are plaintext. Shaded (grey) components may leak 
 data, and \maat is designed to defend against them.}
@@ -454,7 +453,7 @@ data, and \maat is designed to defend against them.}
     \end{minipage}
     \hspace{.3in} 
     \centering
-    \begin{minipage}{0.37\textwidth}
+    \begin{minipage}{0.4\textwidth}
          \vspace{-.1in}
         \includegraphics[width=0.95\textwidth]{figures/jit_arch.pdf}
          \vspace{-.1in}
