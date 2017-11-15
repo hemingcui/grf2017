@@ -111,22 +111,21 @@ means no overhead.}
 \end{wrapfigure}
 
 \para{Preliminary results.} We have implemented a \kakute prototype 
-and evaluated it on \appeval popular big-data algorithms, including three text 
-processing algorithms WordCount~\cite{spark:example}, 
+and evaluated it on \appeval popular big-data queries, including three text 
+processing queries WordCount~\cite{spark:example}, 
 WordGrep~\cite{newt:socc13} and TwitterHot~\cite{spark:example}, two graph 
-algorithms TentativeClosure~\cite{spark:example}
-and ConnectComponent~\cite{spark:example}, and one analysis program 
+queries TentativeClosure~\cite{spark:example}
+and ConnectComponent~\cite{spark:example}, and one meical query
 MedicalGroup~\cite{pigmix}.
-We evaluated these algorithms with 
-real-world datasets that are comparable with related 
-systems~\cite{vldb16:output, icse16:bigdebug, vldb15:titian}.
+We ran them with large, realistic datasets~\cite{vldb16:output, 
+icse16:bigdebug, vldb15:titian}.
 Our evaluation shows that: (1) \kakute 
 incurred merely \timeavg overhead (Figure~\ref{fig:scalability}) with 
-\func{Integer} tag, about two orders of magnitudes faster than a recent DFT 
+\func{Integer} tag, two orders of magnitudes faster than a recent DFT 
 system Phorspor~\cite{oo14:phosphor}; and (2) \kakute effectively 
-detected 13 real-world security and performance bugs presented in other 
+detected 13 real-world security and performance bugs in other 
 papers~\cite{arthur:dave2013,icse16:bigdebug,airavat:nsdi10}. These promising 
-preliminary results have been presented in ACSAC '17 and TPDS '17.
+preliminary results are presented in ACSAC '17 and TPDS '17.
 
 % In \xxx, all replicas directly write to destination
 % replicas' memory and poll messages from local memory to receive messages, and 
@@ -163,12 +162,14 @@ preliminary results have been presented in ACSAC '17 and TPDS '17.
 
 % ~\cite{pig:vldb08}
 % ~\cite{hadoop}
-\para{Future directions.} We will extend \kakute in 
+\para{Future directions.} We plan to extend \kakute in 
 three directions. First, we will port \kakute onto more big-data frameworks, 
 including \pig~\cite{pig:vldb08} and \hadoop~\cite{hadoop}. Second, we will 
 extend \kakute to detect broader types of real-world security bugs. Third, we 
 will apply \kakute to augment other complementary privacy techniques, including 
-anonymization techniques and differential privacy (\textbf{Objective 2}). 
+differential privacy (\ie, \textbf{Objective 2}) and
+\func{k}-anonymization~\cite{kanonymity,icde06:ldiversity}, which will likely 
+produce novel privacy techniques and systems. 
 
 \vspace{-.15in}\subsection{Objective 2: developing the Fine-grained 
 Differential Privacy (FDP) technique}\label{sec:obj2}\vspace{-.075in}
@@ -561,9 +562,10 @@ for public clouds, \maat has broad applications in other security areas, and we
 will further extend it along three directions. First, we will fully implement 
 it and evaluate its efficacy on defending against diverse real-world privacy 
 attacks launched by cloud providers. Second, we will augment the translator to 
-automatically translate the big-data queries with dangerous access patterns on 
-particular data into those without (\eg, oblivious 
-executions~\cite{bigmatrix:ccs17}). Third, we will further enhance DAE to 
+automatically transform the big-data queries with dangerous access patterns on 
+particular data into those without (\eg, 
+oblivious executions~\cite{bigmatrix:ccs17}). This will nurture new theory and 
+algorithms on oblivious executions. Third, we will further enhance DAE to 
 support well isolated, secured operating system calls (\eg, library operating 
 system calls~\cite{graphene:atc17}), so that \maat will not only benefit 
 big-data queries, but other distributed computing paradigms (\eg, graph 
