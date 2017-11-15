@@ -240,7 +240,7 @@ it is much larger than the KMeans training error rate (a few percents).
   n = a suitable partition
 
  \For{$i\leftarrow 1$ \KwTo $n$}{
-    $O_i$ $\leftarrow$ $f(D_i)$\;
+    $O_i$ $\leftarrow$ $Query(D_i)$\;
     if $O_i$ $>$ max, $O_i$ $\leftarrow$ max\\
     if $O_i$ $<$ min, $O_i$ $\leftarrow$ min\\
  }
@@ -294,18 +294,22 @@ Pr[{\cal M}(D) \in O] \leq e^{\Phi(x)} \times Pr[{\cal M}(D') \in O]
 \end{align}
 \end{definition}
 
-Intuitively, Differential Privacy guarantees that the probability of
-producing different result with neighboring dataset is low. For the 
-personalized model, the probability is different for records belonging to 
-different users, so that different users have various levels of protections.
 
-To realize a differential privacy technique, FDP first needs to determine 
-privacy budgets and security levels (\vv{getTagLevel} in \textbf{Algorithm 1}). 
-We use a common differential privacy model with 6 security levels: insecure, 
-$dp_1$, $dp_2$, $dp_3$, $dp_4$ and non-released. Insecure records can be 
-released in query results directly, while non-released must not. $dp_1$ to 
-$dp_4$ vary in terms of their privacy budgets for differential privacy.
+
+Intuitively, Differential Privacy guarantees that the probability of
+producing different result with neighboring dataset is low. To realize a 
+differential privacy technique, FDP first needs to determine privacy budgets 
+and security levels (\vv{getTagLevel} in \textbf{Algorithm 1}). We use a common 
+differential privacy model with 6 security levels: insecure, $dp_1$, $dp_2$, 
+$dp_3$, $dp_4$ and non-released. ``Insecure" data can be released in query 
+results directly, while ``non-released" data must not be released in any 
+condition. $dp_1$ to $dp_4$ vary in terms of their privacy budgets for 
+differential privacy.
 % We may also consider the $(\delta, \varepsilon)$-differential privacy model.
+
+%  For the 
+% personalized model, the probability is different for records belonging to 
+% different users, so that different users have various levels of protections.
 
 % We extend the differential privacy model developed in previous
 % work~\cite{differentialdp:stoc11}. We introduce two noise calibration model
@@ -329,11 +333,10 @@ the output directly, but this approach is too naive for the diversity of
 security levels. Instead, we adopt the sample-and-aggregate approach in 
 previous work~\cite{differentialdp:stoc11}. In this approach, data is 
 partitioned into multiple parts (each part has a size of $m$). Each partition 
-can have different sensitivity levels. \textbf{Algorithm 1} adds noise to the 
-results of each partition according to the partition's security level. Data 
-is partitioned into multiple parts denoted as $p_1$, ..., $p_n$.
-The security levels of $\varepsilon$ are given by $\varepsilon_1$,
-..., $\varepsilon_n$.
+can have different sensitivity levels. Data is partitioned into multiple parts 
+denoted as $D_1$, ..., $D_n$, while each $D_i$ has a security level of 
+$\varepsilon_i$. \textbf{Algorithm 1} adds noise to the query results $O_i$ of 
+each partition $D_i$ according to the $D_i$'s security level. 
 
 \begin{theorem}
   For any output record $O$, the
@@ -352,8 +355,9 @@ S]$, suppose $\varepsilon_{max} = max_{i \le k}(\varepsilon_i)$, \\
   \begin{equation} \label{eq1}
   \begin{split}
   Pr[{\cal M}(D)] & = Pr[{\cal M}(D_1 + D_2 + \ldots + D_k)] \\
+   & = Pr[{\cal M}(D_1)] + Pr[{\cal M}(D_2)] + \ldots + Pr[{\cal M}(D_k)] \\
    & \le e^{\varepsilon_1}Pr[{\cal M}(D'_1)] + \ldots + e^{\varepsilon_k}Pr[{\cal M}(D'_k)] \\
-   & \le  e^{\varepsilon_{max}}(Pr[{\cal M}(D'_1) + \ldots + Pr[{\cal M}(D'_k)]]) \\
+   & \le  e^{\varepsilon_{max}}(Pr[{\cal M}(D'_1)] + \ldots + Pr[{\cal M}(D'_k)]) \\
    & = e^{\varepsilon_{max}}Pr[{\cal M}(D')]
   \end{split}
   \end{equation}
