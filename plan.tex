@@ -207,14 +207,14 @@ coarse-grained and thus inaccurate}
 
 Existing differential privacy techniques often suffer from low accuracy for 
 query results. To prevent computation providers revealing individual 
-data, differential privacy typically adds noise either on input data 
+data, differential privacy mainly adds noise either on input data 
 records or query results. However, due to the lack of precisely tracking 
 how inputs are computed and propagated to outputs, to enforce statistical 
-guarantee on outputs, differential privacy often conservatively add the same 
-noise to all fields of a data record and to all records, causing inaccurate 
-results. For instance, prior work~\cite{differentialresult:vldb15} reports 
-more than 30\% loss of accuracy when the security guarantee is high (the 
-probability of leakage is low). Therefore, a KMeans program will return 
+guarantee on outputs, differential privacy often conservatively adds roughly 
+the same noise to all fields of a data record and to all records, causing 
+inaccurate results. For instance, prior work~\cite{differentialresult:vldb15} 
+reports more than 30\% loss of accuracy when the security guarantee is high 
+(the probability of leakage is low). Therefore, a KMeans program will return 
 centroids far from the accurate ones. This low accuracy makes results useless as 
 it is much larger than the KMeans training error rate (a few percents).
 
@@ -231,7 +231,7 @@ it is much larger than the KMeans training error rate (a few percents).
         \label{fig:vm-tree}
     \end{minipage}
     \begin{minipage}{0.54\textwidth}
-      \vspace{-.2in}
+%       \vspace{-.2in}
       \centering
 
       
@@ -240,18 +240,23 @@ it is much larger than the KMeans training error rate (a few percents).
 \SetAlgoLined
 \KwIn{D: Dataset, N: dataset size, $\varepsilon_k$: privacy budget for level k,
   (min, max): output range}
-  n = a suitable partition
+  n = a suitable number of partition
 
- \For{$i\leftarrow 1$ \KwTo $n$}{
-    $O_i$ $\leftarrow$ $Query(D_i)$\;
-    if $O_i$ $>$ max, $O_i$ $\leftarrow$ max\\
-    if $O_i$ $<$ min, $O_i$ $\leftarrow$ min\\
+ \For{$p\leftarrow 1$ \KwTo $n$}{
+    $O_p$ $\leftarrow$ $Query(D_i)$\;
+    if $O_p$ $>$ max, $O_p$ $\leftarrow$ max\\
+    if $O_p$ $<$ min, $O_p$ $\leftarrow$ min\\
  }
- \For{dimension $j$ of the output $O$}{
-    k $\leftarrow$ $getTagLevel(O_{j})$\;
-    $O_j$ $\leftarrow$ $\dfrac{1}{n}\sum\limits_{i=1}^n O_{ij} + Lap(\dfrac{max 
-- min}{n\varepsilon_{k}})$
-  }
+
+ $O$ $\leftarrow$ $\dfrac{1}{n}\sum\limits_{p=1}^n O_p$
+
+ \For{output record $O_i$ of output $O$}{
+   \For{dimension $j$ of a output $O_i$}{
+     k $\leftarrow$ $getTagLevel(O_{ij})$\;
+     $O_{ij}$ $\leftarrow$ $O_{ij} + Lap(\dfrac{max_j - 
+min_j}{n\varepsilon_{k}})$
+   }
+ }
   \KwOut{$O$}
  \caption{The FDP aggregation algorithm}
  \label{algo:combined}
@@ -289,25 +294,24 @@ computation providers in private clouds. Figure~\ref{fig:vm-tree} shows the
 workflow of FDP with five steps.
 
 \begin{definition}{Differential Privacy}
-For two neighbor dataset $D$ and $D'$ differing at record x,
-a mechanism ${\cal M}(y)$ is differentially private with the following 
+For two neighboring datasets $D$ and $D'$ differing at record x,
+a mechanism ${\cal M}(y)$ is differentially private with the following  
 condition:
 \begin{align}
-Pr[{\cal M}(D) \in O] \leq e^{\Phi(x)} \times Pr[{\cal M}(D') \in O]
+Pr[{\cal M}(D) \in S] \leq e^{\Phi(x)} \times Pr[{\cal M}(D') \in 
+S],\,S\subseteq Range({\cal M})
 \end{align}
 \end{definition}
 
 
 
 Intuitively, Differential Privacy guarantees that the probability of
-producing different result with neighboring dataset is low. To realize a 
+producing different result with neighboring datasets is low. To realize a 
 differential privacy technique, FDP first needs to determine privacy budgets 
 and security levels (\vv{getTagLevel} in \textbf{Algorithm 1}). We use a common 
-differential privacy model with 6 security levels: insecure, $dp_1$, $dp_2$, 
-$dp_3$, $dp_4$ and non-released. ``Insecure" data can be released in query 
-results directly, while ``non-released" data must not be released in any 
-condition. $dp_1$ to $dp_4$ vary in terms of their privacy budgets for 
-differential privacy.
+differential privacy model with 6 security levels (from insensitive 
+to absolutely sensitive): insecure, $dp_1$, $dp_2$, $dp_3$, $dp_4$ and 
+non-released.
 % We may also consider the $(\delta, \varepsilon)$-differential privacy model.
 
 %  For the 
@@ -324,21 +328,21 @@ differential privacy.
   Adding noise with Laplace distribution $Laplace(\dfrac{\Delta 
 f}{\varepsilon})$ enforces
   Differential Privacy, and global sensitivity $\Delta f$ is defined as
-  \vspace{-.1in}
+  \vspace{-.05in}
   \begin{align}
-    \Delta f = max || f(D) - f(D') ||_1
+    \Delta f = \max\limits_{D, D'}|| f(D) - f(D') ||_1
   \end{align}
-\end{theorem}
+  \end{theorem}
 
 To enforce differential privacy, one approach is to use the $\varepsilon$ 
 inferred by the highest security level of each dimension and to add noise to 
 the output directly, but this approach is too naive for the diversity of 
 security levels. Instead, we adopt the sample-and-aggregate approach in 
 previous work~\cite{differentialdp:stoc11}. In this approach, data is 
-partitioned into multiple parts (each part has a size of $m$) to reduce $\Delta 
-f$. Each record $x$ has a security level of $\varepsilon_x$.
-\textbf{Algorithm 1} adds noise to the query results $O_i$ of 
-each partition $D_i$ according to the $D_i$'s security level. 
+partitioned into multiple parts to reduce $\Delta f$. Each field of a record 
+$x$ has a security level of $\varepsilon_k$. \textbf{Algorithm 1} adds noise to 
+aggregated result of the query from all partitions according to security level 
+of $x$'s fields. 
 
 \begin{theorem}
   For any output record $O$, the
@@ -346,11 +350,11 @@ each partition $D_i$ according to the $D_i$'s security level.
 k}(\varepsilon_i)$-differentially private.
 \end{theorem}
 \begin{proof}
-  For each dimension, we can divide the output dataset $D$ as k disjoin partitions 
+  For each dimension, we can divide the dataset $D$ as k disjoin partitions
 $D_1$, $D_2$,
   ..., $D_k$ according to their security levels. According to 
 prior work\cite{pointestimation:smith08},
-  each ${\cal M}(D_i)(i \le k)$ is $\varepsilon_k$-differentially private.
+  each ${\cal M}(D_i)(i \le k)$ is $\varepsilon_i$-differentially private.
   For each $D_i$, we have $Pr[{\cal M}(D_i) \in S] \le e^{\varepsilon_i}Pr[{\cal M}(D'_i) \in 
 S]$, suppose $\varepsilon_{max} = max_{i \le k}(\varepsilon_i)$ and the 
 differing record x of $D$ and $D'$ is in partition $D_x$, \\
